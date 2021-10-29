@@ -53,7 +53,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
             sync: true,
         })
 
-        terminal(`Found ${mg.found.length} file(s)!\n`)
+        terminal(`Upstream: Found ${mg.found.length} file(s)!\n`)
 
         if (mg.found.length === 0) {
             continue
@@ -62,7 +62,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
         for (let j = 0; j < mg.found.length; j++) {
             const pathMatch = mg.found[j]
 
-            terminal(`Deleting: ${pathMatch}...`)
+            terminal(`Upstream: Deleting: ${pathMatch}...`)
 
             fs.unlinkSync(path.join(actionInputs.upstreamRepoDir, pathMatch))
 
