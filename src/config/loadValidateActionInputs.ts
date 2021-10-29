@@ -21,7 +21,7 @@ export const loadValidateActionInputs = (): ActionInputs => {
         throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH'`)
     }
 
-    const sliceIgnores: string[] = ['.git', '.github/workflow', 'git-slice.json']
+    const sliceIgnores: string[] = ['.github/workflows/*', 'git-slice.json']
     if (process.env.GIT_SLICE_SLICE_IGNORES) {
         try {
             const parsedSliceIgnores = JSON.parse(process.env.GIT_SLICE_SLICE_IGNORES)
@@ -37,10 +37,10 @@ export const loadValidateActionInputs = (): ActionInputs => {
     }
 
     return {
-        upstreamRepoDir: process.env.GIT_SLICE_SLICE_REPO_DIR,
-        upstreamDefaultBranch: process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH,
-        sliceRepoDir: process.env.GIT_SLICE_UPSTREAM_REPO_DIR,
-        sliceDefaultBranch: process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH,
+        upstreamRepoDir: process.env.GIT_SLICE_UPSTREAM_REPO_DIR,
+        upstreamDefaultBranch: process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH,
+        sliceRepoDir: process.env.GIT_SLICE_SLICE_REPO_DIR,
+        sliceDefaultBranch: process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH,
         sliceIgnores,
     }
 }

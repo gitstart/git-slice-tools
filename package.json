@@ -15,6 +15,7 @@
     "lint:fix": "yarn lint --fix"
   },
   "devDependencies": {
+    "@types/glob": "^7.2.0",
     "@types/node": "^16.11.6",
     "@types/terminal-kit": "^1.28.4",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
@@ -26,6 +27,8 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
+    "fs-extra": "^10.0.0",
+    "glob": "^7.2.0",
     "nodemon": "^2.0.14",
     "simple-git": "^2.47.0",
     "terminal-kit": "^2.1.8",
