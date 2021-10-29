@@ -22,9 +22,9 @@ export const init = async (
     terminal('Upstream: Repo: \n')
     terminal(upstreamRemote)
 
-    const upstreamUser = await upstreamGit.getConfig('user.name')
+    // const upstreamUser = await upstreamGit.getConfig('user.name')
 
-    terminal(`Upstream: User: ${upstreamUser.value}\n`)
+    // terminal(`Upstream: User: ${upstreamUser.value}\n`)
 
     terminal('Slice: Fetching...')
 
@@ -37,9 +37,9 @@ export const init = async (
     terminal('Slice: Repo: \n')
     terminal(sliceRemote)
 
-    const sliceUser = await sliceGit.getConfig('user.name')
+    // const sliceUser = await sliceGit.getConfig('user.name')
 
-    terminal(`Slice: User: ${sliceUser.value}\n`)
+    // terminal(`Slice: User: ${sliceUser.value}\n`)
 
     return {
         sliceGit,
