@@ -2,12 +2,12 @@ import { CleanOptions, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import { Glob } from 'glob'
 import fs from 'fs-extra'
-import dirCompare from 'dir-compare'
+import { compareSync } from 'dir-compare'
 import { ActionInputs } from '../types'
 import path from 'path'
 
 export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionInputs: ActionInputs): Promise<void> => {
-    terminal('-'.repeat(20) + '\n')
+    terminal('-'.repeat(30) + '\n')
     terminal('Performing pull job...\n')
 
     terminal(`Upstream: Checkout and pull last versions '${actionInputs.upstreamDefaultBranch}' branch...`)
@@ -54,7 +54,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
             sync: true,
         })
 
-        terminal(`Upstream: Found ${mg.found.length} file(s)!\n`)
+        terminal(`Found ${mg.found.length} file(s)!\n`)
 
         if (mg.found.length === 0) {
             terminal('\n')
@@ -86,22 +86,29 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Slice: Removing files on slice but not on upstream...`)
 
-    const compareResponse = dirCompare.compareSync(actionInputs.sliceDefaultBranch, actionInputs.upstreamRepoDir, {
+    const compareResponse = compareSync(actionInputs.sliceRepoDir, actionInputs.upstreamRepoDir, {
         compareContent: false,
         compareDate: false,
         compareSize: false,
         compareSymlink: false,
-        excludeFilter: actionInputs.sliceIgnores.join(','),
+        excludeFilter: [
+            '**/.git',
+            // It requires to have `**/` as prefix to work with dir-compare filter
+            ...actionInputs.sliceIgnores.map(x => (x.startsWith('**/') ? x : `**/${x.replace(/^\/+/, '')}`)),
+        ].join(','),
     })
 
     if (compareResponse.diffSet) {
-        terminal(`Found ${compareResponse.diffSet.length} file(s)!\n`)
-
-        // Filter files only on left = sliceDefaultBranch
+        // Filter files only on left = sliceRepoDir
         const deletedFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
 
+        terminal(`Found ${deletedFiles.length} file(s)!\n`)
+
         deletedFiles.forEach(deletedFile => {
-            terminal(`Slice: Deleting: ${deletedFile.relativePath}...`)
+            const filePath = `${deletedFile.relativePath.substring(1)}/${deletedFile.name1}`
+            terminal(`Slice: Deleting: ${filePath}...`)
+
+            fs.unlinkSync(path.join(actionInputs.sliceRepoDir, filePath))
 
             terminal('Done!\n')
         })
@@ -121,11 +128,19 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
         return
     }
 
-    terminal(sliceStatus.files.map(f => f.path).join('\n'))
+    terminal(
+        [
+            ...sliceStatus.modified.map(x => ({ filePath: x, changeType: '~' })),
+            ...sliceStatus.deleted.map(x => ({ filePath: x, changeType: '-' })),
+            ...sliceStatus.created.map(x => ({ filePath: x, changeType: '+' })),
+        ]
+            .map(x => `Slice: Commit (${x.changeType}) ${x.filePath}`)
+            .join('\n') + '\n'
+    )
 
-    terminal(`\nSlice: Creating 'git-slice:${upstreamLastCommitId}' commit...`)
+    terminal(`Slice: Creating 'git-slice:${upstreamLastCommitId}' commit...`)
 
-    await sliceGit.add('*')
+    await sliceGit.add('.')
     await sliceGit.commit(`git-slice:${upstreamLastCommitId}`)
 
     terminal('Done!\n')
