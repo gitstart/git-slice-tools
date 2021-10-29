@@ -19,7 +19,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Upstream: Clean...`)
 
-    await upstreamGit.clean(CleanOptions.FORCE + CleanOptions.IGNORED_ONLY)
+    await upstreamGit.clean(CleanOptions.FORCE)
 
     terminal('Done!\n')
 
@@ -39,7 +39,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Slice: Clean...`)
 
-    await sliceGit.clean(CleanOptions.FORCE + CleanOptions.IGNORED_ONLY)
+    await sliceGit.clean(CleanOptions.FORCE)
 
     terminal('Done!\n')
 
@@ -81,7 +81,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal('Done!\n')
 
-    terminal(`Slice: Status...\n`)
+    terminal(`Slice: Status...`)
 
     terminal('Done!\n')
 

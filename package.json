@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "start": "yarn build && node build/index.js",
+    "pull": "yarn build && node build/index.js --action pull",
     "start:dev": "nodemon",
     "lint": "eslint . --ext .ts",
     "lint:fix": "yarn lint --fix"
@@ -18,6 +18,7 @@
     "@types/glob": "^7.2.0",
     "@types/node": "^16.11.6",
     "@types/terminal-kit": "^1.28.4",
+    "@types/yargs": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "dotenv": "^10.0.0",
@@ -32,6 +33,7 @@
     "nodemon": "^2.0.14",
     "simple-git": "^2.47.0",
     "terminal-kit": "^2.1.8",
-    "ts-node": "^10.4.0"
+    "ts-node": "^10.4.0",
+    "yargs": "^17.2.1"
   }
 }
