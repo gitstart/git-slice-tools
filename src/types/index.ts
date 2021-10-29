@@ -3,4 +3,5 @@ export interface ActionInputs {
     upstreamDefaultBranch: string
     sliceRepoDir: string
     sliceDefaultBranch: string
+    sliceIgnores: string[]
 }
