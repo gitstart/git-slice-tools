@@ -1,5 +1,11 @@
-import dotenv from 'dotenv'
+import { terminal } from 'terminal-kit'
+import { loadValidateActionInputs } from './config'
+import { init, pull } from './jobs'
 
-dotenv.config()
+const actionInputs = loadValidateActionInputs()
 
-console.log('Hello world!')
+init(actionInputs).then(({ sliceGit, upstreamGit }) => {
+    terminal('Initialized git instances\n')
+
+    return pull(sliceGit, upstreamGit, actionInputs)
+})
