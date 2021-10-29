@@ -75,7 +75,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
     fs.copySync(actionInputs.upstreamRepoDir, actionInputs.sliceRepoDir, {
         overwrite: true,
         filter: filePath => {
-            return filePath.startsWith(path.join(actionInputs.upstreamRepoDir, '.git'))
+            return !filePath.startsWith(path.join(actionInputs.upstreamRepoDir, '.git'))
         },
     })
 
