@@ -4,4 +4,6 @@ export interface ActionInputs {
     sliceRepoDir: string
     sliceDefaultBranch: string
     sliceIgnores: string[]
+    pushBranchNameTemplate: string
+    pushCommitMsgRegex: RegExp
 }

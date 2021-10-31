@@ -43,11 +43,16 @@ export const loadValidateActionInputs = (): ActionInputs => {
         }
     }
 
+    const pushBranchNameTemplate = process.env.GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE || '<branch_name>'
+    const pushCommitMsgRegex = new RegExp(process.env.GIT_SLICE_PUSH_COMMIT_MSG_REGEX || '.*', 'gi')
+
     return {
         upstreamRepoDir: path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR),
         upstreamDefaultBranch: process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH,
         sliceRepoDir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),
         sliceDefaultBranch: process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH,
         sliceIgnores,
+        pushBranchNameTemplate,
+        pushCommitMsgRegex,
     }
 }

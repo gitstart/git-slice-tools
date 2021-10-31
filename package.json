@@ -11,6 +11,7 @@
     "build": "rimraf ./build && tsc",
     "start": "node build/index.js",
     "pull": "yarn build && node build/index.js --action pull",
+    "push": "yarn build && node build/index.js --action push",
     "dev": "nodemon",
     "lint": "eslint . --ext .ts",
     "lint:fix": "yarn lint --fix"

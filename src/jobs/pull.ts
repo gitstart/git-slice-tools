@@ -5,6 +5,7 @@ import fs from 'fs-extra'
 import { compareSync } from 'dir-compare'
 import { ActionInputs } from '../types'
 import path from 'path'
+import { deleteSliceIgnoresFilesDirs } from '../common'
 
 export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionInputs: ActionInputs): Promise<void> => {
     terminal('-'.repeat(30) + '\n')
@@ -72,6 +73,8 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
             terminal('Done!\n')
         }
     }
+
+    deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.upstreamRepoDir, 'Upstream')
 
     terminal(`Slice: Copying files from upstream to slice...`)
 
