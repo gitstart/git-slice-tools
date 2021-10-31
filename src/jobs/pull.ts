@@ -47,14 +47,14 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
     for (let i = 0; i < actionInputs.sliceIgnores.length; i++) {
         const pattern = actionInputs.sliceIgnores[i]
 
-        terminal(`Upstream: Unlinking ignore files with pattern '${pattern}'...`)
+        terminal(`Upstream: Getting ingoring files/directores with pattern '${pattern}'...`)
 
         const mg = new Glob(pattern, {
             cwd: actionInputs.upstreamRepoDir,
             sync: true,
         })
 
-        terminal(`Found ${mg.found.length} file(s)!\n`)
+        terminal(`Found ${mg.found.length} files/directories!\n`)
 
         if (mg.found.length === 0) {
             terminal('\n')
@@ -63,10 +63,11 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
         for (let j = 0; j < mg.found.length; j++) {
             const pathMatch = mg.found[j]
+            const resolvedPath = path.join(actionInputs.upstreamRepoDir, pathMatch)
 
             terminal(`Upstream: Deleting: ${pathMatch}...`)
 
-            fs.unlinkSync(path.join(actionInputs.upstreamRepoDir, pathMatch))
+            fs.rmSync(resolvedPath, { force: true, recursive: true })
 
             terminal('Done!\n')
         }
@@ -108,7 +109,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
             const filePath = `${deletedFile.relativePath.substring(1)}/${deletedFile.name1}`
             terminal(`Slice: Deleting: ${filePath}...`)
 
-            fs.unlinkSync(path.join(actionInputs.sliceRepoDir, filePath))
+            fs.rmSync(path.join(actionInputs.sliceRepoDir, filePath), { force: true, recursive: true })
 
             terminal('Done!\n')
         })
@@ -123,6 +124,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
     const sliceStatus = await sliceGit.status()
 
     if (sliceStatus.files.length === 0) {
+        terminal(`Slice: No changes found\n`)
         terminal(`Slice: Up to date with upstream\n`)
 
         return
@@ -145,7 +147,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal('Done!\n')
 
-    terminal(`Slice: Pushing... 'git-slice:${upstreamLastCommitId}' commit...`)
+    terminal(`Slice: Pushing...`)
 
     await sliceGit.push('origin', actionInputs.sliceDefaultBranch)
 

@@ -28,7 +28,7 @@ export const loadValidateActionInputs = (): ActionInputs => {
         throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH'`)
     }
 
-    const sliceIgnores: string[] = ['.github/workflows/**/*.*', 'git-slice.json']
+    const sliceIgnores: string[] = ['.github/workflows', 'git-slice.json']
     if (process.env.GIT_SLICE_SLICE_IGNORES) {
         try {
             const parsedSliceIgnores = JSON.parse(process.env.GIT_SLICE_SLICE_IGNORES)
