@@ -26,7 +26,8 @@ const cleanAndDeleteLocalBranch = async (
 
     try {
         await git.checkout(defaultBranch)
-        await git.deleteLocalBranch(branch, true)
+        await git.branch(['-D', branch])
+        await git.branch(['-Dr', branch])
     } catch (error) {
         // noop
     }
@@ -107,6 +108,12 @@ export const push = async (
     }
 
     if (!upstreamBranchExists || forcePush) {
+        terminal(`Upstream: Checkout new branch '${upstreamBranch}'...`)
+
+        await upstreamGit.checkoutLocalBranch(upstreamBranch)
+
+        terminal('Done!\n')
+
         const hasChanges = await copyFiles(
             upstreamGit,
             actionInputs.sliceRepoDir,

@@ -13,7 +13,7 @@ export const init = async (
 
     terminal('Slice: Fetching...')
 
-    await sliceGit.fetch('origin')
+    await sliceGit.fetch('origin', ['-p'])
 
     terminal('Done!\n')
 
@@ -28,7 +28,7 @@ export const init = async (
 
     terminal('Upstream: Feching...')
 
-    await upstreamGit.fetch('origin')
+    await upstreamGit.fetch('origin', ['-p'])
 
     terminal('Done!\n')
 

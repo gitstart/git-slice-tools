@@ -69,7 +69,7 @@ export const createCommitAndPushCurrentChanges = async (
             .join('\n') + '\n'
     )
 
-    terminal(`${logPrefix}: Creating '${commitMsg}' commit...\n`)
+    terminal(`${logPrefix}: Creating '${commitMsg}' commit...`)
 
     await git.commit(commitMsg)
 
@@ -91,22 +91,10 @@ export const copyFiles = async (
     sliceIgnores: string[],
     logPrefix: string
 ): Promise<boolean> => {
-    terminal(`${logPrefix}: Copy files from '${fromDir}' to '${toDir}'...`)
-
-    fs.copySync(fromDir, toDir, {
-        overwrite: true,
-        dereference: false,
-        filter: filePath => {
-            return !filePath.startsWith(path.join(fromDir, '.git/'))
-        },
-    })
-
-    terminal('Done!\n')
-
-    terminal(`${logPrefix}: Removing files on '${toDir}' but not on '${fromDir}'...`)
+    terminal(`${logPrefix}: Copy files from '${fromDir}' to '${toDir}'...\n`)
 
     const compareResponse = compareSync(toDir, fromDir, {
-        compareContent: false,
+        compareContent: true,
         compareDate: false,
         compareSize: false,
         compareSymlink: true,
@@ -118,21 +106,80 @@ export const copyFiles = async (
     })
 
     if (compareResponse.diffSet) {
-        // Filter files only on left = sliceRepoDir
-        const deletedFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
+        // Filter files only on left = to Dir
+        const onlyOnToDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
 
-        terminal(`Found ${deletedFiles.length} file(s)!\n`)
+        terminal(`${logPrefix}: Found ${onlyOnToDirFiles.length} onlyOnToDir file(s)!\n`)
 
-        deletedFiles.forEach(deletedFile => {
-            const filePath = `${deletedFile.relativePath.substring(1)}/${deletedFile.name1}`
+        onlyOnToDirFiles.forEach(diff => {
+            const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
             terminal(`${logPrefix}: Deleting: ${filePath}...`)
 
             fs.rmSync(path.join(toDir, filePath), { force: true, recursive: true })
 
             terminal('Done!\n')
         })
+
+        // TODO: Getting problem with `.gitignore` related case
+        // + Client push update some files, then add them to .gitignore
+        // + When we copy those files into slice ropo (included .gitignore) => source won't have those files
+
+        // Filter files only on right = from Dir
+        const onlyOnFromDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'right')
+
+        terminal(`${logPrefix}: Found ${onlyOnFromDirFiles.length} onlyOnFromDir file(s)!\n`)
+
+        onlyOnFromDirFiles.forEach(diff => {
+            const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
+            terminal(`${logPrefix}: Copying: ${filePath}...`)
+
+            fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                overwrite: true,
+                dereference: false,
+            })
+
+            terminal('Done!\n')
+        })
+
+        const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
+        const symlinkFiles: { filePath: string; targetLink: string }[] = []
+
+        terminal(`${logPrefix}: Found ${distinctFiles.length} distinct file(s)!\n`)
+
+        await Promise.all(
+            distinctFiles.map(async diff => {
+                const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+
+                const lstat = await fs.lstat(path.join(fromDir, filePath))
+
+                if (lstat.isSymbolicLink()) {
+                    const targetLink = await fs.readlink(path.join(fromDir, filePath))
+
+                    symlinkFiles.push({ filePath, targetLink })
+                } else {
+                    terminal(`${logPrefix}: Overriding: ${filePath}...`)
+
+                    fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                        overwrite: true,
+                        dereference: false,
+                    })
+
+                    terminal('Done!\n')
+                }
+            })
+        )
+
+        terminal(`${logPrefix}: Found ${symlinkFiles.length} symlinks!\n`)
+
+        symlinkFiles.forEach(({ filePath, targetLink }) => {
+            terminal(`${logPrefix}: Linking : ${filePath}...`)
+
+            fs.symlinkSync(path.join(toDir, filePath), path.join(path.join(toDir, filePath), targetLink))
+
+            terminal('Done!\n')
+        })
     } else {
-        terminal('Found 0 file(s)!\n')
+        terminal(`${logPrefix}: Found 0 file(s)!\n`)
     }
 
     const status = await git.status()
