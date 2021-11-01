@@ -73,7 +73,7 @@ export const push = async (
             `Slice: Try to merge default branch '${actionInputs.sliceDefaultBranch}' into branch '${sliceBranch}'...`
         )
 
-        await sliceGit.pull('origin', actionInputs.sliceDefaultBranch)
+        await sliceGit.pull('origin', actionInputs.sliceDefaultBranch, ['--no-rebase'])
         const status = await sliceGit.status()
 
         if (status.ahead) {

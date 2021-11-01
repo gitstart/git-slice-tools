@@ -13,7 +13,6 @@ export const init = async (
 
     terminal('Slice: Fetching...')
 
-    await sliceGit.addConfig('pull.rebase', 'false')
     await sliceGit.fetch('origin', ['-p'])
 
     terminal('Done!\n')
@@ -29,7 +28,6 @@ export const init = async (
 
     terminal('Upstream: Feching...')
 
-    await upstreamGit.addConfig('pull.rebase', 'false')
     await upstreamGit.fetch('origin', ['-p'])
 
     terminal('Done!\n')
