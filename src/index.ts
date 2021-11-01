@@ -5,9 +5,10 @@ import { init, pull, push } from './jobs'
 
 const argv = yargs(process.argv.slice(2))
     .options({
-        action: { choices: ['pull', 'push'], alias: 'a' },
-        branch: { alias: 'b' },
-        message: { alias: 'b' },
+        action: { type: 'string', choices: ['pull', 'push'], alias: 'a' },
+        branch: { type: 'string', alias: 'b' },
+        message: { type: 'string', alias: 'm' },
+        forcePush: { type: 'boolean', alias: 'force-push', default: false },
     })
     .parseSync()
 
@@ -29,7 +30,7 @@ init(actionInputs).then(({ sliceGit, upstreamGit }) => {
                 throw new Error(`Push job: 'message' in string is required`)
             }
 
-            return push(sliceGit, upstreamGit, actionInputs, argv.branch, argv.message)
+            return push(sliceGit, upstreamGit, actionInputs, argv.branch, argv.message, argv.forcePush)
         }
         default: {
             return

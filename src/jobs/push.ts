@@ -1,11 +1,14 @@
 import { CleanOptions, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
-import fs from 'fs-extra'
-import { deleteSliceIgnoresFilesDirs } from '../common'
+import { copyFiles, createCommitAndPushCurrentChanges, deleteSliceIgnoresFilesDirs } from '../common'
 import { ActionInputs } from '../types'
-import path from 'path'
 
-const cleanAndDeleteLocalBranch = async (git: SimpleGit, gitLogPrefix: string, branch: string): Promise<void> => {
+const cleanAndDeleteLocalBranch = async (
+    git: SimpleGit,
+    gitLogPrefix: string,
+    defaultBranch: string,
+    branch: string
+): Promise<void> => {
     terminal(`${gitLogPrefix}: Clean...`)
 
     await git.reset(ResetMode.HARD)
@@ -22,6 +25,7 @@ const cleanAndDeleteLocalBranch = async (git: SimpleGit, gitLogPrefix: string, b
     terminal(`${gitLogPrefix}: Delete local branch '${branch}'...`)
 
     try {
+        await git.checkout(defaultBranch)
         await git.deleteLocalBranch(branch, true)
     } catch (error) {
         // noop
@@ -35,10 +39,11 @@ export const push = async (
     upstreamGit: SimpleGit,
     actionInputs: ActionInputs,
     sliceBranch: string,
-    commitMsg: string
+    commitMsg: string,
+    forcePush: boolean
 ): Promise<void> => {
     terminal('-'.repeat(30) + '\n')
-    terminal(`Performing push job branch with ${JSON.stringify({ sliceBranch, commitMsg })}...\n`)
+    terminal(`Performing push job branch with ${JSON.stringify({ sliceBranch, commitMsg, forcePush })}...\n`)
 
     if (!actionInputs.pushCommitMsgRegex.test(commitMsg)) {
         throw new Error('Commit message failed PUSH_COMMIT_MSG_REGEX')
@@ -46,7 +51,7 @@ export const push = async (
 
     const upstreamBranch = actionInputs.pushBranchNameTemplate.replace('<branch_name>', sliceBranch)
 
-    await cleanAndDeleteLocalBranch(sliceGit, 'Slice', sliceBranch)
+    await cleanAndDeleteLocalBranch(sliceGit, 'Slice', actionInputs.sliceDefaultBranch, sliceBranch)
 
     terminal(`Slice: Checkout branch '${sliceBranch}'...`)
 
@@ -83,40 +88,60 @@ export const push = async (
         throw error
     }
 
-    await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', upstreamBranch)
+    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepoDir, 'Slice')
 
-    terminal(`Upstream: Try to checkout branch '${upstreamBranch}'...`)
-    let upstreamBranchIsNew = false
+    await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamDefaultBranch, upstreamBranch)
+
+    let upstreamBranchExists = false
 
     try {
-        await upstreamGit.checkout(upstreamBranch)
-        await upstreamGit.pull('origin', upstreamBranch)
+        terminal(`Upstream: Check remote branch '${upstreamBranch}'...`)
 
-        terminal('Done!\n')
+        await upstreamGit.show(`remotes/origin/${upstreamBranch}`)
+
+        upstreamBranchExists = true
+
+        terminal('Existed!\n')
     } catch (error) {
-        // noop
         terminal('Not found!\n')
-
-        upstreamBranchIsNew = true
-
-        terminal(`Upstream: Create new branch '${upstreamBranch}'...`)
     }
 
-    deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepoDir, 'Slice')
+    if (!upstreamBranchExists || forcePush) {
+        const hasChanges = await copyFiles(
+            upstreamGit,
+            actionInputs.sliceRepoDir,
+            actionInputs.upstreamRepoDir,
+            actionInputs.sliceIgnores,
+            'Upstream'
+        )
 
-    if (upstreamBranchIsNew) {
-        terminal(`Upstream: Copying files from upstream to slice...`)
+        if (!hasChanges) {
+            return
+        }
 
-        fs.copySync(actionInputs.sliceRepoDir, actionInputs.upstreamRepoDir, {
-            overwrite: true,
-            dereference: true,
-            filter: filePath => {
-                return !filePath.startsWith(path.join(actionInputs.sliceRepoDir, '.git'))
-            },
-        })
+        await createCommitAndPushCurrentChanges(upstreamGit, commitMsg, upstreamBranch, 'Upstream', true)
 
-        terminal('Done!\n')
-
-        // TODO: Check delete file
+        return
     }
+
+    terminal(`Upstream: Checkout branch '${upstreamBranch}'...`)
+
+    await upstreamGit.checkout(upstreamBranch)
+    await upstreamGit.pull('origin', upstreamBranch)
+
+    terminal('Done!\n')
+
+    const hasChanges = await copyFiles(
+        upstreamGit,
+        actionInputs.sliceRepoDir,
+        actionInputs.upstreamRepoDir,
+        actionInputs.sliceIgnores,
+        'Upstream'
+    )
+
+    if (!hasChanges) {
+        return
+    }
+
+    await createCommitAndPushCurrentChanges(upstreamGit, commitMsg, upstreamBranch, 'Upstream', false)
 }
