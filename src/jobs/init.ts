@@ -1,8 +1,6 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
-import { rmSync } from 'fs-extra'
 import { ActionInputs } from '../types'
-import path from 'path'
 
 export const init = async (
     actionInputs: ActionInputs
@@ -12,10 +10,6 @@ export const init = async (
 }> => {
     const upstreamGit: SimpleGit = simpleGit(actionInputs.upstreamRepoDir, { binary: 'git' })
     const sliceGit: SimpleGit = simpleGit(actionInputs.sliceRepoDir, { binary: 'git' })
-
-    // // rm -f ./.git/index.lock
-    // rmSync(path.join(actionInputs.sliceRepoDir, '.git/index.lock'), { force: true })
-    // rmSync(path.join(actionInputs.upstreamRepoDir, '.git/index.lock'), { force: true })
 
     terminal('Slice: Fetching...')
 
