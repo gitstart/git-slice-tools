@@ -120,6 +120,8 @@ export const copyFiles = async (
             terminal('Done!\n')
         })
 
+        const symlinkFiles: { filePath: string; targetLink: string }[] = []
+
         // TODO: Getting problem with `.gitignore` related case
         // + Client push update some files, then add them to .gitignore
         // + When we copy those files into slice ropo (included .gitignore) => source won't have those files
@@ -129,27 +131,36 @@ export const copyFiles = async (
 
         terminal(`${logPrefix}: Found ${onlyOnFromDirFiles.length} onlyOnFromDir file(s)!\n`)
 
-        onlyOnFromDirFiles.forEach(diff => {
-            const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
-            terminal(`${logPrefix}: Copying: ${filePath}...`)
+        await Promise.all(
+            onlyOnFromDirFiles.map(async diff => {
+                const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
+                const lstat = await fs.lstat(path.join(fromDir, filePath))
 
-            fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
-                overwrite: true,
-                dereference: false,
+                if (lstat.isSymbolicLink()) {
+                    const targetLink = await fs.readlink(path.join(fromDir, filePath))
+
+                    symlinkFiles.push({ filePath, targetLink })
+                } else {
+                    terminal(`${logPrefix}: Copying: ${filePath}...`)
+
+                    fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                        overwrite: true,
+                        dereference: false,
+                        recursive: false
+                    })
+
+                    terminal('Done!\n')
+                }
             })
-
-            terminal('Done!\n')
-        })
+        )
 
         const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
-        const symlinkFiles: { filePath: string; targetLink: string }[] = []
 
         terminal(`${logPrefix}: Found ${distinctFiles.length} distinct file(s)!\n`)
 
         await Promise.all(
             distinctFiles.map(async diff => {
                 const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
-
                 const lstat = await fs.lstat(path.join(fromDir, filePath))
 
                 if (lstat.isSymbolicLink()) {
@@ -162,6 +173,7 @@ export const copyFiles = async (
                     fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
                         overwrite: true,
                         dereference: false,
+                        recursive: false
                     })
 
                     terminal('Done!\n')
@@ -173,8 +185,9 @@ export const copyFiles = async (
 
         symlinkFiles.forEach(({ filePath, targetLink }) => {
             terminal(`${logPrefix}: Linking : ${filePath}...`)
+            const symlinkPath = path.join(toDir, filePath)
 
-            fs.symlinkSync(path.join(toDir, filePath), path.join(path.join(toDir, filePath), targetLink))
+            fs.symlinkSync(targetLink, symlinkPath)
 
             terminal('Done!\n')
         })
