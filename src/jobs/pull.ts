@@ -1,10 +1,7 @@
 import { CleanOptions, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
-import { Glob } from 'glob'
-import fs from 'fs-extra'
-import { ActionInputs } from '../types'
-import path from 'path'
 import { copyFiles, createCommitAndPushCurrentChanges, deleteSliceIgnoresFilesDirs } from '../common'
+import { ActionInputs } from '../types'
 
 export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionInputs: ActionInputs): Promise<void> => {
     terminal('-'.repeat(30) + '\n')
@@ -21,7 +18,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Upstream: Clean...`)
 
-    await upstreamGit.clean(CleanOptions.FORCE)
+    await upstreamGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
 
     terminal('Done!\n')
 
@@ -41,7 +38,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Slice: Clean...`)
 
-    await sliceGit.clean(CleanOptions.FORCE)
+    await sliceGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
 
     terminal('Done!\n')
 
@@ -52,7 +49,8 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
         actionInputs.upstreamRepoDir,
         actionInputs.sliceRepoDir,
         actionInputs.sliceIgnores,
-        'Slice'
+        'Slice',
+        true
     )
 
     if (hasChanges) {

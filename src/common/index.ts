@@ -89,7 +89,8 @@ export const copyFiles = async (
     fromDir: string,
     toDir: string,
     sliceIgnores: string[],
-    logPrefix: string
+    logPrefix: string,
+    forceAdd = false
 ): Promise<boolean> => {
     terminal(`${logPrefix}: Copy files from '${fromDir}' to '${toDir}'...\n`)
 
@@ -99,6 +100,7 @@ export const copyFiles = async (
         compareSize: false,
         compareSymlink: true,
         excludeFilter: [
+            '**/.DS_Store',
             '**/.git/**',
             // It requires to have `**/` as prefix to work with dir-compare filter
             ...sliceIgnores.map(x => (x.startsWith('**/') ? x : `**/${x.replace(/^\/+/, '')}`)),
@@ -111,14 +113,19 @@ export const copyFiles = async (
 
         terminal(`${logPrefix}: Found ${onlyOnToDirFiles.length} onlyOnToDir file(s)!\n`)
 
-        onlyOnToDirFiles.forEach(diff => {
+        for (let i = 0; i < onlyOnToDirFiles.length; i++) {
+            const diff = onlyOnToDirFiles[i]
+
             const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+            const absPath = path.join(toDir, filePath)
+
             terminal(`${logPrefix}: Deleting: ${filePath}...`)
 
-            fs.rmSync(path.join(toDir, filePath), { force: true, recursive: true })
+            fs.rmSync(absPath, { force: true, recursive: true })
+            forceAdd && (await git.raw('add', absPath, '--force'))
 
             terminal('Done!\n')
-        })
+        }
 
         const symlinkFiles: { filePath: string; targetLink: string }[] = []
 
@@ -131,66 +138,70 @@ export const copyFiles = async (
 
         terminal(`${logPrefix}: Found ${onlyOnFromDirFiles.length} onlyOnFromDir file(s)!\n`)
 
-        await Promise.all(
-            onlyOnFromDirFiles.map(async diff => {
-                const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
-                const lstat = await fs.lstat(path.join(fromDir, filePath))
+        for (let i = 0; i < onlyOnFromDirFiles.length; i++) {
+            const diff = onlyOnFromDirFiles[i]
+            const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
+            const lstat = await fs.lstat(path.join(fromDir, filePath))
 
-                if (lstat.isSymbolicLink()) {
-                    const targetLink = await fs.readlink(path.join(fromDir, filePath))
+            if (lstat.isSymbolicLink()) {
+                const targetLink = await fs.readlink(path.join(fromDir, filePath))
 
-                    symlinkFiles.push({ filePath, targetLink })
-                } else {
-                    terminal(`${logPrefix}: Copying: ${filePath}...`)
+                symlinkFiles.push({ filePath, targetLink })
+            } else {
+                terminal(`${logPrefix}: Copying: ${filePath}...`)
 
-                    fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
-                        overwrite: true,
-                        dereference: false,
-                        recursive: false
-                    })
+                fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                    overwrite: true,
+                    dereference: false,
+                    recursive: false,
+                })
 
-                    terminal('Done!\n')
-                }
-            })
-        )
+                forceAdd && (await git.raw('add', filePath, '--force'))
+
+                terminal('Done!\n')
+            }
+        }
 
         const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
 
         terminal(`${logPrefix}: Found ${distinctFiles.length} distinct file(s)!\n`)
 
-        await Promise.all(
-            distinctFiles.map(async diff => {
-                const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
-                const lstat = await fs.lstat(path.join(fromDir, filePath))
+        for (let i = 0; i < distinctFiles.length; i++) {
+            const diff = distinctFiles[i]
+            const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+            const lstat = await fs.lstat(path.join(fromDir, filePath))
 
-                if (lstat.isSymbolicLink()) {
-                    const targetLink = await fs.readlink(path.join(fromDir, filePath))
+            if (lstat.isSymbolicLink()) {
+                const targetLink = await fs.readlink(path.join(fromDir, filePath))
 
-                    symlinkFiles.push({ filePath, targetLink })
-                } else {
-                    terminal(`${logPrefix}: Overriding: ${filePath}...`)
+                symlinkFiles.push({ filePath, targetLink })
+            } else {
+                terminal(`${logPrefix}: Overriding: ${filePath}...`)
 
-                    fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
-                        overwrite: true,
-                        dereference: false,
-                        recursive: false
-                    })
+                fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                    overwrite: true,
+                    dereference: false,
+                    recursive: false,
+                })
 
-                    terminal('Done!\n')
-                }
-            })
-        )
+                forceAdd && (await git.raw('add', filePath, '--force'))
+
+                terminal('Done!\n')
+            }
+        }
 
         terminal(`${logPrefix}: Found ${symlinkFiles.length} symlinks!\n`)
 
-        symlinkFiles.forEach(({ filePath, targetLink }) => {
+        for (let i = 0; i < symlinkFiles.length; i++) {
+            const { filePath, targetLink } = symlinkFiles[i]
             terminal(`${logPrefix}: Linking : ${filePath}...`)
             const symlinkPath = path.join(toDir, filePath)
 
             fs.symlinkSync(targetLink, symlinkPath)
+            forceAdd && (await git.raw('add', symlinkPath, '--force'))
 
             terminal('Done!\n')
-        })
+        }
     } else {
         terminal(`${logPrefix}: Found 0 file(s)!\n`)
     }

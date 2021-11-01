@@ -12,7 +12,7 @@ const cleanAndDeleteLocalBranch = async (
     terminal(`${gitLogPrefix}: Clean...`)
 
     await git.reset(ResetMode.HARD)
-    await git.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE)
+    await git.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
 
     terminal('Done!\n')
 
