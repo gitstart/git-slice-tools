@@ -114,7 +114,7 @@ export const push = async (
 
         terminal('Done!\n')
 
-        const hasChanges = await copyFiles(
+        const diffFiles = await copyFiles(
             upstreamGit,
             actionInputs.sliceRepoDir,
             actionInputs.upstreamRepoDir,
@@ -122,7 +122,7 @@ export const push = async (
             'Upstream'
         )
 
-        if (!hasChanges) {
+        if (!diffFiles.length) {
             return
         }
 
@@ -138,7 +138,7 @@ export const push = async (
 
     terminal('Done!\n')
 
-    const hasChanges = await copyFiles(
+    const diffFiles = await copyFiles(
         upstreamGit,
         actionInputs.sliceRepoDir,
         actionInputs.upstreamRepoDir,
@@ -146,7 +146,7 @@ export const push = async (
         'Upstream'
     )
 
-    if (!hasChanges) {
+    if (!diffFiles.length) {
         return
     }
 

@@ -44,16 +44,17 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.upstreamRepoDir, 'Upstream')
 
-    const hasChanges = await copyFiles(
+    const diffFiles = await copyFiles(
         sliceGit,
         actionInputs.upstreamRepoDir,
         actionInputs.sliceRepoDir,
         actionInputs.sliceIgnores,
-        'Slice',
-        true
+        'Slice'
     )
 
-    if (hasChanges) {
+    if (diffFiles.length !== 0) {
+        await sliceGit.raw('add', '.', '--force')
+
         await createCommitAndPushCurrentChanges(
             sliceGit,
             `git-slice:${upstreamLastCommitId}`,

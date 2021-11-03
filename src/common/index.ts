@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import { terminal } from 'terminal-kit'
 import { SimpleGit } from 'simple-git'
-import { compareSync } from 'dir-compare'
+import { compareSync, DifferenceState, Reason } from 'dir-compare'
 
 export const deleteSliceIgnoresFilesDirs = async (
     sliceIgnores: string[],
@@ -89,9 +89,8 @@ export const copyFiles = async (
     fromDir: string,
     toDir: string,
     sliceIgnores: string[],
-    logPrefix: string,
-    forceAdd = false
-): Promise<boolean> => {
+    logPrefix: string
+): Promise<string[]> => {
     terminal(`${logPrefix}: Copy files from '${fromDir}' to '${toDir}'...\n`)
 
     const compareResponse = compareSync(toDir, fromDir, {
@@ -107,112 +106,146 @@ export const copyFiles = async (
         ].join(','),
     })
 
-    if (compareResponse.diffSet) {
-        // Filter files only on left = to Dir
-        const onlyOnToDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
+    if (!compareResponse.diffSet || compareResponse.diffSet.length === 0) {
+        terminal(`${logPrefix}: Found 0 diff file(s)!\n`)
 
-        terminal(`${logPrefix}: Found ${onlyOnToDirFiles.length} onlyOnToDir file(s)!\n`)
+        return []
+    }
 
-        for (let i = 0; i < onlyOnToDirFiles.length; i++) {
-            const diff = onlyOnToDirFiles[i]
+    const fileChanges: string[] = []
 
-            const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
-            const absPath = path.join(toDir, filePath)
+    // Filter files only on left = to Dir
+    const onlyOnToDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
 
-            terminal(`${logPrefix}: Deleting: ${filePath}...`)
+    terminal(`${logPrefix}: Found ${onlyOnToDirFiles.length} onlyOnToDir file(s)!\n`)
 
-            fs.rmSync(absPath, { force: true, recursive: true })
-            forceAdd && (await git.raw('add', absPath, '--force'))
+    for (let i = 0; i < onlyOnToDirFiles.length; i++) {
+        const diff = onlyOnToDirFiles[i]
+
+        const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+        const absPath = path.join(toDir, filePath)
+
+        terminal(`${logPrefix}: Deleting: ${filePath}...`)
+
+        fs.rmSync(absPath, { force: true, recursive: true })
+        fileChanges.push(absPath)
+
+        terminal('Done!\n')
+    }
+
+    const symlinkFiles: { filePath: string; targetLink: string; reason: Reason; state: DifferenceState }[] = []
+
+    // TODO: Getting problem with `.gitignore` related case
+    // + Client push update some files, then add them to .gitignore
+    // + When we copy those files into slice ropo (included .gitignore) => source won't have those files
+
+    // Filter files only on right = from Dir
+    const onlyOnFromDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'right')
+
+    terminal(`${logPrefix}: Found ${onlyOnFromDirFiles.length} onlyOnFromDir file(s)!\n`)
+
+    for (let i = 0; i < onlyOnFromDirFiles.length; i++) {
+        const diff = onlyOnFromDirFiles[i]
+        const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
+        const lstat = await fs.lstat(path.join(fromDir, filePath))
+
+        if (lstat.isSymbolicLink()) {
+            const targetLink = await fs.readlink(path.join(fromDir, filePath))
+
+            symlinkFiles.push({
+                filePath,
+                targetLink,
+                reason: diff.reason,
+                state: diff.state,
+            })
+        } else if (lstat.isFile()) {
+            terminal(`${logPrefix}: Copying: ${filePath}...`)
+
+            fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                overwrite: true,
+                dereference: false,
+                recursive: false,
+            })
+
+            fileChanges.push(path.join(toDir, filePath))
 
             terminal('Done!\n')
         }
+    }
 
-        const symlinkFiles: { filePath: string; targetLink: string }[] = []
+    const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
 
-        // TODO: Getting problem with `.gitignore` related case
-        // + Client push update some files, then add them to .gitignore
-        // + When we copy those files into slice ropo (included .gitignore) => source won't have those files
+    terminal(`${logPrefix}: Found ${distinctFiles.length} distinct file(s)!\n`)
 
-        // Filter files only on right = from Dir
-        const onlyOnFromDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'right')
+    for (let i = 0; i < distinctFiles.length; i++) {
+        const diff = distinctFiles[i]
+        const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+        const lstat = await fs.lstat(path.join(fromDir, filePath))
 
-        terminal(`${logPrefix}: Found ${onlyOnFromDirFiles.length} onlyOnFromDir file(s)!\n`)
+        if (lstat.isSymbolicLink()) {
+            const targetLink = await fs.readlink(path.join(fromDir, filePath))
 
-        for (let i = 0; i < onlyOnFromDirFiles.length; i++) {
-            const diff = onlyOnFromDirFiles[i]
-            const filePath = `${diff.relativePath.substring(1)}/${diff.name2}`
-            const lstat = await fs.lstat(path.join(fromDir, filePath))
+            symlinkFiles.push({
+                filePath,
+                targetLink,
+                reason: diff.reason,
+                state: diff.state,
+            })
+        } else if (lstat.isFile()) {
+            terminal(`${logPrefix}: Overriding: ${filePath}...`)
 
-            if (lstat.isSymbolicLink()) {
-                const targetLink = await fs.readlink(path.join(fromDir, filePath))
+            fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
+                overwrite: true,
+                dereference: false,
+                recursive: false,
+            })
 
-                symlinkFiles.push({ filePath, targetLink })
-            } else {
-                terminal(`${logPrefix}: Copying: ${filePath}...`)
+            fileChanges.push(path.join(toDir, filePath))
 
-                fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
-                    overwrite: true,
-                    dereference: false,
-                    recursive: false,
-                })
+            terminal('Done!\n')
+        }
+    }
 
-                forceAdd && (await git.raw('add', filePath, '--force'))
+    terminal(`${logPrefix}: Found ${symlinkFiles.length} symlinks!\n`)
 
-                terminal('Done!\n')
-            }
+    for (let i = 0; i < symlinkFiles.length; i++) {
+        const { filePath, targetLink, reason, state } = symlinkFiles[i]
+
+        terminal(`${logPrefix}: Checking symlink target: ${filePath} (${state}/${reason ?? 'No reason'})...`)
+
+        if (state === 'distinct' && reason === 'different-symlink') {
+            const symlinkPath = path.join(toDir, filePath)
+
+            fs.rmSync(symlinkPath, { force: true })
+            fs.symlinkSync(targetLink, symlinkPath)
+
+            fileChanges.push(symlinkPath)
+
+            terminal('Done!\n')
+
+            continue
         }
 
-        const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
-
-        terminal(`${logPrefix}: Found ${distinctFiles.length} distinct file(s)!\n`)
-
-        for (let i = 0; i < distinctFiles.length; i++) {
-            const diff = distinctFiles[i]
-            const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
-            const lstat = await fs.lstat(path.join(fromDir, filePath))
-
-            if (lstat.isSymbolicLink()) {
-                const targetLink = await fs.readlink(path.join(fromDir, filePath))
-
-                symlinkFiles.push({ filePath, targetLink })
-            } else {
-                terminal(`${logPrefix}: Overriding: ${filePath}...`)
-
-                fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
-                    overwrite: true,
-                    dereference: false,
-                    recursive: false,
-                })
-
-                forceAdd && (await git.raw('add', filePath, '--force'))
-
-                terminal('Done!\n')
-            }
-        }
-
-        terminal(`${logPrefix}: Found ${symlinkFiles.length} symlinks!\n`)
-
-        for (let i = 0; i < symlinkFiles.length; i++) {
-            const { filePath, targetLink } = symlinkFiles[i]
-            terminal(`${logPrefix}: Linking : ${filePath}...`)
+        if (state === 'right') {
             const symlinkPath = path.join(toDir, filePath)
 
             fs.symlinkSync(targetLink, symlinkPath)
-            forceAdd && (await git.raw('add', symlinkPath, '--force'))
+
+            fileChanges.push(symlinkPath)
 
             terminal('Done!\n')
+
+            continue
         }
-    } else {
-        terminal(`${logPrefix}: Found 0 file(s)!\n`)
+
+        terminal('Ignored!\n')
     }
 
     const status = await git.status()
 
-    if (status.files.length === 0) {
-        terminal(`${logPrefix}: No changes found\n`)
+    terminal(
+        `${logPrefix}: Found ${fileChanges.length} diff files during compare - Git status: ${status.files.length} files \n`
+    )
 
-        return false
-    }
-
-    return true
+    return fileChanges
 }
