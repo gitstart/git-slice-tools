@@ -1,15 +1,24 @@
 import simpleGit, { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import { ActionInputs } from '../types'
+import { gitInit } from '../common'
 
 export const init = async (
     actionInputs: ActionInputs
 ): Promise<{
-    upstreamGit: SimpleGit
     sliceGit: SimpleGit
+    upstreamGit: SimpleGit
 }> => {
-    const upstreamGit: SimpleGit = simpleGit(actionInputs.upstreamRepoDir, { binary: 'git' })
-    const sliceGit: SimpleGit = simpleGit(actionInputs.sliceRepoDir, { binary: 'git' })
+    let sliceGit: SimpleGit
+    let upstreamGit: SimpleGit
+
+    if (actionInputs.forceInit) {
+        sliceGit = await gitInit(actionInputs.sliceRepo)
+        upstreamGit = await gitInit(actionInputs.upstreamRepo)
+    } else {
+        sliceGit = simpleGit(actionInputs.sliceRepo.dir, { binary: 'git' })
+        upstreamGit = simpleGit(actionInputs.upstreamRepo.dir, { binary: 'git' })
+    }
 
     terminal('Slice: Fetching...')
 

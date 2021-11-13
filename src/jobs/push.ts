@@ -52,7 +52,7 @@ export const push = async (
 
     const upstreamBranch = actionInputs.pushBranchNameTemplate.replace('<branch_name>', sliceBranch)
 
-    await cleanAndDeleteLocalBranch(sliceGit, 'Slice', actionInputs.sliceDefaultBranch, sliceBranch)
+    await cleanAndDeleteLocalBranch(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch, sliceBranch)
 
     terminal(`Slice: Checkout branch '${sliceBranch}'...`)
 
@@ -70,10 +70,10 @@ export const push = async (
 
     try {
         terminal(
-            `Slice: Try to merge default branch '${actionInputs.sliceDefaultBranch}' into branch '${sliceBranch}'...`
+            `Slice: Try to merge default branch '${actionInputs.sliceRepo.defaultBranch}' into branch '${sliceBranch}'...`
         )
 
-        await sliceGit.pull('origin', actionInputs.sliceDefaultBranch, ['--no-rebase'])
+        await sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch, ['--no-rebase'])
         const status = await sliceGit.status()
 
         if (status.ahead) {
@@ -89,9 +89,9 @@ export const push = async (
         throw error
     }
 
-    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepoDir, 'Slice')
+    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepo.dir, 'Slice')
 
-    await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamDefaultBranch, upstreamBranch)
+    await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)
 
     let upstreamBranchExists = false
 
@@ -116,8 +116,8 @@ export const push = async (
 
         const diffFiles = await copyFiles(
             upstreamGit,
-            actionInputs.sliceRepoDir,
-            actionInputs.upstreamRepoDir,
+            actionInputs.sliceRepo.dir,
+            actionInputs.upstreamRepo.dir,
             actionInputs.sliceIgnores,
             'Upstream'
         )
@@ -140,8 +140,8 @@ export const push = async (
 
     const diffFiles = await copyFiles(
         upstreamGit,
-        actionInputs.sliceRepoDir,
-        actionInputs.upstreamRepoDir,
+        actionInputs.sliceRepo.dir,
+        actionInputs.upstreamRepo.dir,
         actionInputs.sliceIgnores,
         'Upstream'
     )

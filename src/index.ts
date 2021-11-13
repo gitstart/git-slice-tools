@@ -1,11 +1,11 @@
 import { terminal } from 'terminal-kit'
 import yargs from 'yargs/yargs'
 import { loadValidateActionInputs } from './config'
-import { init, pull, push } from './jobs'
+import { init, pull, push, checkout } from './jobs'
 
 const argv = yargs(process.argv.slice(2))
     .options({
-        action: { type: 'string', choices: ['pull', 'push'], alias: 'a' },
+        action: { type: 'string', choices: ['pull', 'push', 'checkout'], alias: 'a' },
         branch: { type: 'string', alias: 'b' },
         message: { type: 'string', alias: 'm' },
         forcePush: { type: 'boolean', alias: 'force-push', default: false },
@@ -20,6 +20,9 @@ init(actionInputs).then(({ sliceGit, upstreamGit }) => {
     switch (argv.action) {
         case 'pull': {
             return pull(sliceGit, upstreamGit, actionInputs)
+        }
+        case 'checkout': {
+            return checkout(sliceGit, upstreamGit, actionInputs)
         }
         case 'push': {
             if (!argv.branch || typeof argv.branch !== 'string') {

@@ -7,12 +7,12 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
     terminal('-'.repeat(30) + '\n')
     terminal('Performing pull job...\n')
 
-    terminal(`Upstream: Checkout and pull last versions '${actionInputs.upstreamDefaultBranch}' branch...`)
+    terminal(`Upstream: Checkout and pull last versions '${actionInputs.upstreamRepo.defaultBranch}' branch...`)
 
     await upstreamGit.reset(ResetMode.HARD)
-    await upstreamGit.checkout(actionInputs.upstreamDefaultBranch)
-    await upstreamGit.reset(['--hard', `origin/${actionInputs.upstreamDefaultBranch}`])
-    await upstreamGit.pull('origin', actionInputs.upstreamDefaultBranch)
+    await upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)
+    await upstreamGit.reset(['--hard', `origin/${actionInputs.upstreamRepo.defaultBranch}`])
+    await upstreamGit.pull('origin', actionInputs.upstreamRepo.defaultBranch)
 
     terminal('Done!\n')
 
@@ -28,11 +28,11 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal(`Done! -> ${upstreamLastCommitId}\n`)
 
-    terminal(`Slice: Checkout and pull last versions '${actionInputs.sliceDefaultBranch}' branch...`)
+    terminal(`Slice: Checkout and pull last versions '${actionInputs.sliceRepo.defaultBranch}' branch...`)
 
-    await sliceGit.checkout(actionInputs.sliceDefaultBranch)
-    await sliceGit.reset(['--hard', `origin/${actionInputs.sliceDefaultBranch}`])
-    await sliceGit.pull('origin', actionInputs.sliceDefaultBranch)
+    await sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)
+    await sliceGit.reset(['--hard', `origin/${actionInputs.sliceRepo.defaultBranch}`])
+    await sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch)
 
     terminal('Done!\n')
 
@@ -42,12 +42,12 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     terminal('Done!\n')
 
-    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.upstreamRepoDir, 'Upstream')
+    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.upstreamRepo.dir, 'Upstream')
 
     const diffFiles = await copyFiles(
         sliceGit,
-        actionInputs.upstreamRepoDir,
-        actionInputs.sliceRepoDir,
+        actionInputs.upstreamRepo.dir,
+        actionInputs.sliceRepo.dir,
         actionInputs.sliceIgnores,
         'Slice'
     )
@@ -58,7 +58,7 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
         await createCommitAndPushCurrentChanges(
             sliceGit,
             `git-slice:${upstreamLastCommitId}`,
-            actionInputs.sliceDefaultBranch,
+            actionInputs.sliceRepo.defaultBranch,
             'Slice'
         )
     }

@@ -5,6 +5,8 @@ import { terminal } from 'terminal-kit'
 import { SimpleGit } from 'simple-git'
 import { compareSync, DifferenceState, Reason } from 'dir-compare'
 
+export * from './gitInit'
+
 export const deleteSliceIgnoresFilesDirs = async (
     sliceIgnores: string[],
     rootDir: string,

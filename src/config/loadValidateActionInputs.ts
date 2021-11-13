@@ -6,6 +6,8 @@ import { ActionInputs } from '../types'
 dotenv.config()
 
 export const loadValidateActionInputs = (): ActionInputs => {
+    const forceInit = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false'
+
     if (
         !process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
         !fs.existsSync(path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR))
@@ -28,6 +30,38 @@ export const loadValidateActionInputs = (): ActionInputs => {
         throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH'`)
     }
 
+    if (!process.env.GIT_SLICE_SLICE_REPO_USERNAME) {
+        throw new Error(`Missing 'GIT_SLICE_SLICE_REPO_USERNAME'`)
+    }
+
+    if (!process.env.GIT_SLICE_UPSTREAM_REPO_USERNAME) {
+        throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_USERNAME'`)
+    }
+
+    if (!process.env.GIT_SLICE_SLICE_REPO_PASSWORD) {
+        throw new Error(`Missing 'GIT_SLICE_SLICE_REPO_PASSWORD'`)
+    }
+
+    if (!process.env.GIT_SLICE_UPSTREAM_REPO_PASSWORD) {
+        throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_PASSWORD'`)
+    }
+
+    if (!process.env.GIT_SLICE_SLICE_REPO_URL) {
+        throw new Error(`Missing 'GIT_SLICE_SLICE_REPO_URL'`)
+    }
+
+    if (!process.env.GIT_SLICE_UPSTREAM_REPO_URL) {
+        throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_URL'`)
+    }
+
+    if (!process.env.GIT_SLICE_SLICE_REPO_EMAIL) {
+        throw new Error(`Missing 'GIT_SLICE_SLICE_REPO_EMAIL'`)
+    }
+
+    if (!process.env.GIT_SLICE_UPSTREAM_REPO_EMAIL) {
+        throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_EMAIL'`)
+    }
+
     const sliceIgnores: string[] = ['.github/workflows', 'git-slice.json']
     if (process.env.GIT_SLICE_SLICE_IGNORES) {
         try {
@@ -47,12 +81,27 @@ export const loadValidateActionInputs = (): ActionInputs => {
     const pushCommitMsgRegex = new RegExp(process.env.GIT_SLICE_PUSH_COMMIT_MSG_REGEX || '.*', 'gi')
 
     return {
-        upstreamRepoDir: path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR),
-        upstreamDefaultBranch: process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH,
-        sliceRepoDir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),
-        sliceDefaultBranch: process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH,
         sliceIgnores,
         pushBranchNameTemplate,
         pushCommitMsgRegex,
+        forceInit,
+        sliceRepo: {
+            name: 'Slice',
+            dir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),
+            defaultBranch: process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH,
+            username: process.env.GIT_SLICE_SLICE_REPO_USERNAME,
+            userEmail: process.env.GIT_SLICE_SLICE_REPO_EMAIL,
+            userToken: process.env.GIT_SLICE_SLICE_REPO_PASSWORD,
+            gitHttpUri: process.env.GIT_SLICE_SLICE_REPO_URL,
+        },
+        upstreamRepo: {
+            name: 'Upstream',
+            dir: path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR),
+            defaultBranch: process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH,
+            username: process.env.GIT_SLICE_UPSTREAM_REPO_USERNAME,
+            userEmail: process.env.GIT_SLICE_UPSTREAM_REPO_EMAIL,
+            userToken: process.env.GIT_SLICE_UPSTREAM_REPO_PASSWORD,
+            gitHttpUri: process.env.GIT_SLICE_UPSTREAM_REPO_URL,
+        },
     }
 }
