@@ -65,3 +65,11 @@ Command arguments
 ```bash
 yarn push --branch dev-test --message "test: commit message" --force-push false
 ```
+
+## Future jobs
+
+| Job                                                                                                | Description                                                               |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| GitStart dashboard integration                                                                     | Support GitStart authentication and fetching repos details from dashboard |
+| Pull a specific branch from upstream repo to slice repo                                            | ...                                                                       |
+| Push a branch in slice repo to upstream repo with any base branches (no need to be default branch) | ...                                                                       |
