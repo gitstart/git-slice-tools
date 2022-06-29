@@ -7,6 +7,32 @@ import { compareSync, DifferenceState, Reason } from 'dir-compare'
 
 export * from './gitInit'
 
+export const mergeDefaultBranchIntoCurrentBranch = async (
+    logPrefix: string,
+    git: SimpleGit,
+    defaultBranch: string,
+    currentBranch: string
+) => {
+    try {
+        terminal(`${logPrefix}: Try to merge default branch '${defaultBranch}' into branch '${currentBranch}'...`)
+
+        await git.pull('origin', defaultBranch, ['--no-rebase'])
+        const status = await git.status()
+
+        if (status.ahead) {
+            await git.push('origin', currentBranch)
+            terminal('Merged!\n')
+        } else {
+            terminal('None!\n')
+        }
+    } catch (error) {
+        // noop
+        terminal('Failed!\n')
+
+        throw error
+    }
+}
+
 export const deleteSliceIgnoresFilesDirs = async (
     sliceIgnores: string[],
     rootDir: string,

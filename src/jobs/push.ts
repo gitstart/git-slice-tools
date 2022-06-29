@@ -1,6 +1,11 @@
 import { CleanOptions, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
-import { copyFiles, createCommitAndPushCurrentChanges, deleteSliceIgnoresFilesDirs } from '../common'
+import {
+    copyFiles,
+    createCommitAndPushCurrentChanges,
+    deleteSliceIgnoresFilesDirs,
+    mergeDefaultBranchIntoCurrentBranch,
+} from '../common'
 import { ActionInputs } from '../types'
 
 const cleanAndDeleteLocalBranch = async (
@@ -69,26 +74,7 @@ export const push = async (
         throw error
     }
 
-    try {
-        terminal(
-            `Slice: Try to merge default branch '${actionInputs.sliceRepo.defaultBranch}' into branch '${sliceBranch}'...`
-        )
-
-        await sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch, ['--no-rebase'])
-        const status = await sliceGit.status()
-
-        if (status.ahead) {
-            await sliceGit.push('origin', sliceBranch)
-            terminal('Merged!\n')
-        } else {
-            terminal('None!\n')
-        }
-    } catch (error) {
-        // noop
-        terminal('Failed!\n')
-
-        throw error
-    }
+    await mergeDefaultBranchIntoCurrentBranch('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)
 
     await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepo.dir, 'Slice')
 
@@ -136,6 +122,14 @@ export const push = async (
 
     await upstreamGit.checkout(upstreamBranch)
     await upstreamGit.pull('origin', upstreamBranch)
+    await mergeDefaultBranchIntoCurrentBranch(
+        'Upstream',
+        upstreamGit,
+        // TODO: should we merge the revision which current slice's default branch is synced as
+        // instead of upstream's default branch which can be missed matching..
+        actionInputs.upstreamRepo.defaultBranch,
+        upstreamBranch
+    )
 
     terminal('Done!\n')
 
