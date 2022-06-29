@@ -7,6 +7,41 @@ import { compareSync, DifferenceState, Reason } from 'dir-compare'
 
 export * from './gitInit'
 
+export const pullRemoteBranchIntoCurrentBranch = async (
+    logPrefix: string,
+    git: SimpleGit,
+    remoteBranch: string,
+    currentBranch: string,
+    noPush = false
+) => {
+    try {
+        terminal(`${logPrefix}: Try to pull remote branch '${remoteBranch}' into current branch '${currentBranch}'...`)
+
+        await git.pull('origin', remoteBranch, ['--no-rebase'])
+        const status = await git.status()
+
+        if (status.ahead) {
+            if (!noPush) {
+                await git.push('origin', currentBranch)
+                terminal('Merged!\n')
+
+                return
+            }
+
+            terminal('Done!\n')
+
+            return
+        }
+
+        terminal('None!\n')
+    } catch (error) {
+        // noop
+        terminal('Failed!\n')
+
+        throw error
+    }
+}
+
 export const deleteSliceIgnoresFilesDirs = async (
     sliceIgnores: string[],
     rootDir: string,

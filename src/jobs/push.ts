@@ -1,6 +1,11 @@
 import { CleanOptions, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
-import { copyFiles, createCommitAndPushCurrentChanges, deleteSliceIgnoresFilesDirs } from '../common'
+import {
+    copyFiles,
+    createCommitAndPushCurrentChanges,
+    deleteSliceIgnoresFilesDirs,
+    pullRemoteBranchIntoCurrentBranch,
+} from '../common'
 import { ActionInputs } from '../types'
 
 const cleanAndDeleteLocalBranch = async (
@@ -55,6 +60,22 @@ export const push = async (
 
     await cleanAndDeleteLocalBranch(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch, sliceBranch)
 
+    // Find the oid from last gitslice:*** commit
+
+    terminal(`Finding the last git-slice:*** commit...`)
+
+    const logs = await sliceGit.log({ maxCount: 20 })
+    const lastGitSlicePullLog = logs.all.find(x => /^git-slice:.*$/.test(x.message.trim()))
+
+    if (!lastGitSlicePullLog) {
+        terminal('Not found!\n')
+
+        throw new Error('Not found git-slice:*** commit in last 20 commits')
+    }
+
+    const currentSyncUpstreamCommitId = lastGitSlicePullLog.message.trim().split(':')[1]
+
+    terminal(`${currentSyncUpstreamCommitId}\n`)
     terminal(`Slice: Checkout branch '${sliceBranch}'...`)
 
     try {
@@ -69,29 +90,8 @@ export const push = async (
         throw error
     }
 
-    try {
-        terminal(
-            `Slice: Try to merge default branch '${actionInputs.sliceRepo.defaultBranch}' into branch '${sliceBranch}'...`
-        )
-
-        await sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch, ['--no-rebase'])
-        const status = await sliceGit.status()
-
-        if (status.ahead) {
-            await sliceGit.push('origin', sliceBranch)
-            terminal('Merged!\n')
-        } else {
-            terminal('None!\n')
-        }
-    } catch (error) {
-        // noop
-        terminal('Failed!\n')
-
-        throw error
-    }
-
+    await pullRemoteBranchIntoCurrentBranch('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)
     await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepo.dir, 'Slice')
-
     await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)
 
     let upstreamBranchExists = false
@@ -136,6 +136,15 @@ export const push = async (
 
     await upstreamGit.checkout(upstreamBranch)
     await upstreamGit.pull('origin', upstreamBranch)
+    await pullRemoteBranchIntoCurrentBranch(
+        'Upstream',
+        upstreamGit,
+        // TODO: should we merge the revision which current slice's default branch is synced as
+        // instead of upstream's default branch which can be missed matching..
+        // actionInputs.upstreamRepo.defaultBranch,
+        currentSyncUpstreamCommitId,
+        upstreamBranch
+    )
 
     terminal('Done!\n')
 
