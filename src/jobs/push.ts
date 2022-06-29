@@ -26,6 +26,7 @@ const cleanAndDeleteLocalBranch = async (
 
     try {
         await git.checkout(defaultBranch)
+        await git.pull('origin', defaultBranch)
         await git.branch(['-D', branch])
         await git.branch(['-Dr', branch])
     } catch (error) {
@@ -44,7 +45,7 @@ export const push = async (
     forcePush: boolean
 ): Promise<void> => {
     terminal('-'.repeat(30) + '\n')
-    terminal(`Performing push job branch with ${JSON.stringify({ sliceBranch, commitMsg, forcePush })}...\n`)
+    terminal(`Performing push job with ${JSON.stringify({ sliceBranch, commitMsg, forcePush })}...\n`)
 
     if (!actionInputs.pushCommitMsgRegex.test(commitMsg)) {
         throw new Error('Commit message failed PUSH_COMMIT_MSG_REGEX')
