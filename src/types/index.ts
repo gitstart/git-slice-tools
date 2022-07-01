@@ -5,6 +5,8 @@ export interface ActionInputs {
     forceInit: boolean
     sliceRepo: Repo
     upstreamRepo: Repo
+    prLabels: string[]
+    prDraft: boolean
 }
 
 export interface Repo {
@@ -21,3 +23,5 @@ export interface ErrorLike {
     message: string
     name?: string
 }
+
+export type LogScope = 'Upstream' | 'Slice'
