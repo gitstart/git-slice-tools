@@ -2,16 +2,21 @@ import { Glob } from 'glob'
 import path from 'path'
 import fs from 'fs-extra'
 import { terminal } from 'terminal-kit'
-import { SimpleGit } from 'simple-git'
+import { GitError, SimpleGit } from 'simple-git'
 import { compareSync, DifferenceState, Reason } from 'dir-compare'
+import { ErrorLike } from '../types'
 
 export * from './gitInit'
+
+export const isErrorLike = (value: unknown): value is ErrorLike =>
+    typeof value === 'object' && value !== null && ('stack' in value || 'message' in value)
 
 export const pullRemoteBranchIntoCurrentBranch = async (
     logPrefix: string,
     git: SimpleGit,
     remoteBranch: string,
     currentBranch: string,
+    ignoreMergeConflictsError = false,
     noPush = false
 ) => {
     try {
@@ -35,6 +40,12 @@ export const pullRemoteBranchIntoCurrentBranch = async (
 
         terminal('None!\n')
     } catch (error) {
+        if (ignoreMergeConflictsError && isErrorLike(error) && error instanceof GitError) {
+            terminal(`Skipped with '${error.message}'\n`)
+
+            return
+        }
+
         // noop
         terminal('Failed!\n')
 
