@@ -42,15 +42,7 @@ init(actionInputs).then(({ sliceGit, upstreamGit }) => {
                 throw new Error(`raise-pr job: 'branch' in string is required`)
             }
 
-            if (!argv.title || typeof argv.title !== 'string') {
-                throw new Error(`raise-pr job: 'title' in string is required`)
-            }
-
-            if (!argv.description || typeof argv.description !== 'string') {
-                throw new Error(`raise-pr job: 'description' in string is required`)
-            }
-
-            return raisePr(actionInputs, argv.branch, argv.title, argv.description)
+            return raisePr(actionInputs, argv.branch)
         }
         default: {
             return
