@@ -32,12 +32,13 @@ A new version of git-slice, super high performance with:
 
 ## Jobs
 
-| Job        | Description                                                                 |
-| ---------- | --------------------------------------------------------------------------- |
-| `checkout` | Fetch `origin` and checkout default branch of both upstream and slice repos |
-| `pull`     | Pull last changes from upstream repo into slice repo                        |
-| `push`     | Push a branch in slice repo to upstream repo                                |
-| `raise-pr` | Raise new PR for branch on upstream repo (GitHub only for now)              |
+| Job           | Description                                                                                                                                                                                                                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `checkout`    | Fetch `origin` and checkout default branch of both upstream and slice repos                                                                                                                                                                                                                                                             |
+| `pull`        | Pull last changes from upstream repo into slice repo                                                                                                                                                                                                                                                                                    |
+| `push`        | Push a branch in slice repo to upstream repo                                                                                                                                                                                                                                                                                            |
+| `raise-pr`    | Raise new PR for branch on upstream repo (GitHub only for now)                                                                                                                                                                                                                                                                          |
+| `pull-branch` | Pull last changes of a branch from upstream repo into slice repo. The destination branch in slice repo has the pulling branch but with `upstream-*` prefix. Please note that this job uses `force-push` and the upstream should be updated to date with the default branch of upstream repo otherwise there would be some extra changes |
 
 ### Job `checkout`
 
@@ -83,10 +84,23 @@ Command arguments
 yarn raise-pr --branch dev-test --title "The pull request title" --description "The pull request description"
 ```
 
+### Job `pull-branch`
+
+Command arguments
+
+| Arg             | Description                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--branch` `-b` | Name of pulling branch in upstream repo                                                                           |
+| `--target` `-g` | Name of target branch in slice repo. If it's passed, git-slice will create a PR (target branch <- pulling branch) |
+
+```bash
+yarn pull-branch --branch dev-test
+```
+
 ## Future jobs
 
-| Job                                                                                                | Description                                                               |
-| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| GitStart dashboard integration                                                                     | Support GitStart authentication and fetching repos details from dashboard |
-| Pull a specific branch from upstream repo to slice repo                                            | ...                                                                       |
-| Push a branch in slice repo to upstream repo with any base branches (no need to be default branch) | ...                                                                       |
+| Job                                                                                                   | Description                                                               |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| GitStart dashboard integration                                                                        | Support GitStart authentication and fetching repos details from dashboard |
+| Pull a specific branch from upstream repo to slice repo                                               | ...                                                                       |
+| Push a branch in slice repo to upstream repo with any base branches (shouldn't be the default branch) | ...                                                                       |
