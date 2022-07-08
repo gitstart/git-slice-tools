@@ -1,11 +1,8 @@
 # git-slice-tools
 
-A new version of git-slice, super high performance with:
+This utility can be used to take out folder(s) from a git repository, fork it into a new git repository and eventually provide commands to sync changes between both repositories.
 
-- git-cli (simple-git): for performing git commands.
-- dir-compare: for detecting file changes between 2 repo folders with glob patterns file ignores support
-- glob: Now support glob patterns for flexibility configurations of ignoring files
-- support: mapping branch name between upstream/slice repos, commit messages validation and non-force push
+A new version of git-slice, super high performance and more features.
 
 ## Environment variables
 
