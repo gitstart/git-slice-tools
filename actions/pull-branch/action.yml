@@ -1,0 +1,29 @@
+name: 'git-slice-tools PULL-BRANCH'
+description: 'Perform cache and git-slice-tools pull-branch job'
+inputs:
+  branch:
+    required: true
+  target-branch:
+    required: false
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache repos
+      id: cache-repos
+      uses: actions/cache@v2
+      with:
+        path: |
+          upstream-repo
+          slice-repo
+        key: cache-repo-${{ env.GIT_SLICE_CHECKOUT_CACHED_KEY }}
+
+    - name: Install git-slice-tools
+      run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.1.3
+      shell: bash
+
+    - name: Execute `git-slice-tools pull-branch`
+      run: git-slice-tools pull-branch --b "$BRANCH" --target "$TARGET_BRANCH"
+      env:
+        BRANCH: ${{ inputs.branch }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
+      shell: bash
