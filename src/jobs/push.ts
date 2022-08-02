@@ -97,7 +97,13 @@ export const push = async (
             return
         }
 
-        await createCommitAndPushCurrentChanges(upstreamGit, commitMsg, upstreamBranch, 'Upstream', true)
+        await createCommitAndPushCurrentChanges(
+            upstreamGit,
+            commitMsg,
+            upstreamBranch,
+            'Upstream',
+            upstreamBranchExists && forcePush
+        )
 
         return
     }
