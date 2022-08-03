@@ -102,6 +102,11 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
     const prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false'
     const isOpenSourceFlow =
         !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false'
+    const openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL
+
+    if (isOpenSourceFlow && !openSourceUrl) {
+        throw new Error(`Missing 'GIT_SLICE_OPEN_SOURCE_URL'`)
+    }
 
     return {
         sliceIgnores,
@@ -111,7 +116,7 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
         prLabels,
         prDraft,
         isOpenSourceFlow,
-        openSourceUrl: process.env.GIT_SLICE_OPEN_SOURCE_URL,
+        openSourceUrl,
         sliceRepo: {
             name: 'Slice',
             dir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

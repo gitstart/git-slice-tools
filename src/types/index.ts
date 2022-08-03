@@ -1,3 +1,5 @@
+export type LogScope = 'Upstream' | 'Slice' | 'OpenSource'
+
 export interface ActionInputs {
     sliceIgnores: string[]
     pushBranchNameTemplate: string
@@ -12,7 +14,7 @@ export interface ActionInputs {
 }
 
 export interface Repo {
-    name: string
+    name: LogScope
     dir: string
     defaultBranch: string
     username: string
@@ -25,5 +27,3 @@ export interface ErrorLike {
     message: string
     name?: string
 }
-
-export type LogScope = 'Upstream' | 'Slice' | 'OpenSource'

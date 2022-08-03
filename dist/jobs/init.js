@@ -41,7 +41,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = void 0;
 var simple_git_1 = __importDefault(require("simple-git"));
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var init = function (actionInputs) { return __awaiter(void 0, void 0, void 0, function () {
     var sliceGit, upstreamGit, sliceRemote, upstreamRemote;
@@ -49,10 +48,10 @@ var init = function (actionInputs) { return __awaiter(void 0, void 0, void 0, fu
         switch (_a.label) {
             case 0:
                 if (!actionInputs.forceInit) return [3 /*break*/, 3];
-                return [4 /*yield*/, (0, common_1.gitInit)(actionInputs.sliceRepo)];
+                return [4 /*yield*/, (0, common_1.gitInit)('Slice', actionInputs.sliceRepo)];
             case 1:
                 sliceGit = _a.sent();
-                return [4 /*yield*/, (0, common_1.gitInit)(actionInputs.upstreamRepo)];
+                return [4 /*yield*/, (0, common_1.gitInit)('Upstream', actionInputs.upstreamRepo, actionInputs.isOpenSourceFlow ? actionInputs.openSourceUrl : undefined)];
             case 2:
                 upstreamGit = _a.sent();
                 return [3 /*break*/, 4];
@@ -61,28 +60,33 @@ var init = function (actionInputs) { return __awaiter(void 0, void 0, void 0, fu
                 upstreamGit = (0, simple_git_1.default)(actionInputs.upstreamRepo.dir, { binary: 'git' });
                 _a.label = 4;
             case 4:
-                (0, terminal_kit_1.terminal)('Slice: Fetching...');
+                (0, common_1.logWriteLine)('Slice', 'Fetching...');
                 return [4 /*yield*/, sliceGit.fetch('origin', ['-p'])];
             case 5:
                 _a.sent();
-                (0, terminal_kit_1.terminal)('Done!\n');
+                (0, common_1.logExtendLastLine)('Done!');
                 return [4 /*yield*/, sliceGit.remote(['-v'])];
             case 6:
                 sliceRemote = _a.sent();
-                (0, terminal_kit_1.terminal)('Slice: Repo: \n');
-                (0, terminal_kit_1.terminal)(sliceRemote);
+                (0, common_1.logWriteLine)('Slice', "Repo:\n" + sliceRemote);
                 // const sliceUser = await sliceGit.getConfig('user.name')
                 // terminal(`Slice: User: ${sliceUser.value}\n`)
-                (0, terminal_kit_1.terminal)('Upstream: Feching...');
+                (0, common_1.logWriteLine)('Upstream', 'Feching...');
                 return [4 /*yield*/, upstreamGit.fetch('origin', ['-p'])];
             case 7:
                 _a.sent();
-                (0, terminal_kit_1.terminal)('Done!\n');
-                return [4 /*yield*/, upstreamGit.remote(['-v'])];
+                (0, common_1.logExtendLastLine)('Done!');
+                if (!actionInputs.isOpenSourceFlow) return [3 /*break*/, 9];
+                (0, common_1.logWriteLine)('OpenSource', 'Feching...');
+                return [4 /*yield*/, upstreamGit.fetch(common_1.OPEN_SOURCE_REMOTE, ['-p'])];
             case 8:
+                _a.sent();
+                (0, common_1.logExtendLastLine)('Done!');
+                _a.label = 9;
+            case 9: return [4 /*yield*/, upstreamGit.remote(['-v'])];
+            case 10:
                 upstreamRemote = _a.sent();
-                (0, terminal_kit_1.terminal)('Upstream: Repo: \n');
-                (0, terminal_kit_1.terminal)(upstreamRemote);
+                (0, common_1.logWriteLine)('Upstream', "Repo:\n" + upstreamRemote);
                 // const upstreamUser = await upstreamGit.getConfig('user.name')
                 // terminal(`Upstream: User: ${upstreamUser.value}\n`)
                 return [2 /*return*/, {

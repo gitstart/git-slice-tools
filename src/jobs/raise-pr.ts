@@ -2,14 +2,15 @@ import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
 import { terminal } from 'terminal-kit'
 import { isErrorLike, logExtendLastLine, logWriteLine } from '../common'
-import { ActionInputs } from '../types'
+import { ActionInputs, LogScope } from '../types'
 
 export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): Promise<void> => {
     terminal('-'.repeat(30) + '\n')
     terminal(`Performing raise-pr job with ${JSON.stringify({ sliceBranch })}...\n`)
 
-    const { upstreamRepo, sliceRepo } = actionInputs
+    const { upstreamRepo, sliceRepo, isOpenSourceFlow, openSourceUrl } = actionInputs
     const upstreamGitUrlObject = gitUrlParse(upstreamRepo.gitHttpUri)
+    const openSourceGitUrlObject = isOpenSourceFlow ? gitUrlParse(openSourceUrl) : null
     const sliceGitUrlObject = gitUrlParse(sliceRepo.gitHttpUri)
 
     if (upstreamGitUrlObject.source !== 'github.com') {
@@ -52,11 +53,21 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
 
     const upstreamBranch = actionInputs.pushBranchNameTemplate.replace('<branch_name>', sliceBranch)
 
-    logWriteLine('Upstream', `Checking existing PR (${upstreamRepo.defaultBranch} <- ${upstreamBranch})...`)
+    let targetGitUrlOwner = upstreamGitUrlObject.owner
+    let targetGitUrlRepo = upstreamGitUrlObject.name
+    let targetLogScope: LogScope = 'Upstream'
+
+    if (isOpenSourceFlow) {
+        targetGitUrlOwner = openSourceGitUrlObject.owner
+        targetGitUrlRepo = openSourceGitUrlObject.name
+        targetLogScope = 'OpenSource'
+    }
+
+    logWriteLine(targetLogScope, `Checking existing PR (${upstreamRepo.defaultBranch} <- ${upstreamBranch})...`)
 
     listResponse = await upstreamOctokit.rest.pulls.list({
-        owner: upstreamGitUrlObject.owner,
-        repo: upstreamGitUrlObject.name,
+        owner: targetGitUrlOwner,
+        repo: targetGitUrlRepo,
         base: upstreamRepo.defaultBranch,
         head: `${upstreamGitUrlObject.owner}:${upstreamBranch}`,
         state: 'open',
@@ -64,18 +75,18 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
 
     if (listResponse.data.length !== 0) {
         logExtendLastLine(`Found PR #${listResponse.data[0].number} (${listResponse.data[0].html_url})`)
-        logWriteLine('Upstream', `Done!`)
+        logWriteLine(targetLogScope, `Done!`)
 
         return
     }
 
     logExtendLastLine(`Not found!`)
 
-    logWriteLine('Upstream', `Raising new PR (${upstreamRepo.defaultBranch} <- ${upstreamBranch})...`)
+    logWriteLine(targetLogScope, `Raising new PR (${upstreamRepo.defaultBranch} <- ${upstreamBranch})...`)
 
     const createResponse = await upstreamOctokit.rest.pulls.create({
-        owner: upstreamGitUrlObject.owner,
-        repo: upstreamGitUrlObject.name,
+        owner: targetGitUrlOwner,
+        repo: targetGitUrlRepo,
         title,
         body,
         base: upstreamRepo.defaultBranch,
@@ -87,19 +98,12 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
 
     logExtendLastLine(`Done PR #${prNumber}`)
 
-    await upstreamOctokit.rest.issues.addLabels({
-        issue_number: prNumber,
-        owner: upstreamGitUrlObject.owner,
-        repo: upstreamGitUrlObject.name,
-        labels: actionInputs.prLabels,
-    })
-
-    logWriteLine('Upstream', `Adding assignees into PR #${prNumber}...`)
+    logWriteLine(targetLogScope, `Adding assignees into PR #${prNumber}...`)
     try {
         await upstreamOctokit.rest.issues.addAssignees({
             issue_number: prNumber,
-            owner: upstreamGitUrlObject.owner,
-            repo: upstreamGitUrlObject.name,
+            owner: targetGitUrlOwner,
+            repo: targetGitUrlRepo,
             assignees: [upstreamRepo.username],
         })
 
@@ -113,12 +117,12 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
     }
 
     if (actionInputs.prLabels.length) {
-        logWriteLine('Upstream', `Adding labels into PR #${prNumber}...`)
+        logWriteLine(targetLogScope, `Adding labels into PR #${prNumber}...`)
         try {
             await upstreamOctokit.rest.issues.addLabels({
                 issue_number: prNumber,
                 owner: upstreamGitUrlObject.owner,
-                repo: upstreamGitUrlObject.name,
+                repo: targetGitUrlRepo,
                 labels: actionInputs.prLabels,
             })
 
@@ -132,5 +136,5 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
         }
     }
 
-    logWriteLine('Upstream', `Created PR #${prNumber} (${createResponse.data.html_url}) successfully`)
+    logWriteLine(targetLogScope, `Created PR #${prNumber} (${createResponse.data.html_url}) successfully`)
 }

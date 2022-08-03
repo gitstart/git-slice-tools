@@ -126,6 +126,8 @@ yarn checkout
 git-slice-tools checkout
 ```
 
+Support `open source flow`
+
 ### Job `pull`
 
 No command arguments needed
@@ -135,6 +137,8 @@ yarn pull
 
 git-slice-tools pull
 ```
+
+Support `open source flow`
 
 ### Job `push`
 
@@ -166,6 +170,8 @@ yarn raise-pr --branch dev-test
 git-slice-tools raise-pr --branch dev-test
 ```
 
+Support `open source flow`
+
 ### Job `pull-branch`
 
 Command arguments
@@ -196,6 +202,8 @@ yarn pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph
 git-slice-tools pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
 ```
 
+Support `open source flow`
+
 ### Job `pull-issue`
 
 Command arguments
@@ -211,9 +219,18 @@ yarn pull-issue --from 123
 yarn pull-issue --from 123 --to 332
 ```
 
+Support `open source flow`
+
 ## Open source flow
 
-Updating...
+In open source contribution, we slice a forked-repo of an open source and raise PRs on open source repo. `git-slice-tools` supports that flow, you just need to setup `GIT_SLICE_OPEN_SOURCE_FLOW=true` and
+`GIT_SLICE_OPEN_SOURCE_URL=...` env variables.
+
+In this flow:
+
+- `pull` job will update forked-repo default branch with last version of that branch on open source repo,
+- `raise-pr` job will create a PR on open source repo with `head` is a branch on forked-repo (upstream repo).
+- `pull-issue` and `pull-review` will look for issues and reviews on open source repo.
 
 ## Future jobs
 

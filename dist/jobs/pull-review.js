@@ -45,16 +45,17 @@ var octokit_1 = require("octokit");
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceRepo, upstreamRepo, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, prReivewLinkRegResult, upstreamPrNumber, upstreamPrReviewNumber, upstreamReview, upstreamReviewComments, detailedPullReviewComments, _i, upstreamReviewComments_1, comment, upstreamReviewComment, path, body, user, sliceReview;
+    var sliceRepo, upstreamRepo, isOpenSourceFlow, openSourceUrl, upstreamGitUrlObject, sliceGitUrlObject, openSourceGitUrlObject, upstreamOctokit, sliceOctokit, prReivewLinkRegResult, targetPrNumber, targetPrReviewNumber, targetGitUrlOwner, targetGitUrlRepo, targetLogScope, upstreamReview, targetReviewComments, detailedPullReviewComments, _i, targetReviewComments_1, comment, targetReviewComment, path, body, user, sliceReview;
     var _a, _b, _c, _d, _e, _f, _g, _h;
     return __generator(this, function (_j) {
         switch (_j.label) {
             case 0:
                 (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
                 (0, terminal_kit_1.terminal)("Performing pull-review job with " + JSON.stringify({ slicePrNumber: slicePrNumber, upstreamPrReviewLink: upstreamPrReviewLink }) + "...\n");
-                sliceRepo = actionInputs.sliceRepo, upstreamRepo = actionInputs.upstreamRepo;
+                sliceRepo = actionInputs.sliceRepo, upstreamRepo = actionInputs.upstreamRepo, isOpenSourceFlow = actionInputs.isOpenSourceFlow, openSourceUrl = actionInputs.openSourceUrl;
                 upstreamGitUrlObject = (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
                 sliceGitUrlObject = (0, git_url_parse_1.default)(sliceRepo.gitHttpUri);
+                openSourceGitUrlObject = isOpenSourceFlow ? (0, git_url_parse_1.default)(openSourceUrl) : null;
                 upstreamOctokit = new octokit_1.Octokit({
                     auth: upstreamRepo.userToken,
                 });
@@ -68,55 +69,63 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                 if (!prReivewLinkRegResult || !prReivewLinkRegResult[1] || !prReivewLinkRegResult[2]) {
                     throw new Error("Invalid pr-preview-link '" + upstreamPrReviewLink + "'");
                 }
-                upstreamPrNumber = Number(prReivewLinkRegResult[1]);
-                upstreamPrReviewNumber = Number(prReivewLinkRegResult[2]);
-                (0, common_1.logWriteLine)('Upstream', "Getting PR review...");
+                targetPrNumber = Number(prReivewLinkRegResult[1]);
+                targetPrReviewNumber = Number(prReivewLinkRegResult[2]);
+                targetGitUrlOwner = upstreamGitUrlObject.owner;
+                targetGitUrlRepo = upstreamGitUrlObject.name;
+                targetLogScope = 'Upstream';
+                if (isOpenSourceFlow) {
+                    targetGitUrlOwner = openSourceGitUrlObject.owner;
+                    targetGitUrlRepo = openSourceGitUrlObject.name;
+                    targetLogScope = 'OpenSource';
+                }
+                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.getReview({
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
-                        pull_number: upstreamPrNumber,
-                        review_id: upstreamPrReviewNumber,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
+                        pull_number: targetPrNumber,
+                        review_id: targetPrReviewNumber,
                     })];
             case 1:
                 upstreamReview = (_j.sent()).data;
                 (0, common_1.logExtendLastLine)("Done!");
-                (0, common_1.logWriteLine)('Upstream', "Getting PR review comments...");
+                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review comments...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.listCommentsForReview({
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
-                        pull_number: upstreamPrNumber,
-                        review_id: upstreamPrReviewNumber,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
+                        pull_number: targetPrNumber,
+                        review_id: targetPrReviewNumber,
                         // Assume that 100 comments per review is good limit
                         per_page: 100,
                         page: 1,
                     })];
             case 2:
-                upstreamReviewComments = (_j.sent()).data;
+                targetReviewComments = (_j.sent()).data;
                 (0, common_1.logExtendLastLine)("Done!");
-                (0, common_1.logWriteLine)('Upstream', "Getting PR review comments details...");
+                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review comments details...");
                 detailedPullReviewComments = [];
-                _i = 0, upstreamReviewComments_1 = upstreamReviewComments;
+                _i = 0, targetReviewComments_1 = targetReviewComments;
                 _j.label = 3;
             case 3:
-                if (!(_i < upstreamReviewComments_1.length)) return [3 /*break*/, 7];
-                comment = upstreamReviewComments_1[_i];
+                if (!(_i < targetReviewComments_1.length)) return [3 /*break*/, 7];
+                comment = targetReviewComments_1[_i];
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.getReviewComment({
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
-                        pull_number: upstreamPrNumber,
-                        review_id: upstreamPrReviewNumber,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
+                        pull_number: targetPrNumber,
+                        review_id: targetPrReviewNumber,
                         comment_id: comment.id,
                     })];
             case 4:
-                upstreamReviewComment = (_j.sent()).data;
+                targetReviewComment = (_j.sent()).data;
                 path = comment.path, body = comment.body, user = comment.user;
                 detailedPullReviewComments.push({
                     path: path,
                     body: "From **_" + (user === null || user === void 0 ? void 0 : user.login) + "_**:\n" + body,
-                    side: (_a = upstreamReviewComment.side) !== null && _a !== void 0 ? _a : undefined,
-                    start_side: (_b = upstreamReviewComment.start_side) !== null && _b !== void 0 ? _b : undefined,
-                    line: (_d = (_c = upstreamReviewComment.original_line) !== null && _c !== void 0 ? _c : upstreamReviewComment.line) !== null && _d !== void 0 ? _d : undefined,
-                    start_line: (_f = (_e = upstreamReviewComment.original_start_line) !== null && _e !== void 0 ? _e : upstreamReviewComment.start_line) !== null && _f !== void 0 ? _f : undefined,
+                    side: (_a = targetReviewComment.side) !== null && _a !== void 0 ? _a : undefined,
+                    start_side: (_b = targetReviewComment.start_side) !== null && _b !== void 0 ? _b : undefined,
+                    line: (_d = (_c = targetReviewComment.original_line) !== null && _c !== void 0 ? _c : targetReviewComment.line) !== null && _d !== void 0 ? _d : undefined,
+                    start_line: (_f = (_e = targetReviewComment.original_start_line) !== null && _e !== void 0 ? _e : targetReviewComment.start_line) !== null && _f !== void 0 ? _f : undefined,
                 });
                 // Just to make sure we don't reach github api limit
                 return [4 /*yield*/, (0, common_1.delay)(500)];

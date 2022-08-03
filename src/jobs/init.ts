@@ -1,7 +1,6 @@
 import simpleGit, { SimpleGit } from 'simple-git'
-import { terminal } from 'terminal-kit'
 import { ActionInputs } from '../types'
-import { gitInit } from '../common'
+import { gitInit, logExtendLastLine, logWriteLine, OPEN_SOURCE_REMOTE } from '../common'
 
 export const init = async (
     actionInputs: ActionInputs
@@ -13,38 +12,48 @@ export const init = async (
     let upstreamGit: SimpleGit
 
     if (actionInputs.forceInit) {
-        sliceGit = await gitInit(actionInputs.sliceRepo)
-        upstreamGit = await gitInit(actionInputs.upstreamRepo)
+        sliceGit = await gitInit('Slice', actionInputs.sliceRepo)
+        upstreamGit = await gitInit(
+            'Upstream',
+            actionInputs.upstreamRepo,
+            actionInputs.isOpenSourceFlow ? actionInputs.openSourceUrl : undefined
+        )
     } else {
         sliceGit = simpleGit(actionInputs.sliceRepo.dir, { binary: 'git' })
         upstreamGit = simpleGit(actionInputs.upstreamRepo.dir, { binary: 'git' })
     }
 
-    terminal('Slice: Fetching...')
+    logWriteLine('Slice', 'Fetching...')
 
     await sliceGit.fetch('origin', ['-p'])
 
-    terminal('Done!\n')
+    logExtendLastLine('Done!')
 
     const sliceRemote = await sliceGit.remote(['-v'])
 
-    terminal('Slice: Repo: \n')
-    terminal(sliceRemote)
+    logWriteLine('Slice', `Repo:\n${sliceRemote}`)
 
     // const sliceUser = await sliceGit.getConfig('user.name')
 
     // terminal(`Slice: User: ${sliceUser.value}\n`)
 
-    terminal('Upstream: Feching...')
+    logWriteLine('Upstream', 'Feching...')
 
     await upstreamGit.fetch('origin', ['-p'])
 
-    terminal('Done!\n')
+    logExtendLastLine('Done!')
+
+    if (actionInputs.isOpenSourceFlow) {
+        logWriteLine('OpenSource', 'Feching...')
+
+        await upstreamGit.fetch(OPEN_SOURCE_REMOTE, ['-p'])
+
+        logExtendLastLine('Done!')
+    }
 
     const upstreamRemote = await upstreamGit.remote(['-v'])
 
-    terminal('Upstream: Repo: \n')
-    terminal(upstreamRemote)
+    logWriteLine('Upstream', `Repo:\n${upstreamRemote}`)
 
     // const upstreamUser = await upstreamGit.getConfig('user.name')
 

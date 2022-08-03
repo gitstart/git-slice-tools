@@ -58,14 +58,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.deleteSliceIgnoresFilesDirs = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = void 0;
+exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.deleteSliceIgnoresFilesDirs = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = void 0;
 var dir_compare_1 = require("dir-compare");
 var fs_extra_1 = __importDefault(require("fs-extra"));
 var glob_1 = require("glob");
 var path_1 = __importDefault(require("path"));
 var simple_git_1 = require("simple-git");
 var terminal_kit_1 = require("terminal-kit");
+var constants_1 = require("./constants");
 var logger_1 = require("./logger");
+__exportStar(require("./constants"), exports);
 __exportStar(require("./gitInit"), exports);
 __exportStar(require("./logger"), exports);
 var isErrorLike = function (value) {
@@ -366,4 +368,37 @@ var cleanAndDeleteLocalBranch = function (git, scope, defaultBranch, branch) { r
     });
 }); };
 exports.cleanAndDeleteLocalBranch = cleanAndDeleteLocalBranch;
+var checkoutAndPullLastVersion = function (git, scope, branch, isOpenSource) {
+    if (isOpenSource === void 0) { isOpenSource = false; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var remoteName;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    (0, logger_1.logWriteLine)(scope, "Checkout and pull last versions '" + branch + "' branch...");
+                    remoteName = isOpenSource ? constants_1.OPEN_SOURCE_REMOTE : 'origin';
+                    return [4 /*yield*/, git.reset(simple_git_1.ResetMode.HARD)];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, git.checkout(branch)];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, git.reset(['--hard', remoteName + "/" + branch])];
+                case 3:
+                    _a.sent();
+                    return [4 /*yield*/, git.pull(remoteName, branch)];
+                case 4:
+                    _a.sent();
+                    (0, logger_1.logExtendLastLine)('Done!');
+                    (0, logger_1.logWriteLine)(scope, "Clean...");
+                    return [4 /*yield*/, git.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
+                case 5:
+                    _a.sent();
+                    (0, logger_1.logExtendLastLine)('Done!');
+                    return [2 /*return*/];
+            }
+        });
+    });
+};
+exports.checkoutAndPullLastVersion = checkoutAndPullLastVersion;
 //# sourceMappingURL=index.js.map

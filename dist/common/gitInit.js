@@ -56,17 +56,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.gitInit = void 0;
-var terminal_kit_1 = require("terminal-kit");
 var simple_git_1 = __importStar(require("simple-git"));
-var gitInit = function (repo) { return __awaiter(void 0, void 0, void 0, function () {
+var constants_1 = require("./constants");
+var logger_1 = require("./logger");
+var gitInit = function (scope, originRepo, openSourceUrl) { return __awaiter(void 0, void 0, void 0, function () {
     var git, remotes;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                (0, terminal_kit_1.terminal)(repo.name + ": Forcing git init...");
-                git = (0, simple_git_1.default)(repo.dir, { binary: 'git' });
+                (0, logger_1.logWriteLine)(scope, "Git init...");
+                git = (0, simple_git_1.default)(originRepo.dir, { binary: 'git' });
                 // git config init.defaultBranch main
-                return [4 /*yield*/, git.addConfig('init.defaultBranch', repo.defaultBranch, false, simple_git_1.GitConfigScope.global)];
+                return [4 /*yield*/, git.addConfig('init.defaultBranch', originRepo.defaultBranch, false, simple_git_1.GitConfigScope.global)];
             case 1:
                 // git config init.defaultBranch main
                 _a.sent();
@@ -76,28 +77,28 @@ var gitInit = function (repo) { return __awaiter(void 0, void 0, void 0, functio
             case 2:
                 _a.sent();
                 // git config user.email $EMAIL
-                return [4 /*yield*/, git.addConfig('user.email', repo.userEmail, false, simple_git_1.GitConfigScope.local)
+                return [4 /*yield*/, git.addConfig('user.email', originRepo.userEmail, false, simple_git_1.GitConfigScope.local)
                     // git config user.name $USERNAME
                 ];
             case 3:
                 // git config user.email $EMAIL
                 _a.sent();
                 // git config user.name $USERNAME
-                return [4 /*yield*/, git.addConfig('user.name', repo.username, false, simple_git_1.GitConfigScope.local)];
+                return [4 /*yield*/, git.addConfig('user.name', originRepo.username, false, simple_git_1.GitConfigScope.local)];
             case 4:
                 // git config user.name $USERNAME
                 _a.sent();
-                if (!repo.gitHttpUri.toLowerCase().includes('github.com')) return [3 /*break*/, 6];
+                if (!originRepo.gitHttpUri.toLowerCase().includes('github.com')) return [3 /*break*/, 6];
                 // git config url."https://$USERNAME:$PAT@github.com/".insteadOf "https://github.com/"
-                return [4 /*yield*/, git.addConfig("url.https://" + repo.username + ":" + repo.userToken + "@github.com/.insteadOf", 'https://github.com/', false, simple_git_1.GitConfigScope.local)];
+                return [4 /*yield*/, git.addConfig("url.https://" + originRepo.username + ":" + originRepo.userToken + "@github.com/.insteadOf", 'https://github.com/', false, simple_git_1.GitConfigScope.local)];
             case 5:
                 // git config url."https://$USERNAME:$PAT@github.com/".insteadOf "https://github.com/"
                 _a.sent();
                 return [3 /*break*/, 9];
             case 6:
-                if (!repo.gitHttpUri.toLowerCase().includes('gitlab.com')) return [3 /*break*/, 8];
+                if (!originRepo.gitHttpUri.toLowerCase().includes('gitlab.com')) return [3 /*break*/, 8];
                 // git config url."https://$USERNAME:$PAT@gitlab.com/".insteadOf "https://gitlab.com/"
-                return [4 /*yield*/, git.addConfig("url.\"https://" + repo.username + ":" + repo.userToken + "@gitlab.com/\".insteadOf", 'https://gitlab.com/', false, simple_git_1.GitConfigScope.local)];
+                return [4 /*yield*/, git.addConfig("url.\"https://" + originRepo.username + ":" + originRepo.userToken + "@gitlab.com/\".insteadOf", 'https://gitlab.com/', false, simple_git_1.GitConfigScope.local)];
             case 7:
                 // git config url."https://$USERNAME:$PAT@gitlab.com/".insteadOf "https://gitlab.com/"
                 _a.sent();
@@ -108,21 +109,40 @@ var gitInit = function (repo) { return __awaiter(void 0, void 0, void 0, functio
                 remotes = _a.sent();
                 if (!remotes.find(function (x) { return x.name === 'origin'; })) return [3 /*break*/, 12];
                 // git remote set-url origin https://github.com/GitStartHQ/client-sourcegraph.git
-                return [4 /*yield*/, git.raw('remote', 'set-url', 'origin', repo.gitHttpUri)];
+                return [4 /*yield*/, git.raw('remote', 'set-url', 'origin', originRepo.gitHttpUri)];
             case 11:
                 // git remote set-url origin https://github.com/GitStartHQ/client-sourcegraph.git
                 _a.sent();
                 return [3 /*break*/, 14];
             case 12: 
             // git remote add -t \* -f origin https://github.com/GitStartHQ/client-sourcegraph.git
-            return [4 /*yield*/, git.raw('remote', 'add', '-t', '*', '-f', 'origin', repo.gitHttpUri)];
+            return [4 /*yield*/, git.raw('remote', 'add', '-t', '*', '-f', 'origin', originRepo.gitHttpUri)];
             case 13:
                 // git remote add -t \* -f origin https://github.com/GitStartHQ/client-sourcegraph.git
                 _a.sent();
                 _a.label = 14;
             case 14:
-                (0, terminal_kit_1.terminal)("Done!\n");
-                return [2 /*return*/, git];
+                (0, logger_1.logExtendLastLine)("Done!");
+                if (!openSourceUrl) return [3 /*break*/, 19];
+                (0, logger_1.logWriteLine)(scope, "Setting `open-source` origin...");
+                if (!remotes.find(function (x) { return x.name === constants_1.OPEN_SOURCE_REMOTE; })) return [3 /*break*/, 16];
+                // git remote set-url open-source https://github.com/GitStartHQ/client-sourcegraph.git
+                return [4 /*yield*/, git.raw('remote', 'set-url', constants_1.OPEN_SOURCE_REMOTE, openSourceUrl)];
+            case 15:
+                // git remote set-url open-source https://github.com/GitStartHQ/client-sourcegraph.git
+                _a.sent();
+                return [3 /*break*/, 18];
+            case 16: 
+            // git remote add -t \* -f open-source https://github.com/GitStartHQ/client-sourcegraph.git
+            return [4 /*yield*/, git.raw('remote', 'add', '-t', '*', '-f', constants_1.OPEN_SOURCE_REMOTE, openSourceUrl)];
+            case 17:
+                // git remote add -t \* -f open-source https://github.com/GitStartHQ/client-sourcegraph.git
+                _a.sent();
+                _a.label = 18;
+            case 18:
+                (0, logger_1.logExtendLastLine)("Done!");
+                _a.label = 19;
+            case 19: return [2 /*return*/, git];
         }
     });
 }); };

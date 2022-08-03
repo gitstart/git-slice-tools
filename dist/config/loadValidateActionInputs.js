@@ -81,6 +81,10 @@ var loadValidateActionInputs = function (envFilePath) {
     }
     var prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false';
     var isOpenSourceFlow = !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false';
+    var openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL;
+    if (isOpenSourceFlow && !openSourceUrl) {
+        throw new Error("Missing 'GIT_SLICE_OPEN_SOURCE_URL'");
+    }
     return {
         sliceIgnores: sliceIgnores,
         pushBranchNameTemplate: pushBranchNameTemplate,
@@ -89,7 +93,7 @@ var loadValidateActionInputs = function (envFilePath) {
         prLabels: prLabels,
         prDraft: prDraft,
         isOpenSourceFlow: isOpenSourceFlow,
-        openSourceUrl: process.env.GIT_SLICE_OPEN_SOURCE_URL,
+        openSourceUrl: openSourceUrl,
         sliceRepo: {
             name: 'Slice',
             dir: path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

@@ -45,14 +45,15 @@ var octokit_1 = require("octokit");
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, void 0, void 0, function () {
-    var upstreamRepo, sliceRepo, upstreamGitUrlObject, sliceGitUrlObject, sliceOctokit, listResponse, _a, title, body, slicePrNumber, upstreamOctokit, upstreamBranch, createResponse, prNumber, error_1, error_2;
+    var upstreamRepo, sliceRepo, isOpenSourceFlow, openSourceUrl, upstreamGitUrlObject, openSourceGitUrlObject, sliceGitUrlObject, sliceOctokit, listResponse, _a, title, body, slicePrNumber, upstreamOctokit, upstreamBranch, targetGitUrlOwner, targetGitUrlRepo, targetLogScope, createResponse, prNumber, error_1, error_2;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
                 (0, terminal_kit_1.terminal)("Performing raise-pr job with " + JSON.stringify({ sliceBranch: sliceBranch }) + "...\n");
-                upstreamRepo = actionInputs.upstreamRepo, sliceRepo = actionInputs.sliceRepo;
+                upstreamRepo = actionInputs.upstreamRepo, sliceRepo = actionInputs.sliceRepo, isOpenSourceFlow = actionInputs.isOpenSourceFlow, openSourceUrl = actionInputs.openSourceUrl;
                 upstreamGitUrlObject = (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
+                openSourceGitUrlObject = isOpenSourceFlow ? (0, git_url_parse_1.default)(openSourceUrl) : null;
                 sliceGitUrlObject = (0, git_url_parse_1.default)(sliceRepo.gitHttpUri);
                 if (upstreamGitUrlObject.source !== 'github.com') {
                     throw new Error("Unsuported codehost '" + upstreamGitUrlObject.source + "'");
@@ -84,10 +85,18 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                     auth: upstreamRepo.userToken,
                 });
                 upstreamBranch = actionInputs.pushBranchNameTemplate.replace('<branch_name>', sliceBranch);
-                (0, common_1.logWriteLine)('Upstream', "Checking existing PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
+                targetGitUrlOwner = upstreamGitUrlObject.owner;
+                targetGitUrlRepo = upstreamGitUrlObject.name;
+                targetLogScope = 'Upstream';
+                if (isOpenSourceFlow) {
+                    targetGitUrlOwner = openSourceGitUrlObject.owner;
+                    targetGitUrlRepo = openSourceGitUrlObject.name;
+                    targetLogScope = 'OpenSource';
+                }
+                (0, common_1.logWriteLine)(targetLogScope, "Checking existing PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.list({
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
                         base: upstreamRepo.defaultBranch,
                         head: upstreamGitUrlObject.owner + ":" + upstreamBranch,
                         state: 'open',
@@ -96,14 +105,14 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                 listResponse = _b.sent();
                 if (listResponse.data.length !== 0) {
                     (0, common_1.logExtendLastLine)("Found PR #" + listResponse.data[0].number + " (" + listResponse.data[0].html_url + ")");
-                    (0, common_1.logWriteLine)('Upstream', "Done!");
+                    (0, common_1.logWriteLine)(targetLogScope, "Done!");
                     return [2 /*return*/];
                 }
                 (0, common_1.logExtendLastLine)("Not found!");
-                (0, common_1.logWriteLine)('Upstream', "Raising new PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
+                (0, common_1.logWriteLine)(targetLogScope, "Raising new PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.create({
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
                         title: title,
                         body: body,
                         base: upstreamRepo.defaultBranch,
@@ -115,60 +124,52 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                 createResponse = _b.sent();
                 prNumber = createResponse.data.number;
                 (0, common_1.logExtendLastLine)("Done PR #" + prNumber);
-                return [4 /*yield*/, upstreamOctokit.rest.issues.addLabels({
-                        issue_number: prNumber,
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
-                        labels: actionInputs.prLabels,
-                    })];
+                (0, common_1.logWriteLine)(targetLogScope, "Adding assignees into PR #" + prNumber + "...");
+                _b.label = 4;
             case 4:
-                _b.sent();
-                (0, common_1.logWriteLine)('Upstream', "Adding assignees into PR #" + prNumber + "...");
-                _b.label = 5;
-            case 5:
-                _b.trys.push([5, 7, , 8]);
+                _b.trys.push([4, 6, , 7]);
                 return [4 /*yield*/, upstreamOctokit.rest.issues.addAssignees({
                         issue_number: prNumber,
-                        owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
+                        owner: targetGitUrlOwner,
+                        repo: targetGitUrlRepo,
                         assignees: [upstreamRepo.username],
                     })];
-            case 6:
+            case 5:
                 _b.sent();
                 (0, common_1.logExtendLastLine)("Done!");
-                return [3 /*break*/, 8];
-            case 7:
+                return [3 /*break*/, 7];
+            case 6:
                 error_1 = _b.sent();
                 if ((0, common_1.isErrorLike)(error_1)) {
                     (0, terminal_kit_1.terminal)("Failed with following error: '" + error_1.message + "'\n");
                     return [2 /*return*/];
                 }
-                return [3 /*break*/, 8];
+                return [3 /*break*/, 7];
+            case 7:
+                if (!actionInputs.prLabels.length) return [3 /*break*/, 11];
+                (0, common_1.logWriteLine)(targetLogScope, "Adding labels into PR #" + prNumber + "...");
+                _b.label = 8;
             case 8:
-                if (!actionInputs.prLabels.length) return [3 /*break*/, 12];
-                (0, common_1.logWriteLine)('Upstream', "Adding labels into PR #" + prNumber + "...");
-                _b.label = 9;
-            case 9:
-                _b.trys.push([9, 11, , 12]);
+                _b.trys.push([8, 10, , 11]);
                 return [4 /*yield*/, upstreamOctokit.rest.issues.addLabels({
                         issue_number: prNumber,
                         owner: upstreamGitUrlObject.owner,
-                        repo: upstreamGitUrlObject.name,
+                        repo: targetGitUrlRepo,
                         labels: actionInputs.prLabels,
                     })];
-            case 10:
+            case 9:
                 _b.sent();
                 (0, common_1.logExtendLastLine)("Done!");
-                return [3 /*break*/, 12];
-            case 11:
+                return [3 /*break*/, 11];
+            case 10:
                 error_2 = _b.sent();
                 if ((0, common_1.isErrorLike)(error_2)) {
                     (0, terminal_kit_1.terminal)("Failed with following error: '" + error_2.message + "'\n");
                     return [2 /*return*/];
                 }
-                return [3 /*break*/, 12];
-            case 12:
-                (0, common_1.logWriteLine)('Upstream', "Created PR #" + prNumber + " (" + createResponse.data.html_url + ") successfully");
+                return [3 /*break*/, 11];
+            case 11:
+                (0, common_1.logWriteLine)(targetLogScope, "Created PR #" + prNumber + " (" + createResponse.data.html_url + ") successfully");
                 return [2 /*return*/];
         }
     });

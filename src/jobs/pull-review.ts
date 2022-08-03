@@ -2,7 +2,7 @@ import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
 import { terminal } from 'terminal-kit'
 import { delay, logExtendLastLine, logWriteLine } from '../common'
-import { ActionInputs } from '../types'
+import { ActionInputs, LogScope } from '../types'
 
 export const pullReview = async (
     actionInputs: ActionInputs,
@@ -12,9 +12,10 @@ export const pullReview = async (
     terminal('-'.repeat(30) + '\n')
     terminal(`Performing pull-review job with ${JSON.stringify({ slicePrNumber, upstreamPrReviewLink })}...\n`)
 
-    const { sliceRepo, upstreamRepo } = actionInputs
+    const { sliceRepo, upstreamRepo, isOpenSourceFlow, openSourceUrl } = actionInputs
     const upstreamGitUrlObject = gitUrlParse(upstreamRepo.gitHttpUri)
     const sliceGitUrlObject = gitUrlParse(sliceRepo.gitHttpUri)
+    const openSourceGitUrlObject = isOpenSourceFlow ? gitUrlParse(openSourceUrl) : null
     const upstreamOctokit = new Octokit({
         auth: upstreamRepo.userToken,
     })
@@ -32,27 +33,37 @@ export const pullReview = async (
         throw new Error(`Invalid pr-preview-link '${upstreamPrReviewLink}'`)
     }
 
-    const upstreamPrNumber = Number(prReivewLinkRegResult[1])
-    const upstreamPrReviewNumber = Number(prReivewLinkRegResult[2])
+    const targetPrNumber = Number(prReivewLinkRegResult[1])
+    const targetPrReviewNumber = Number(prReivewLinkRegResult[2])
 
-    logWriteLine('Upstream', `Getting PR review...`)
+    let targetGitUrlOwner = upstreamGitUrlObject.owner
+    let targetGitUrlRepo = upstreamGitUrlObject.name
+    let targetLogScope: LogScope = 'Upstream'
+
+    if (isOpenSourceFlow) {
+        targetGitUrlOwner = openSourceGitUrlObject.owner
+        targetGitUrlRepo = openSourceGitUrlObject.name
+        targetLogScope = 'OpenSource'
+    }
+
+    logWriteLine(targetLogScope, `Getting PR review...`)
 
     const { data: upstreamReview } = await upstreamOctokit.rest.pulls.getReview({
-        owner: upstreamGitUrlObject.owner,
-        repo: upstreamGitUrlObject.name,
-        pull_number: upstreamPrNumber,
-        review_id: upstreamPrReviewNumber,
+        owner: targetGitUrlOwner,
+        repo: targetGitUrlRepo,
+        pull_number: targetPrNumber,
+        review_id: targetPrReviewNumber,
     })
 
     logExtendLastLine(`Done!`)
 
-    logWriteLine('Upstream', `Getting PR review comments...`)
+    logWriteLine(targetLogScope, `Getting PR review comments...`)
 
-    const { data: upstreamReviewComments } = await upstreamOctokit.rest.pulls.listCommentsForReview({
-        owner: upstreamGitUrlObject.owner,
-        repo: upstreamGitUrlObject.name,
-        pull_number: upstreamPrNumber,
-        review_id: upstreamPrReviewNumber,
+    const { data: targetReviewComments } = await upstreamOctokit.rest.pulls.listCommentsForReview({
+        owner: targetGitUrlOwner,
+        repo: targetGitUrlRepo,
+        pull_number: targetPrNumber,
+        review_id: targetPrReviewNumber,
         // Assume that 100 comments per review is good limit
         per_page: 100,
         page: 1,
@@ -60,7 +71,7 @@ export const pullReview = async (
 
     logExtendLastLine(`Done!`)
 
-    logWriteLine('Upstream', `Getting PR review comments details...`)
+    logWriteLine(targetLogScope, `Getting PR review comments details...`)
 
     const detailedPullReviewComments: {
         path: string
@@ -72,12 +83,12 @@ export const pullReview = async (
         start_side?: string
     }[] = []
 
-    for (const comment of upstreamReviewComments) {
-        const { data: upstreamReviewComment } = await upstreamOctokit.rest.pulls.getReviewComment({
-            owner: upstreamGitUrlObject.owner,
-            repo: upstreamGitUrlObject.name,
-            pull_number: upstreamPrNumber,
-            review_id: upstreamPrReviewNumber,
+    for (const comment of targetReviewComments) {
+        const { data: targetReviewComment } = await upstreamOctokit.rest.pulls.getReviewComment({
+            owner: targetGitUrlOwner,
+            repo: targetGitUrlRepo,
+            pull_number: targetPrNumber,
+            review_id: targetPrReviewNumber,
             comment_id: comment.id,
         })
 
@@ -86,10 +97,10 @@ export const pullReview = async (
         detailedPullReviewComments.push({
             path,
             body: `From **_${user?.login}_**:\n${body}`,
-            side: upstreamReviewComment.side ?? undefined,
-            start_side: upstreamReviewComment.start_side ?? undefined,
-            line: upstreamReviewComment.original_line ?? upstreamReviewComment.line ?? undefined,
-            start_line: upstreamReviewComment.original_start_line ?? upstreamReviewComment.start_line ?? undefined,
+            side: targetReviewComment.side ?? undefined,
+            start_side: targetReviewComment.start_side ?? undefined,
+            line: targetReviewComment.original_line ?? targetReviewComment.line ?? undefined,
+            start_line: targetReviewComment.original_start_line ?? targetReviewComment.start_line ?? undefined,
         })
 
         // Just to make sure we don't reach github api limit

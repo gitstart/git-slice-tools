@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pull = void 0;
-var simple_git_1 = require("simple-git");
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(void 0, void 0, void 0, function () {
@@ -47,61 +46,43 @@ var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(voi
             case 0:
                 (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
                 (0, terminal_kit_1.terminal)('Performing pull job...\n');
-                (0, common_1.logWriteLine)('Upstream', "Checkout and pull last versions '" + actionInputs.upstreamRepo.defaultBranch + "' branch...");
-                return [4 /*yield*/, upstreamGit.reset(simple_git_1.ResetMode.HARD)];
+                return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch)];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)];
+                if (!actionInputs.isOpenSourceFlow) return [3 /*break*/, 4];
+                return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(upstreamGit, 'OpenSource', actionInputs.upstreamRepo.defaultBranch, true)];
             case 2:
                 _a.sent();
-                return [4 /*yield*/, upstreamGit.reset(['--hard', "origin/" + actionInputs.upstreamRepo.defaultBranch])];
+                (0, common_1.logWriteLine)('Upstream', "Push '" + actionInputs.upstreamRepo.defaultBranch + "' branch to make sure it up-to-date open-source repo ...");
+                return [4 /*yield*/, upstreamGit.push('origin', actionInputs.upstreamRepo.defaultBranch)];
             case 3:
                 _a.sent();
-                return [4 /*yield*/, upstreamGit.pull('origin', actionInputs.upstreamRepo.defaultBranch)];
+                (0, common_1.logExtendLastLine)('Done!');
+                _a.label = 4;
             case 4:
-                _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Upstream', "Clean...");
-                return [4 /*yield*/, upstreamGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
-            case 5:
-                _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
                 (0, common_1.logWriteLine)('Upstream', "Get last commit oid...");
                 return [4 /*yield*/, upstreamGit.revparse('HEAD')];
-            case 6:
+            case 5:
                 upstreamLastCommitId = _a.sent();
                 (0, common_1.logExtendLastLine)("Done! -> " + upstreamLastCommitId);
-                (0, common_1.logWriteLine)('Slice', "Checkout and pull last versions '" + actionInputs.sliceRepo.defaultBranch + "' branch...");
-                return [4 /*yield*/, sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)];
+                return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch)];
+            case 6:
+                _a.sent();
+                return [4 /*yield*/, (0, common_1.deleteSliceIgnoresFilesDirs)(actionInputs.sliceIgnores, actionInputs.upstreamRepo.dir, 'Upstream')];
             case 7:
                 _a.sent();
-                return [4 /*yield*/, sliceGit.reset(['--hard', "origin/" + actionInputs.sliceRepo.defaultBranch])];
+                return [4 /*yield*/, (0, common_1.copyFiles)(sliceGit, actionInputs.upstreamRepo.dir, actionInputs.sliceRepo.dir, actionInputs.sliceIgnores, 'Slice')];
             case 8:
-                _a.sent();
-                return [4 /*yield*/, sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch)];
+                diffFiles = _a.sent();
+                if (!(diffFiles.length !== 0)) return [3 /*break*/, 11];
+                return [4 /*yield*/, sliceGit.raw('add', '.', '--force')];
             case 9:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Clean...");
-                return [4 /*yield*/, sliceGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
+                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(sliceGit, "git-slice:" + upstreamLastCommitId, actionInputs.sliceRepo.defaultBranch, 'Slice')];
             case 10:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                return [4 /*yield*/, (0, common_1.deleteSliceIgnoresFilesDirs)(actionInputs.sliceIgnores, actionInputs.upstreamRepo.dir, 'Upstream')];
+                _a.label = 11;
             case 11:
-                _a.sent();
-                return [4 /*yield*/, (0, common_1.copyFiles)(sliceGit, actionInputs.upstreamRepo.dir, actionInputs.sliceRepo.dir, actionInputs.sliceIgnores, 'Slice')];
-            case 12:
-                diffFiles = _a.sent();
-                if (!(diffFiles.length !== 0)) return [3 /*break*/, 15];
-                return [4 /*yield*/, sliceGit.raw('add', '.', '--force')];
-            case 13:
-                _a.sent();
-                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(sliceGit, "git-slice:" + upstreamLastCommitId, actionInputs.sliceRepo.defaultBranch, 'Slice')];
-            case 14:
-                _a.sent();
-                _a.label = 15;
-            case 15:
                 (0, common_1.logWriteLine)('Slice', "Up to date");
                 return [2 /*return*/];
         }

@@ -5,8 +5,10 @@ import path from 'path'
 import { CleanOptions, GitError, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import { ErrorLike, LogScope } from '../types'
+import { OPEN_SOURCE_REMOTE } from './constants'
 import { logExtendLastLine, logWriteLine } from './logger'
 
+export * from './constants'
 export * from './gitInit'
 export * from './logger'
 
@@ -336,6 +338,30 @@ export const cleanAndDeleteLocalBranch = async (
     } catch (error) {
         // noop
     }
+
+    logExtendLastLine('Done!')
+}
+
+export const checkoutAndPullLastVersion = async (
+    git: SimpleGit,
+    scope: LogScope,
+    branch: string,
+    isOpenSource = false
+): Promise<void> => {
+    logWriteLine(scope, `Checkout and pull last versions '${branch}' branch...`)
+
+    const remoteName = isOpenSource ? OPEN_SOURCE_REMOTE : 'origin'
+
+    await git.reset(ResetMode.HARD)
+    await git.checkout(branch)
+    await git.reset(['--hard', `${remoteName}/${branch}`])
+    await git.pull(remoteName, branch)
+
+    logExtendLastLine('Done!')
+
+    logWriteLine(scope, `Clean...`)
+
+    await git.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
 
     logExtendLastLine('Done!')
 }
