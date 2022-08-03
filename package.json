@@ -28,6 +28,7 @@
     "raise-pr": "ts-node src/index.ts raise-pr",
     "pull-branch": "ts-node src/index.ts pull-branch",
     "pull-review": "ts-node src/index.ts pull-review",
+    "pull-issue": "ts-node src/index.ts pull-issue",
     "config": "ts-node src/index.ts config",
     "dev": "nodemon",
     "lint": "eslint . --ext .ts",

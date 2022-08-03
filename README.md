@@ -14,6 +14,8 @@ A new version of git-slice, super high performance and more features.
 | `GIT_SLICE_UPSTREAM_REPO_EMAIL`          | User email for git authentication and commit details on upstream repo                                                                                                                      |
 | `GIT_SLICE_UPSTREAM_REPO_PASSWORD`       | Personal Access Token for git authentication on upstream repo                                                                                                                              |
 | `GIT_SLICE_UPSTREAM_REPO_URL`            | Http git url of upstream repo, should be in this format : https://github.com/GitStartHQ/client-sourcegraph.git                                                                             |
+| `GIT_SLICE_OPEN_SOURCE_FLOW`             | (`true` or `false`). Default is `false`. Set `true` if you want to use opensource flow                                                                                                     |
+| `GIT_SLICE_OPEN_SOURCE_URL`              | Http git url of the opensource repo, should be in this format : https://github.com/sourcegraph/sourcegraph.git                                                                             |
 | `GIT_SLICE_SLICE_REPO_DIR`               | Relation/absolute path to directory which contains slice source                                                                                                                            |
 | `GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH`    | Name of default branch of slice repo                                                                                                                                                       |
 | `GIT_SLICE_SLICE_REPO_USERNAME`          | Username for git authentication and commit details on slice repo                                                                                                                           |
@@ -51,6 +53,9 @@ GIT_SLICE_SLICE_REPO_URL=https://github.com/sourcegraph/sourcegraph.git
 
 GIT_SLICE_PR_LABELS='["gitstart","team/frontend-platform"]'
 GIT_SLICE_PR_DRAFT=true
+
+GIT_SLICE_OPEN_SOURCE_FLOW=false
+GIT_SLICE_OPEN_SOURCE_URL=https://github.com/sourcegraph/sourcegraph.git
 ```
 
 ## Development
@@ -109,6 +114,7 @@ You can save all required environment variables in a text file and use `--env` p
 | `raise-pr`    | Raise new PR for branch on upstream repo (GitHub only) with details (title/body) from the PR for a branch on slice repo                                                                                                                                                                                                                 |
 | `pull-branch` | Pull last changes of a branch from upstream repo into slice repo. The destination branch in slice repo has the pulling branch but with `upstream-*` prefix. Please note that this job uses `force-push` and the upstream should be updated to date with the default branch of upstream repo otherwise there would be some extra changes |
 | `pull-review` | Pull a PR review from a PR on upstream repo into a PR on slice repo (GitHub only). Please note that if upstream review has comments on code, this job will throw errors if upstream and slice branches don't have the same changes                                                                                                      |
+| `pull-issue`  | Pull an issue from upstream repo (or open source repo with `open source flow`) into slice repo (GitHub only)                                                                                                                                                                                                                            |
 
 ### Job `checkout`
 
@@ -189,6 +195,25 @@ yarn pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph
 
 git-slice-tools pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
 ```
+
+### Job `pull-issue`
+
+Command arguments
+
+| Arg      | Description                                             |
+| -------- | ------------------------------------------------------- |
+| `--from` | Number of the upstream issue you want to pull           |
+| `--to`   | (optional) Number of the slice issue you want to update |
+
+```bash
+yarn pull-issue --from 123
+
+yarn pull-issue --from 123 --to 332
+```
+
+## Open source flow
+
+Updating...
 
 ## Future jobs
 

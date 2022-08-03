@@ -2,7 +2,7 @@ import { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import yargs from 'yargs/yargs'
 import { loadValidateActionInputs } from './config'
-import { checkout, init, pull, pullBranch, pullReview, push, raisePr } from './jobs'
+import { checkout, init, pull, pullBranch, pullIssue, pullReview, push, raisePr } from './jobs'
 import { ActionInputs } from './types'
 
 const loadActionInputsAndInit = async (
@@ -133,8 +133,37 @@ yargs(process.argv.slice(2))
                 throw new Error(`pull-review job: 'pr-review-link' in string is required`)
             }
 
-            return loadActionInputsAndInit(env, ({ actionInputs, sliceGit, upstreamGit }) =>
-                pullReview(sliceGit, upstreamGit, actionInputs, prNumber, prReivewLink)
+            return loadActionInputsAndInit(env, ({ actionInputs }) => pullReview(actionInputs, prNumber, prReivewLink))
+        }
+    )
+    .command(
+        'pull-issue',
+        "Pull an issue from upstream repo (or open source repo with 'GIT_SLICE_OPEN_SOURCE_FLOW') (GitHub only)",
+        {
+            ...GLOBAL_OPTIONS_CONFIG,
+            fromIssueNumber: {
+                type: 'number',
+                alias: 'from',
+                desc: 'Number of the upstream issue you want to pull',
+            },
+            toIssueNumber: {
+                type: 'number',
+                alias: 'to',
+                desc: 'Number of the slice issue you want to update',
+                default: 0,
+            },
+        },
+        async ({ env, fromIssueNumber, toIssueNumber }) => {
+            if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
+                throw new Error(`pull-issue job: 'from' in number is required`)
+            }
+
+            if (toIssueNumber != null && typeof toIssueNumber !== 'number') {
+                throw new Error(`pull-issue job: 'to' in number is required`)
+            }
+
+            return loadActionInputsAndInit(env, ({ actionInputs }) =>
+                pullIssue(actionInputs, fromIssueNumber, toIssueNumber)
             )
         }
     )

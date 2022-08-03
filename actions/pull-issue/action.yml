@@ -1,10 +1,10 @@
-name: 'git-slice-tools PULL-REVIEW'
-description: 'Perform git-slice-tools pull-review job'
+name: 'git-slice-tools PULL-ISSUE'
+description: 'Perform git-slice-tools pull-issue job'
 inputs:
-  pr-number:
+  upstream-issue:
     required: true
-  pr-review-link:
-    required: true
+  slice-issue:
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -21,9 +21,9 @@ runs:
       run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.1.4
       shell: bash
 
-    - name: Execute `git-slice-tools pull-review`
-      run: git-slice-tools pull-review --pr-number "$PR_NUMBER" --pr-review-link "$PR_REVIEW_LINK"
+    - name: Execute `git-slice-tools pull-issue`
+      run: git-slice-tools pull-issue --from "$UPSTREAM_ISSUE" --to "$SLICE_ISSUE"
       env:
-        PR_NUMBER: ${{ inputs.pr-number }}
-        PR_REVIEW_LINK: ${{ inputs.pr-review-link }}
+        UPSTREAM_ISSUE: ${{ inputs.upstream-issue }}
+        SLICE_ISSUE: ${{ inputs.slice-issue }}
       shell: bash

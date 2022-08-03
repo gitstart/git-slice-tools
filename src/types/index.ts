@@ -7,6 +7,8 @@ export interface ActionInputs {
     upstreamRepo: Repo
     prLabels: string[]
     prDraft: boolean
+    isOpenSourceFlow: boolean
+    openSourceUrl: string
 }
 
 export interface Repo {
@@ -24,4 +26,4 @@ export interface ErrorLike {
     name?: string
 }
 
-export type LogScope = 'Upstream' | 'Slice'
+export type LogScope = 'Upstream' | 'Slice' | 'OpenSource'

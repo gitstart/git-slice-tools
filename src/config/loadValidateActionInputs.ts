@@ -99,7 +99,9 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
         }
     }
 
-    const prDraft = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false'
+    const prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false'
+    const isOpenSourceFlow =
+        !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false'
 
     return {
         sliceIgnores,
@@ -108,6 +110,8 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
         forceInit,
         prLabels,
         prDraft,
+        isOpenSourceFlow,
+        openSourceUrl: process.env.GIT_SLICE_OPEN_SOURCE_URL,
         sliceRepo: {
             name: 'Slice',
             dir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

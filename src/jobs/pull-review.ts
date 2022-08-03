@@ -1,13 +1,10 @@
 import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
-import { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import { delay, logExtendLastLine, logWriteLine } from '../common'
 import { ActionInputs } from '../types'
 
 export const pullReview = async (
-    sliceGit: SimpleGit,
-    upstreamGit: SimpleGit,
     actionInputs: ActionInputs,
     slicePrNumber: number,
     upstreamPrReviewLink: string
