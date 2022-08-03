@@ -121,7 +121,7 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                 if (!diffFiles_1.length) {
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(upstreamGit, commitMsg, upstreamBranch, 'Upstream', true)];
+                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(upstreamGit, commitMsg, upstreamBranch, 'Upstream', upstreamBranchExists && forcePush)];
             case 17:
                 _a.sent();
                 return [2 /*return*/];

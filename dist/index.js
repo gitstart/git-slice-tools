@@ -174,8 +174,34 @@ var GLOBAL_OPTIONS_CONFIG = {
                 throw new Error("pull-review job: 'pr-review-link' in string is required");
             }
             return [2 /*return*/, loadActionInputsAndInit(env, function (_a) {
-                    var actionInputs = _a.actionInputs, sliceGit = _a.sliceGit, upstreamGit = _a.upstreamGit;
-                    return (0, jobs_1.pullReview)(sliceGit, upstreamGit, actionInputs, prNumber, prReivewLink);
+                    var actionInputs = _a.actionInputs;
+                    return (0, jobs_1.pullReview)(actionInputs, prNumber, prReivewLink);
+                })];
+        });
+    });
+})
+    .command('pull-issue', "Pull an issue from upstream repo (or open source repo with 'GIT_SLICE_OPEN_SOURCE_FLOW') (GitHub only)", __assign(__assign({}, GLOBAL_OPTIONS_CONFIG), { fromIssueNumber: {
+        type: 'number',
+        alias: 'from',
+        desc: 'Number of the upstream issue you want to pull',
+    }, toIssueNumber: {
+        type: 'number',
+        alias: 'to',
+        desc: 'Number of the slice issue you want to update',
+        default: 0,
+    } }), function (_a) {
+    var env = _a.env, fromIssueNumber = _a.fromIssueNumber, toIssueNumber = _a.toIssueNumber;
+    return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_b) {
+            if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
+                throw new Error("pull-issue job: 'from' in number is required");
+            }
+            if (toIssueNumber != null && typeof toIssueNumber !== 'number') {
+                throw new Error("pull-issue job: 'to' in number is required");
+            }
+            return [2 /*return*/, loadActionInputsAndInit(env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return (0, jobs_1.pullIssue)(actionInputs, fromIssueNumber, toIssueNumber);
                 })];
         });
     });

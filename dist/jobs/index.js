@@ -15,6 +15,7 @@ __exportStar(require("./init"), exports);
 __exportStar(require("./pull"), exports);
 __exportStar(require("./pull-branch"), exports);
 __exportStar(require("./pull-review"), exports);
+__exportStar(require("./pull-issue"), exports);
 __exportStar(require("./push"), exports);
 __exportStar(require("./raise-pr"), exports);
 //# sourceMappingURL=index.js.map

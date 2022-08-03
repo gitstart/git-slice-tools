@@ -44,7 +44,7 @@ var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
-var pullReview = function (sliceGit, upstreamGit, actionInputs, slicePrNumber, upstreamPrReviewLink) { return __awaiter(void 0, void 0, void 0, function () {
+var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { return __awaiter(void 0, void 0, void 0, function () {
     var sliceRepo, upstreamRepo, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, prReivewLinkRegResult, upstreamPrNumber, upstreamPrReviewNumber, upstreamReview, upstreamReviewComments, detailedPullReviewComments, _i, upstreamReviewComments_1, comment, upstreamReviewComment, path, body, user, sliceReview;
     var _a, _b, _c, _d, _e, _f, _g, _h;
     return __generator(this, function (_j) {

@@ -79,7 +79,8 @@ var loadValidateActionInputs = function (envFilePath) {
             throw new Error("Parsing 'GIT_SLICE_PR_LABELS' failed");
         }
     }
-    var prDraft = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false';
+    var prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false';
+    var isOpenSourceFlow = !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false';
     return {
         sliceIgnores: sliceIgnores,
         pushBranchNameTemplate: pushBranchNameTemplate,
@@ -87,6 +88,8 @@ var loadValidateActionInputs = function (envFilePath) {
         forceInit: forceInit,
         prLabels: prLabels,
         prDraft: prDraft,
+        isOpenSourceFlow: isOpenSourceFlow,
+        openSourceUrl: process.env.GIT_SLICE_OPEN_SOURCE_URL,
         sliceRepo: {
             name: 'Slice',
             dir: path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),
