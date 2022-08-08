@@ -68,7 +68,7 @@ export const pullIssue = async (
         owner: sliceGitUrlObject.owner,
         repo: sliceGitUrlObject.name,
         title,
-        body,
+        body: `Issue is synched from ${html_url} by git-slice-tools:\n${body}`,
     })
 
     logExtendLastLine(`Done! -> ${sliceIssue.html_url}`)

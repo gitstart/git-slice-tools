@@ -98,7 +98,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
                         title: title,
-                        body: body,
+                        body: "Issue is synched from " + html_url + " by git-slice-tools:\n" + body,
                     })];
             case 4:
                 sliceIssue = (_a.sent()).data;
