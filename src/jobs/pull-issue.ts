@@ -44,7 +44,7 @@ export const pullIssue = async (
 
     logExtendLastLine(`Done!`)
 
-    const { title, body } = upstreamIssue
+    const { title, body, html_url } = upstreamIssue
 
     if (toIssueNumber > 0) {
         logWriteLine('Slice', `Updating issue #${toIssueNumber}...`)
@@ -54,7 +54,7 @@ export const pullIssue = async (
             repo: sliceGitUrlObject.name,
             issue_number: toIssueNumber,
             title,
-            body,
+            body: `Issue is synched from ${html_url} by git-slice-tools:\n${body}`,
         })
 
         logExtendLastLine(`Done!`)
