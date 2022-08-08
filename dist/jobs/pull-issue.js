@@ -45,7 +45,7 @@ var octokit_1 = require("octokit");
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceRepo, upstreamRepo, upstreamLogScope, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamIssue, title, body, sliceIssue;
+    var sliceRepo, upstreamRepo, upstreamLogScope, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamIssue, title, body, html_url, sliceIssue;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -78,7 +78,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return
             case 1:
                 upstreamIssue = (_a.sent()).data;
                 (0, common_1.logExtendLastLine)("Done!");
-                title = upstreamIssue.title, body = upstreamIssue.body;
+                title = upstreamIssue.title, body = upstreamIssue.body, html_url = upstreamIssue.html_url;
                 if (!(toIssueNumber > 0)) return [3 /*break*/, 3];
                 (0, common_1.logWriteLine)('Slice', "Updating issue #" + toIssueNumber + "...");
                 return [4 /*yield*/, sliceOctokit.rest.issues.update({
@@ -86,7 +86,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return
                         repo: sliceGitUrlObject.name,
                         issue_number: toIssueNumber,
                         title: title,
-                        body: body,
+                        body: "Issue is synched from " + html_url + " by git-slice-tools:\n" + body,
                     })];
             case 2:
                 _a.sent();
