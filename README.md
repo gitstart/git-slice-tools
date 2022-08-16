@@ -232,6 +232,34 @@ In this flow:
 - `raise-pr` job will create a PR on open source repo with `head` is a branch on forked-repo (upstream repo).
 - `pull-issue` and `pull-review` will look for issues and reviews on open source repo.
 
+## Use `git-slice-tools` in Github Action
+
+You can setup `git-slice-tools` easily in Github Action by coping our prepared `git-slice.yml` file into your `.github/workflows` folder and correct the root `env:` object with your slice/upstream/opensource repo you want. It requires 3 extra secret variables:
+
+| Name                                | Description                                                                                                                                           |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GIT_SLICE_UPSTREAM_REPO_PASSWORD`  | it's PAT of the Github Account for upstream repo                                                                                                      |
+| `GIT_SLICE_SLICE_REPO_PASSWORD`     | it's PAT of the Github Account for slice repo                                                                                                         |
+| `GIT_SLICE_UPSTREAM_REPO_CACHE_KEY` | it's a key for caching a version of sourcecode of both upstream and slice repos. You should change it when you see it takes longer time for pull jobs |
+
+A note about Github Account for slice repo, please make sure it has right permissions for force-push changes on default branch, we recommend to give it `admin` permission.
+
+Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
+
+These are `/git-slice ...` command you can use in PR comments:
+
+| Name                                                | Description                                                                                           |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/git-slice push -m "comment message" [-f] [-pr]`   | Push changes of current branch in slice repo to upstream repo                                         |
+| `/git-slice pull-review -from "<pull review link>"` | Pull a review from upstream PR to slice PR. Please make sure you wrap the pull review link in `"..."` |
+
+These are features you can trigger with using workflow dispatch in actions page, you can select the `job` you want:
+
+| Name            | Description                                                                                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pull-a-branch` | this job will pull a branch from upstream repo into slice repo. If you set `Raise a PR to merge the pulled upstream branch into this branch` field, it will create a PR to merge it into a slice branch but you still need to review and merge the PR manually |
+| `pull-an-issue` | this job will pull an issue from upstream repo into a new slice repo issue, if you set `Slice issue number to update` it will update the current one instead of creating a new one                                                                             |
+
 ## Future jobs
 
 | Job                            | Description                                                               |

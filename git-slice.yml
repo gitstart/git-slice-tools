@@ -1,0 +1,251 @@
+name: git-slice-tools
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  schedule:
+    - cron: '0 0 * * *'
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job'
+        type: choice
+        options:
+          - push-a-branch
+          - pull-the-main-branch
+          - pull-a-branch
+          - pull-a-review
+          - pull-an-issue
+        required: true
+      branch:
+        description: '[push-a-branch][pull-a-branch] Which branch should be pushed/pulled?'
+        default: 'issue-'
+      commitMessage:
+        description: '[push-a-branch] Commit message for the client?'
+      overide:
+        type: boolean
+        description: '[push-a-branch] Overide pervious push (force push)?'
+        default: false
+      pushPr:
+        type: boolean
+        description: '[push-a-branch] Create a PR with the same title and body on the client side?'
+        default: false
+      targetBranch:
+        description: '[pull-a-branch] Raise a PR to merge the pulled upstream branch into this branch'
+        default: ''
+      prNumber:
+        description: '[pull-a-review] PR number on slice repo'
+      prReivewLink:
+        description: '[pull-a-review] Link to a PR review on upstream repo (GitHub only)'
+      upstreamIssue:
+        description: '[pull-an-issue] Upstream issue number'
+      sliceIssue:
+        description: '[pull-an-issue] Slice issue number to update (optional)'
+
+env:
+  GIT_SLICE_UPSTREAM_REPO_DIR: ./upstream-repo
+  GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: develop
+  GIT_SLICE_UPSTREAM_REPO_USERNAME: gitstart
+  GIT_SLICE_UPSTREAM_REPO_EMAIL: bot@gitstart.com
+  GIT_SLICE_UPSTREAM_REPO_PASSWORD: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_PASSWORD }}
+  GIT_SLICE_UPSTREAM_REPO_URL: https://github.com/gitstart/cypress.git
+  GIT_SLICE_SLICE_REPO_DIR: ./slice-repo
+  GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH: main
+  GIT_SLICE_SLICE_REPO_USERNAME: gitstart
+  GIT_SLICE_SLICE_REPO_EMAIL: bot@gitstart.com
+  GIT_SLICE_SLICE_REPO_PASSWORD: ${{ secrets.GIT_SLICE_SLICE_REPO_PASSWORD }}
+  GIT_SLICE_SLICE_REPO_URL: https://github.com/GitStartHQ/client-cypress.git
+  GIT_SLICE_SLICE_IGNORES: '[]'
+  GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE: '<branch_name>'
+  GIT_SLICE_PUSH_COMMIT_MSG_REGEX: '.*'
+  GIT_SLICE_CHECKOUT_CACHED_KEY: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_CACHE_KEY }}
+  GIT_SLICE_PR_LABELS: '["gitstart"]'
+  GIT_SLICE_PR_DRAFT: true
+
+  GIT_SLICE_OPEN_SOURCE_FLOW: true
+  GIT_SLICE_OPEN_SOURCE_URL: https://github.com/cypress-io/cypress.git
+
+jobs:
+  git-slice-checkout:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.7.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        if: steps.cache-repos.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools CHECKOUT
+        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.1.7
+
+  git-slice-pull:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: |
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        github.event_name == 'schedule' ||
+        github.event_name == 'push' ||
+        github.event_name == 'pull_request' ||
+        (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/git-slice push '))
+      }}
+
+    needs: [git-slice-checkout]
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PULL
+        uses: GitStartHQ/git-slice-tools/actions/pull@v1.1.7
+
+  git-slice-pull-branch:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'pull-a-branch' }}
+
+    needs: [git-slice-pull]
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PULL-BRANCH
+        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.1.7
+        with:
+          branch: ${{ github.event.inputs.branch }}
+          target-branch: ${{ github.event.inputs.targetBranch }}
+
+  git-slice-pull-review:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'pull-a-review' }}
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PULL-REVIEW
+        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.1.7
+        with:
+          pr-number: ${{ github.event.inputs.prNumber }}
+          pr-review-link: ${{ github.event.inputs.prReivewLink }}
+
+  # Trigger git-slice pull-review action with pull request comment: /git-slice pull-review -from https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
+  # -from : Link to pull request review (GitHub only)
+  git-slice-pull-review-comment:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/git-slice pull-review ') }}
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PULL-REVIEW-COMMENT (trigger by comments)
+        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.1.7
+
+  git-slice-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'push-a-branch' }}
+
+    needs: [git-slice-pull]
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PUSH
+        uses: GitStartHQ/git-slice-tools/actions/push@v1.1.7
+        with:
+          branch: ${{ github.event.inputs.branch }}
+          message: ${{ github.event.inputs.commitMessage }}
+          force-push: ${{ github.event.inputs.overide }}
+          push-pr: ${{ github.event.inputs.pushPr }}
+
+  # Trigger git-slice push action with pull request comment: /git-slice push -m "<commit message>" [-f] [-pr]
+  # -f : Overide pervious push (force push)
+  # -pr : Create a PR with the same title and body on the client side
+  git-slice-push-comment:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/git-slice push') }}
+
+    needs: [git-slice-pull]
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PUSH (trigger by comments)
+        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.1.7
+
+  git-slice-pull-issue:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.job == 'pull-an-issue' }}
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: git-slice-tools PULL-ISSUE
+        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.1.7
+        with:
+          upstream-issue: ${{ github.event.inputs.upstreamIssue }}
+          slice-issue: ${{ github.event.inputs.sliceIssue }}
