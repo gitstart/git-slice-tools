@@ -53,6 +53,8 @@ export const gitInit = async (scope: LogScope, originRepo: Repo, openSourceUrl?:
         await git.raw('remote', 'add', '-t', '*', '-f', 'origin', originRepo.gitHttpUri)
     }
 
+    await git.addConfig('checkout.defaultRemote', 'origin')
+
     logExtendLastLine(`Done!`)
 
     if (openSourceUrl) {

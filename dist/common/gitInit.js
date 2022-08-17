@@ -121,28 +121,30 @@ var gitInit = function (scope, originRepo, openSourceUrl) { return __awaiter(voi
                 // git remote add -t \* -f origin https://github.com/GitStartHQ/client-sourcegraph.git
                 _a.sent();
                 _a.label = 14;
-            case 14:
+            case 14: return [4 /*yield*/, git.addConfig('checkout.defaultRemote', 'origin')];
+            case 15:
+                _a.sent();
                 (0, logger_1.logExtendLastLine)("Done!");
-                if (!openSourceUrl) return [3 /*break*/, 19];
+                if (!openSourceUrl) return [3 /*break*/, 20];
                 (0, logger_1.logWriteLine)(scope, "Setting `open-source` origin...");
-                if (!remotes.find(function (x) { return x.name === constants_1.OPEN_SOURCE_REMOTE; })) return [3 /*break*/, 16];
+                if (!remotes.find(function (x) { return x.name === constants_1.OPEN_SOURCE_REMOTE; })) return [3 /*break*/, 17];
                 // git remote set-url open-source https://github.com/GitStartHQ/client-sourcegraph.git
                 return [4 /*yield*/, git.raw('remote', 'set-url', constants_1.OPEN_SOURCE_REMOTE, openSourceUrl)];
-            case 15:
+            case 16:
                 // git remote set-url open-source https://github.com/GitStartHQ/client-sourcegraph.git
                 _a.sent();
-                return [3 /*break*/, 18];
-            case 16: 
+                return [3 /*break*/, 19];
+            case 17: 
             // git remote add -t \* -f open-source https://github.com/GitStartHQ/client-sourcegraph.git
             return [4 /*yield*/, git.raw('remote', 'add', '-t', '*', '-f', constants_1.OPEN_SOURCE_REMOTE, openSourceUrl)];
-            case 17:
+            case 18:
                 // git remote add -t \* -f open-source https://github.com/GitStartHQ/client-sourcegraph.git
                 _a.sent();
-                _a.label = 18;
-            case 18:
-                (0, logger_1.logExtendLastLine)("Done!");
                 _a.label = 19;
-            case 19: return [2 /*return*/, git];
+            case 19:
+                (0, logger_1.logExtendLastLine)("Done!");
+                _a.label = 20;
+            case 20: return [2 /*return*/, git];
         }
     });
 }); };
