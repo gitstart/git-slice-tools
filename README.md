@@ -260,6 +260,21 @@ These are features you can trigger with using workflow dispatch in actions page,
 | `pull-a-branch` | this job will pull a branch from upstream repo into slice repo. If you set `Raise a PR to merge the pulled upstream branch into this branch` field, it will create a PR to merge it into a slice branch but you still need to review and merge the PR manually |
 | `pull-an-issue` | this job will pull an issue from upstream repo into a new slice repo issue, if you set `Slice issue number to update` it will update the current one instead of creating a new one                                                                             |
 
+## Projects are using `git-slice-tools` instead of `git-slice` from engine team
+
+These are list of projects which are using `git-slice-tools` instead of `git-slice` from engine
+
+- [HelloAlice - Mad Hatter instance](https://github.com/GitStartHQ/client-helloalice-mad-hatter) - @davidokonji
+- [Appsmith - Opensource Instance](https://github.com/GitStartHQ/client-appsmith) - @BikashSah999
+- [Cypress - Opensource Instance](https://github.com/GitStartHQ/cypress) - @raph941
+- [SourceGraph - Front-end instance](https://github.com/GitStartHQ/client-sourcegrapph-gitslice-test) - @raph941
+- [SourceGraph - Opensource front-end instance](https://github.com/GitStartHQ/client-sourcegraph) @raph941
+- [SourceGraph - Opensource back-end instance](https://github.com/GitStartHQ/client-sourcegaph-devx-oss) @Valentine-Mario
+
+## Contributions
+
+This project works well with these features but we need more hands to make it stable and better with tests covering, docker image and K8S supports. We greatly appreciate all your PRs to resolve them. If you want to have an onboarding tour, let's ping @phunguyenmurcul, this nice guy (me) would help you to understand the project quickly.
+
 ## Future jobs
 
 | Job                            | Description                                                               |
