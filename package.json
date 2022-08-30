@@ -51,11 +51,11 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "dotenv": "^10.0.0",
     "dir-compare": "^3.3.0",
+    "dotenv": "^10.0.0",
     "fs-extra": "^10.0.0",
     "git-url-parse": "^12.0.0",
-    "glob": "^7.2.0",
+    "globby": "^11.0.4",
     "nodemon": "^2.0.14",
     "octokit": "^1.8.1",
     "simple-git": "^2.47.0",

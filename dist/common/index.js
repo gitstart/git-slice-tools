@@ -58,10 +58,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.deleteSliceIgnoresFilesDirs = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = void 0;
+exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = void 0;
 var dir_compare_1 = require("dir-compare");
 var fs_extra_1 = __importDefault(require("fs-extra"));
-var glob_1 = require("glob");
 var path_1 = __importDefault(require("path"));
 var simple_git_1 = require("simple-git");
 var terminal_kit_1 = require("terminal-kit");
@@ -69,6 +68,7 @@ var constants_1 = require("./constants");
 var logger_1 = require("./logger");
 __exportStar(require("./constants"), exports);
 __exportStar(require("./gitInit"), exports);
+__exportStar(require("./ignore"), exports);
 __exportStar(require("./logger"), exports);
 var isErrorLike = function (value) {
     return typeof value === 'object' && value !== null && ('stack' in value || 'message' in value);
@@ -122,32 +122,6 @@ var pullRemoteBranchIntoCurrentBranch = function (logPrefix, git, remoteBranch, 
     });
 };
 exports.pullRemoteBranchIntoCurrentBranch = pullRemoteBranchIntoCurrentBranch;
-var deleteSliceIgnoresFilesDirs = function (sliceIgnores, rootDir, scope) { return __awaiter(void 0, void 0, void 0, function () {
-    var i, pattern, mg, j, pathMatch, resolvedPath;
-    return __generator(this, function (_a) {
-        for (i = 0; i < sliceIgnores.length; i++) {
-            pattern = sliceIgnores[i];
-            (0, logger_1.logWriteLine)(scope, "Getting ingoring files/directores with pattern '" + pattern + "'...");
-            mg = new glob_1.Glob(pattern, {
-                cwd: rootDir,
-                sync: true,
-            });
-            (0, logger_1.logExtendLastLine)("Found " + mg.found.length + " files/directories!");
-            if (mg.found.length === 0) {
-                continue;
-            }
-            for (j = 0; j < mg.found.length; j++) {
-                pathMatch = mg.found[j];
-                resolvedPath = path_1.default.join(rootDir, pathMatch);
-                (0, logger_1.logWriteLine)(scope, "Deleting: " + pathMatch + "...");
-                fs_extra_1.default.rmSync(resolvedPath, { force: true, recursive: true });
-                (0, logger_1.logExtendLastLine)('Done!');
-            }
-        }
-        return [2 /*return*/];
-    });
-}); };
-exports.deleteSliceIgnoresFilesDirs = deleteSliceIgnoresFilesDirs;
 var createCommitAndPushCurrentChanges = function (git, commitMsg, branch, scope, forcePush) {
     if (forcePush === void 0) { forcePush = false; }
     return __awaiter(void 0, void 0, void 0, function () {

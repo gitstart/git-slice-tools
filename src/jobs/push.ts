@@ -4,7 +4,8 @@ import {
     cleanAndDeleteLocalBranch,
     copyFiles,
     createCommitAndPushCurrentChanges,
-    deleteSliceIgnoresFilesDirs,
+    deleteGitSliceIgnoreFiles,
+    getGitSliceIgoreConfig,
     logExtendLastLine,
     logWriteLine,
     pullRemoteBranchIntoCurrentBranch,
@@ -61,8 +62,13 @@ export const push = async (
     }
 
     await pullRemoteBranchIntoCurrentBranch('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)
-    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.sliceRepo.dir, 'Slice')
     await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)
+
+    const upstreamGitSliceIgnore = getGitSliceIgoreConfig(actionInputs.upstreamRepo.dir)
+    // We will never push changes of `.gitsliceignore`, this file belongs to upstream only;
+    const resolvedGitSliceIgnoreFiles = [...upstreamGitSliceIgnore, ...actionInputs.sliceIgnores, '.gitsliceignore']
+
+    await deleteGitSliceIgnoreFiles(resolvedGitSliceIgnoreFiles, actionInputs.sliceRepo.dir, 'Slice')
 
     let upstreamBranchExists = false
 

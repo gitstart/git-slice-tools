@@ -35,12 +35,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.push = void 0;
 var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg, forcePush) { return __awaiter(void 0, void 0, void 0, function () {
-    var upstreamBranch, logs, lastGitSlicePullLog, currentSyncUpstreamCommitId, error_1, upstreamBranchExists, error_2, diffFiles_1, diffFiles;
+    var upstreamBranch, logs, lastGitSlicePullLog, currentSyncUpstreamCommitId, error_1, upstreamGitSliceIgnore, resolvedGitSliceIgnoreFiles, upstreamBranchExists, error_2, diffFiles_1, diffFiles;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -87,10 +96,12 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
             case 7: return [4 /*yield*/, (0, common_1.pullRemoteBranchIntoCurrentBranch)('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)];
             case 8:
                 _a.sent();
-                return [4 /*yield*/, (0, common_1.deleteSliceIgnoresFilesDirs)(actionInputs.sliceIgnores, actionInputs.sliceRepo.dir, 'Slice')];
+                return [4 /*yield*/, (0, common_1.cleanAndDeleteLocalBranch)(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)];
             case 9:
                 _a.sent();
-                return [4 /*yield*/, (0, common_1.cleanAndDeleteLocalBranch)(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)];
+                upstreamGitSliceIgnore = (0, common_1.getGitSliceIgoreConfig)(actionInputs.upstreamRepo.dir);
+                resolvedGitSliceIgnoreFiles = __spreadArray(__spreadArray(__spreadArray([], upstreamGitSliceIgnore, true), actionInputs.sliceIgnores, true), ['.gitsliceignore'], false);
+                return [4 /*yield*/, (0, common_1.deleteGitSliceIgnoreFiles)(resolvedGitSliceIgnoreFiles, actionInputs.sliceRepo.dir, 'Slice')];
             case 10:
                 _a.sent();
                 upstreamBranchExists = false;

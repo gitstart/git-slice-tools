@@ -1,6 +1,5 @@
 import { compareSync, DifferenceState, Reason } from 'dir-compare'
 import fs from 'fs-extra'
-import { Glob } from 'glob'
 import path from 'path'
 import { CleanOptions, GitError, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
@@ -10,6 +9,7 @@ import { logExtendLastLine, logWriteLine } from './logger'
 
 export * from './constants'
 export * from './gitInit'
+export * from './ignore'
 export * from './logger'
 
 export const isErrorLike = (value: unknown): value is ErrorLike =>
@@ -58,40 +58,6 @@ export const pullRemoteBranchIntoCurrentBranch = async (
         terminal('Failed!\n')
 
         throw error
-    }
-}
-
-export const deleteSliceIgnoresFilesDirs = async (
-    sliceIgnores: string[],
-    rootDir: string,
-    scope: LogScope
-): Promise<void> => {
-    for (let i = 0; i < sliceIgnores.length; i++) {
-        const pattern = sliceIgnores[i]
-
-        logWriteLine(scope, `Getting ingoring files/directores with pattern '${pattern}'...`)
-
-        const mg = new Glob(pattern, {
-            cwd: rootDir,
-            sync: true,
-        })
-
-        logExtendLastLine(`Found ${mg.found.length} files/directories!`)
-
-        if (mg.found.length === 0) {
-            continue
-        }
-
-        for (let j = 0; j < mg.found.length; j++) {
-            const pathMatch = mg.found[j]
-            const resolvedPath = path.join(rootDir, pathMatch)
-
-            logWriteLine(scope, `Deleting: ${pathMatch}...`)
-
-            fs.rmSync(resolvedPath, { force: true, recursive: true })
-
-            logExtendLastLine('Done!')
-        }
     }
 }
 

@@ -1,12 +1,13 @@
 import { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import {
+    checkoutAndPullLastVersion,
     copyFiles,
     createCommitAndPushCurrentChanges,
-    deleteSliceIgnoresFilesDirs,
-    logWriteLine,
+    deleteGitSliceIgnoreFiles,
+    getGitSliceIgoreConfig,
     logExtendLastLine,
-    checkoutAndPullLastVersion,
+    logWriteLine,
 } from '../common'
 import { ActionInputs } from '../types'
 
@@ -37,7 +38,10 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
 
     await checkoutAndPullLastVersion(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch)
 
-    await deleteSliceIgnoresFilesDirs(actionInputs.sliceIgnores, actionInputs.upstreamRepo.dir, 'Upstream')
+    const upstreamGitSliceIgnore = getGitSliceIgoreConfig(actionInputs.upstreamRepo.dir)
+    const resolvedGitSliceIgnoreFiles = [...upstreamGitSliceIgnore, ...actionInputs.sliceIgnores]
+
+    await deleteGitSliceIgnoreFiles(resolvedGitSliceIgnoreFiles, actionInputs.upstreamRepo.dir, 'Upstream')
 
     const diffFiles = await copyFiles(
         sliceGit,

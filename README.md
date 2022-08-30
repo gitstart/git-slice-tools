@@ -260,6 +260,26 @@ These are features you can trigger with using workflow dispatch in actions page,
 | `pull-a-branch` | this job will pull a branch from upstream repo into slice repo. If you set `Raise a PR to merge the pulled upstream branch into this branch` field, it will create a PR to merge it into a slice branch but you still need to review and merge the PR manually |
 | `pull-an-issue` | this job will pull an issue from upstream repo into a new slice repo issue, if you set `Slice issue number to update` it will update the current one instead of creating a new one                                                                             |
 
+## Ignore files in `pull` and `push` jobs
+
+Env `GIT_SLICE_SLICE_IGNORES` is used for ignoring files in `pull` and `push` jobs, this configuration is defined in slice repo.
+
+To allow upstream repos control this, `git-slice-tools` supports to load glob patterns from `.gitsliceignore` file from upstream repo from version 1.2.0.
+
+Please note that `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
+
+Example:
+
+```
+# .gitsliceignore
+third-party-licenses
+
+ui
+
+# We still need this file
+!ui/**/.gitignore
+```
+
 ## Projects are using `git-slice-tools` instead of `git-slice` from engine team
 
 These are list of projects which are using `git-slice-tools` instead of `git-slice` from engine
