@@ -227,6 +227,23 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           ACTOR: ${{ github.actor }}
 
+  oss-pr-merged-by-client:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/pr-merged'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.0
+      - name: git-slice-tools open-source merge-pr
+        run: git-slice-tools open-source merge-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}
+
   oss-pr-close:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/pr-closed'
