@@ -11,6 +11,10 @@ on:
     types:
       - created
 
+  pull_request:
+    types:
+      - labeled
+
 env:
   GIT_SLICE_UPSTREAM_REPO_DIR: ./upstream-repo
   GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: develop
