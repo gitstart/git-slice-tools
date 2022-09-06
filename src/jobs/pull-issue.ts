@@ -1,21 +1,15 @@
 import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
-import { terminal } from 'terminal-kit'
-import { logExtendLastLine, logWriteLine } from '../common'
+import { logger } from '../common'
 import { ActionInputs, LogScope } from '../types'
 
 export const pullIssue = async (
     actionInputs: ActionInputs,
     fromIssueNumber: number,
-    toIssueNumber: number
+    toIssueNumber: number,
+    actor?: string
 ): Promise<void> => {
-    terminal('-'.repeat(30) + '\n')
-    terminal(
-        `Performing pull-issue job with ${JSON.stringify({
-            fromIssueNumber,
-            toIssueNumber,
-        })}...\n`
-    )
+    logger.logInputs('pull-issue', { fromIssueNumber, toIssueNumber })
 
     const { sliceRepo, upstreamRepo } = actionInputs
     const upstreamLogScope: LogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream'
@@ -34,7 +28,7 @@ export const pullIssue = async (
         throw new Error(`Unsuported codehost '${upstreamGitUrlObject.source}'`)
     }
 
-    logWriteLine(upstreamLogScope, `Getting issue...`)
+    logger.logWriteLine(upstreamLogScope, `Getting issue...`)
 
     const { data: upstreamIssue } = await upstreamOctokit.rest.issues.get({
         owner: upstreamGitUrlObject.owner,
@@ -42,34 +36,37 @@ export const pullIssue = async (
         issue_number: fromIssueNumber,
     })
 
-    logExtendLastLine(`Done!`)
+    logger.logExtendLastLine(`Done!`)
 
     const { title, body, html_url } = upstreamIssue
+    const pulledIssueBody = `<!-- @${
+        actor || actionInputs.sliceRepo.username
+    } -->\nPulled from ${html_url} by git-slice-tools:\n${body}`
 
     if (toIssueNumber > 0) {
-        logWriteLine('Slice', `Updating issue #${toIssueNumber}...`)
+        logger.logWriteLine('Slice', `Updating issue #${toIssueNumber}...`)
 
         await sliceOctokit.rest.issues.update({
             owner: sliceGitUrlObject.owner,
             repo: sliceGitUrlObject.name,
             issue_number: toIssueNumber,
             title,
-            body: `Issue is synched from ${html_url} by git-slice-tools:\n${body}`,
+            body: pulledIssueBody,
         })
 
-        logExtendLastLine(`Done!`)
+        logger.logExtendLastLine(`Done!`)
 
         return
     }
 
-    logWriteLine('Slice', `Creating new issue...`)
+    logger.logWriteLine('Slice', `Creating new issue...`)
 
     const { data: sliceIssue } = await sliceOctokit.rest.issues.create({
         owner: sliceGitUrlObject.owner,
         repo: sliceGitUrlObject.name,
         title,
-        body: `Issue is synched from ${html_url} by git-slice-tools:\n${body}`,
+        body: pulledIssueBody,
     })
 
-    logExtendLastLine(`Done! -> ${sliceIssue.html_url}`)
+    logger.logExtendLastLine(`Done! -> ${sliceIssue.html_url}`)
 }

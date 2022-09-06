@@ -42,7 +42,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.pullReview = void 0;
 var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { return __awaiter(void 0, void 0, void 0, function () {
     var sliceRepo, upstreamRepo, isOpenSourceFlow, openSourceUrl, upstreamGitUrlObject, sliceGitUrlObject, openSourceGitUrlObject, upstreamOctokit, sliceOctokit, prReivewLinkRegResult, targetPrNumber, targetPrReviewNumber, targetGitUrlOwner, targetGitUrlRepo, targetLogScope, upstreamReview, targetReviewComments, detailedPullReviewComments, _i, targetReviewComments_1, comment, targetReviewComment, path, body, user, sliceReview;
@@ -50,8 +49,7 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
     return __generator(this, function (_j) {
         switch (_j.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)("Performing pull-review job with " + JSON.stringify({ slicePrNumber: slicePrNumber, upstreamPrReviewLink: upstreamPrReviewLink }) + "...\n");
+                common_1.logger.logInputs('pull-review', { slicePrNumber: slicePrNumber, upstreamPrReviewLink: upstreamPrReviewLink });
                 sliceRepo = actionInputs.sliceRepo, upstreamRepo = actionInputs.upstreamRepo, isOpenSourceFlow = actionInputs.isOpenSourceFlow, openSourceUrl = actionInputs.openSourceUrl;
                 upstreamGitUrlObject = (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
                 sliceGitUrlObject = (0, git_url_parse_1.default)(sliceRepo.gitHttpUri);
@@ -79,7 +77,7 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                     targetGitUrlRepo = openSourceGitUrlObject.name;
                     targetLogScope = 'OpenSource';
                 }
-                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review...");
+                common_1.logger.logWriteLine(targetLogScope, "Getting PR review...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.getReview({
                         owner: targetGitUrlOwner,
                         repo: targetGitUrlRepo,
@@ -88,8 +86,8 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                     })];
             case 1:
                 upstreamReview = (_j.sent()).data;
-                (0, common_1.logExtendLastLine)("Done!");
-                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review comments...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine(targetLogScope, "Getting PR review comments...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.listCommentsForReview({
                         owner: targetGitUrlOwner,
                         repo: targetGitUrlRepo,
@@ -101,8 +99,8 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                     })];
             case 2:
                 targetReviewComments = (_j.sent()).data;
-                (0, common_1.logExtendLastLine)("Done!");
-                (0, common_1.logWriteLine)(targetLogScope, "Getting PR review comments details...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine(targetLogScope, "Getting PR review comments details...");
                 detailedPullReviewComments = [];
                 _i = 0, targetReviewComments_1 = targetReviewComments;
                 _j.label = 3;
@@ -137,8 +135,8 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                 _i++;
                 return [3 /*break*/, 3];
             case 7:
-                (0, common_1.logExtendLastLine)("Done!");
-                (0, common_1.logWriteLine)('Slice', "Creating PR review...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine('Slice', "Creating PR review...");
                 return [4 /*yield*/, sliceOctokit.rest.pulls.createReview({
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
@@ -149,7 +147,7 @@ var pullReview = function (actionInputs, slicePrNumber, upstreamPrReviewLink) { 
                     })];
             case 8:
                 sliceReview = (_j.sent()).data;
-                (0, common_1.logExtendLastLine)("Done! -> " + sliceReview.html_url);
+                common_1.logger.logExtendLastLine("Done! -> " + sliceReview.html_url);
                 return [2 /*return*/];
         }
     });

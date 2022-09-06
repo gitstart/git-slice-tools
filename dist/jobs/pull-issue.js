@@ -42,18 +42,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.pullIssue = void 0;
 var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
-var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceRepo, upstreamRepo, upstreamLogScope, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamIssue, title, body, html_url, sliceIssue;
+var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) { return __awaiter(void 0, void 0, void 0, function () {
+    var sliceRepo, upstreamRepo, upstreamLogScope, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamIssue, title, body, html_url, pulledIssueBody, sliceIssue;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)("Performing pull-issue job with " + JSON.stringify({
-                    fromIssueNumber: fromIssueNumber,
-                    toIssueNumber: toIssueNumber,
-                }) + "...\n");
+                common_1.logger.logInputs('pull-issue', { fromIssueNumber: fromIssueNumber, toIssueNumber: toIssueNumber });
                 sliceRepo = actionInputs.sliceRepo, upstreamRepo = actionInputs.upstreamRepo;
                 upstreamLogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream';
                 upstreamGitUrlObject = actionInputs.isOpenSourceFlow
@@ -69,7 +64,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return
                 if (upstreamGitUrlObject.source !== 'github.com') {
                     throw new Error("Unsuported codehost '" + upstreamGitUrlObject.source + "'");
                 }
-                (0, common_1.logWriteLine)(upstreamLogScope, "Getting issue...");
+                common_1.logger.logWriteLine(upstreamLogScope, "Getting issue...");
                 return [4 /*yield*/, upstreamOctokit.rest.issues.get({
                         owner: upstreamGitUrlObject.owner,
                         repo: upstreamGitUrlObject.name,
@@ -77,32 +72,33 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber) { return
                     })];
             case 1:
                 upstreamIssue = (_a.sent()).data;
-                (0, common_1.logExtendLastLine)("Done!");
+                common_1.logger.logExtendLastLine("Done!");
                 title = upstreamIssue.title, body = upstreamIssue.body, html_url = upstreamIssue.html_url;
+                pulledIssueBody = "<!-- @" + (actor || actionInputs.sliceRepo.username) + " -->\nPulled from " + html_url + " by git-slice-tools:\n" + body;
                 if (!(toIssueNumber > 0)) return [3 /*break*/, 3];
-                (0, common_1.logWriteLine)('Slice', "Updating issue #" + toIssueNumber + "...");
+                common_1.logger.logWriteLine('Slice', "Updating issue #" + toIssueNumber + "...");
                 return [4 /*yield*/, sliceOctokit.rest.issues.update({
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
                         issue_number: toIssueNumber,
                         title: title,
-                        body: "Issue is synched from " + html_url + " by git-slice-tools:\n" + body,
+                        body: pulledIssueBody,
                     })];
             case 2:
                 _a.sent();
-                (0, common_1.logExtendLastLine)("Done!");
+                common_1.logger.logExtendLastLine("Done!");
                 return [2 /*return*/];
             case 3:
-                (0, common_1.logWriteLine)('Slice', "Creating new issue...");
+                common_1.logger.logWriteLine('Slice', "Creating new issue...");
                 return [4 /*yield*/, sliceOctokit.rest.issues.create({
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
                         title: title,
-                        body: "Issue is synched from " + html_url + " by git-slice-tools:\n" + body,
+                        body: pulledIssueBody,
                     })];
             case 4:
                 sliceIssue = (_a.sent()).data;
-                (0, common_1.logExtendLastLine)("Done! -> " + sliceIssue.html_url);
+                common_1.logger.logExtendLastLine("Done! -> " + sliceIssue.html_url);
                 return [2 /*return*/];
         }
     });

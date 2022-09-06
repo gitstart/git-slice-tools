@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logExtendLastLine = exports.logWriteLine = void 0;
+exports.logInputs = exports.logExtendLastLine = exports.logWriteLine = void 0;
 var terminal_kit_1 = require("terminal-kit");
 var lastLogLine = '';
 var lastLogTime = new Date();
@@ -15,4 +15,10 @@ var logExtendLastLine = function (content) {
     terminal_kit_1.terminal.up(1)("" + lastLogLine + content.trim() + " (" + duration.toFixed(3) + "s)\n");
 };
 exports.logExtendLastLine = logExtendLastLine;
+var logInputs = function (jobName, ipnuts) {
+    if (ipnuts === void 0) { ipnuts = {}; }
+    (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
+    (0, terminal_kit_1.terminal)("Performing '" + jobName + "' job with " + JSON.stringify(ipnuts) + "...\n");
+};
+exports.logInputs = logInputs;
 //# sourceMappingURL=logger.js.map

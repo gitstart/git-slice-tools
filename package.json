@@ -30,6 +30,7 @@
     "pull-review": "ts-node src/index.ts pull-review",
     "pull-issue": "ts-node src/index.ts pull-issue",
     "config": "ts-node src/index.ts config",
+    "open-source": "ts-node src/index.ts open-source",
     "dev": "nodemon",
     "lint": "eslint . --ext .ts",
     "lint:fix": "yarn lint --fix",

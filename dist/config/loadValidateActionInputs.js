@@ -7,18 +7,21 @@ exports.loadValidateActionInputs = void 0;
 var dotenv_1 = __importDefault(require("dotenv"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var loadValidateActionInputs = function (envFilePath) {
+var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
+    if (ignoreCheckDirs === void 0) { ignoreCheckDirs = false; }
     if (envFilePath && !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), envFilePath))) {
         throw new Error(envFilePath + " doesn't exist");
     }
     dotenv_1.default.config(envFilePath ? { path: envFilePath } : undefined);
     var forceInit = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false';
-    if (!process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
-        !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR))) {
+    if (!ignoreCheckDirs &&
+        (!process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
+            !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR)))) {
         throw new Error("Missing 'UPSTREAM_REPO_DIR' or 'UPSTREAM_REPO_DIR' doesn't exist ");
     }
-    if (!process.env.GIT_SLICE_SLICE_REPO_DIR ||
-        !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR))) {
+    if (!ignoreCheckDirs &&
+        (!process.env.GIT_SLICE_SLICE_REPO_DIR ||
+            !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR)))) {
         throw new Error("Missing 'SLICE_REPO_DIR' or 'SLICE_REPO_DIR' doesn't exist ");
     }
     if (!process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH) {
@@ -94,6 +97,9 @@ var loadValidateActionInputs = function (envFilePath) {
         prDraft: prDraft,
         isOpenSourceFlow: isOpenSourceFlow,
         openSourceUrl: openSourceUrl,
+        openSourceInstanceName: process.env.GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME,
+        openSourceManagerProjectView: process.env.GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW,
+        openSourceTeamReviewingCommittee: process.env.GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE,
         sliceRepo: {
             name: 'Slice',
             dir: path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

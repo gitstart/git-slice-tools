@@ -46,15 +46,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.push = void 0;
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg, forcePush) { return __awaiter(void 0, void 0, void 0, function () {
     var upstreamBranch, logs, lastGitSlicePullLog, currentSyncUpstreamCommitId, error_1, upstreamGitSliceIgnore, resolvedGitSliceIgnoreFiles, upstreamBranchExists, error_2, diffFiles_1, diffFiles;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)("Performing push job with " + JSON.stringify({ sliceBranch: sliceBranch, commitMsg: commitMsg, forcePush: forcePush }) + "...\n");
+                common_1.logger.logInputs('push', { sliceBranch: sliceBranch, commitMsg: commitMsg, forcePush: forcePush });
                 if (!actionInputs.pushCommitMsgRegex.test(commitMsg)) {
                     throw new Error('Commit message failed PUSH_COMMIT_MSG_REGEX');
                 }
@@ -65,18 +63,18 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
             case 1:
                 _a.sent();
                 // Find the oid from last gitslice:*** commit
-                (0, common_1.logWriteLine)('Slice', "Finding the last git-slice:*** commit...");
+                common_1.logger.logWriteLine('Slice', "Finding the last git-slice:*** commit...");
                 return [4 /*yield*/, sliceGit.log({ maxCount: 20 })];
             case 2:
                 logs = _a.sent();
                 lastGitSlicePullLog = logs.all.find(function (x) { return /^git-slice:.*$/.test(x.message.trim()); });
                 if (!lastGitSlicePullLog) {
-                    (0, common_1.logExtendLastLine)('Not found!');
+                    common_1.logger.logExtendLastLine('Not found!');
                     throw new Error('Not found git-slice:*** commit in last 20 commits');
                 }
                 currentSyncUpstreamCommitId = lastGitSlicePullLog.message.trim().split(':')[1];
-                (0, common_1.logExtendLastLine)(currentSyncUpstreamCommitId + "\n");
-                (0, common_1.logWriteLine)('Slice', "Checkout branch '" + sliceBranch + "'...");
+                common_1.logger.logExtendLastLine(currentSyncUpstreamCommitId + "\n");
+                common_1.logger.logWriteLine('Slice', "Checkout branch '" + sliceBranch + "'...");
                 _a.label = 3;
             case 3:
                 _a.trys.push([3, 6, , 7]);
@@ -86,12 +84,12 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                 return [4 /*yield*/, sliceGit.pull('origin', sliceBranch)];
             case 5:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
+                common_1.logger.logExtendLastLine('Done!');
                 return [3 /*break*/, 7];
             case 6:
                 error_1 = _a.sent();
                 // noop
-                (0, common_1.logExtendLastLine)('Not found!');
+                common_1.logger.logExtendLastLine('Not found!');
                 throw error_1;
             case 7: return [4 /*yield*/, (0, common_1.pullRemoteBranchIntoCurrentBranch)('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)];
             case 8:
@@ -108,24 +106,24 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                 _a.label = 11;
             case 11:
                 _a.trys.push([11, 13, , 14]);
-                (0, common_1.logWriteLine)('Upstream', "Check remote branch '" + upstreamBranch + "'...");
+                common_1.logger.logWriteLine('Upstream', "Check remote branch '" + upstreamBranch + "'...");
                 return [4 /*yield*/, upstreamGit.show("remotes/origin/" + upstreamBranch)];
             case 12:
                 _a.sent();
                 upstreamBranchExists = true;
-                (0, common_1.logExtendLastLine)('Existed!\n');
+                common_1.logger.logExtendLastLine('Existed!\n');
                 return [3 /*break*/, 14];
             case 13:
                 error_2 = _a.sent();
-                (0, common_1.logExtendLastLine)('Not found!\n');
+                common_1.logger.logExtendLastLine('Not found!\n');
                 return [3 /*break*/, 14];
             case 14:
                 if (!(!upstreamBranchExists || forcePush)) return [3 /*break*/, 18];
-                (0, common_1.logWriteLine)('Upstream', "Checkout new branch '" + upstreamBranch + "'...");
+                common_1.logger.logWriteLine('Upstream', "Checkout new branch '" + upstreamBranch + "'...");
                 return [4 /*yield*/, upstreamGit.checkoutLocalBranch(upstreamBranch)];
             case 15:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!\n');
+                common_1.logger.logExtendLastLine('Done!\n');
                 return [4 /*yield*/, (0, common_1.copyFiles)(upstreamGit, actionInputs.sliceRepo.dir, actionInputs.upstreamRepo.dir, actionInputs.sliceIgnores, 'Upstream')];
             case 16:
                 diffFiles_1 = _a.sent();
@@ -137,7 +135,7 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                 _a.sent();
                 return [2 /*return*/];
             case 18:
-                (0, common_1.logWriteLine)('Upstream', "Upstream: Checkout branch '" + upstreamBranch + "'...");
+                common_1.logger.logWriteLine('Upstream', "Upstream: Checkout branch '" + upstreamBranch + "'...");
                 return [4 /*yield*/, upstreamGit.checkout(upstreamBranch)];
             case 19:
                 _a.sent();
@@ -153,7 +151,7 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                     true)];
             case 21:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!\n');
+                common_1.logger.logExtendLastLine('Done!\n');
                 return [4 /*yield*/, (0, common_1.copyFiles)(upstreamGit, actionInputs.sliceRepo.dir, actionInputs.upstreamRepo.dir, actionInputs.sliceIgnores, 'Upstream')];
             case 22:
                 diffFiles = _a.sent();

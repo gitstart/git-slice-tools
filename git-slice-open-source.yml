@@ -1,0 +1,241 @@
+name: git-slice-open-source
+
+on:
+  issues:
+    types:
+      - labeled
+      - opened
+      - assigned
+
+  issue_comment:
+    types:
+      - created
+
+env:
+  GIT_SLICE_UPSTREAM_REPO_DIR: ./upstream-repo
+  GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: develop
+  GIT_SLICE_UPSTREAM_REPO_USERNAME: gitstart
+  GIT_SLICE_UPSTREAM_REPO_EMAIL: bot@gitstart.com
+  GIT_SLICE_UPSTREAM_REPO_PASSWORD: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_PASSWORD }}
+  GIT_SLICE_UPSTREAM_REPO_URL: https://github.com/gitstart/cypress.git
+  GIT_SLICE_SLICE_REPO_DIR: ./slice-repo
+  GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH: main
+  GIT_SLICE_SLICE_REPO_USERNAME: gitstart
+  GIT_SLICE_SLICE_REPO_EMAIL: bot@gitstart.com
+  GIT_SLICE_SLICE_REPO_PASSWORD: ${{ secrets.GIT_SLICE_SLICE_REPO_PASSWORD }}
+  GIT_SLICE_SLICE_REPO_URL: https://github.com/GitStartHQ/client-cypress.git
+  GIT_SLICE_SLICE_IGNORES: '[]'
+  GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE: '<branch_name>'
+  GIT_SLICE_PUSH_COMMIT_MSG_REGEX: '.*'
+  GIT_SLICE_CHECKOUT_CACHED_KEY: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_CACHE_KEY }}
+  GIT_SLICE_PR_LABELS: '["gitstart"]'
+  GIT_SLICE_PR_DRAFT: true
+
+  GIT_SLICE_OPEN_SOURCE_FLOW: true
+  GIT_SLICE_OPEN_SOURCE_URL: https://github.com/cypress-io/cypress.git
+  GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME: Cypress
+
+  GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW: https://github.com/orgs/GitStartHQ/projects/5/views/1
+  GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE: test-team-reviewing-committee
+
+# Sample step to debug current context
+# - name: Show GitHub context
+#   env:
+#     GITHUB_CONTEXT: ${{ toJson(github) }}
+#   run: echo "$GITHUB_CONTEXT"
+
+jobs:
+  oss-issue-created:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source add-issue
+        run: git-slice-tools open-source add-issue "$REPO_NAME" "$ISSUE_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+
+  oss-issue-reviewer-approved:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'oss/issue/reviewer-approved'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source reviewer-approve-issue
+        run: git-slice-tools open-source reviewer-approve-issue "$ACTOR" "$REPO_NAME" "$ISSUE_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-issue-reviewer-rejected:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'oss/issue/reviewer-rejected'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source reviewer-reject-issue
+        run: git-slice-tools open-source reviewer-reject-issue "$ACTOR" "$REPO_NAME" "$ISSUE_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-issue-update-estimate:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.action == 'created' && !github.event.issue.pull_request && startsWith(github.event.comment.body, '/open-source estimate ')
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Read comment command
+        uses: actions/github-script@v4
+        id: read-comment-command
+        with:
+          result-encoding: string
+          script: |
+            try {
+              await github.reactions.createForIssueComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: context.payload.comment.id,
+                content: 'rocket'
+              });
+
+              const body = context.payload.comment.body.trim()
+              const regex = /\/open-source\s+estimate\s+(\d+)/gi
+              const regexResult = regex.exec(body)
+
+              if (!regexResult) {
+                throw new Error('Invalid command');
+              }
+
+              return JSON.stringify({ credits: Number(regexResult[1]) });
+            } catch (err) {
+              core.setFailed(`Request failed with error ${err}`);
+            }
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source update-estimate
+        run: git-slice-tools open-source update-estimate "$REPO_NAME" "$ISSUE_NUMBER" "$CREDITS"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          CREDITS: ${{ fromJSON(steps.read-comment-command.outputs.result).credits }}
+
+  oss-issue-assigned:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'assigned'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source assign-dev
+        run: git-slice-tools open-source assign-dev "$ASSIGNEE" "$REPO_NAME" "$ISSUE_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ASSIGNEE: ${{ github.event.assignee.login }}
+
+  oss-pr-ready-for-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/ready-for-review'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source request-review-pr
+        run: git-slice-tools open-source request-review-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-pr-reviewer-approved:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/ready-to-push-upstream'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source reviewer-approve-pr
+        run: git-slice-tools open-source reviewer-approve-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-pr-reviewer-requeted-changes:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/changes-requested'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source reviewer-request-changes-pr
+        run: git-slice-tools open-source reviewer-request-changes-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-pr-pushed-to-client:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/pushed-to-client'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source push-pr
+        run: git-slice-tools open-source push-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}
+
+  oss-pr-close:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.event.label.name == 'oss/pr/pr-closed'
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install git-slice-tools
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
+      - name: git-slice-tools open-source close-pr
+        run: git-slice-tools open-source close-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
+        env:
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          ACTOR: ${{ github.actor }}

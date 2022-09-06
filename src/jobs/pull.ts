@@ -1,40 +1,37 @@
 import { SimpleGit } from 'simple-git'
-import { terminal } from 'terminal-kit'
 import {
     checkoutAndPullLastVersion,
     copyFiles,
     createCommitAndPushCurrentChanges,
     deleteGitSliceIgnoreFiles,
     getGitSliceIgoreConfig,
-    logExtendLastLine,
-    logWriteLine,
+    logger,
 } from '../common'
 import { ActionInputs } from '../types'
 
 export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionInputs: ActionInputs): Promise<void> => {
-    terminal('-'.repeat(30) + '\n')
-    terminal('Performing pull job...\n')
+    logger.logInputs('pull')
 
     await checkoutAndPullLastVersion(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch)
 
     if (actionInputs.isOpenSourceFlow) {
         await checkoutAndPullLastVersion(upstreamGit, 'OpenSource', actionInputs.upstreamRepo.defaultBranch, true)
 
-        logWriteLine(
+        logger.logWriteLine(
             'Upstream',
             `Push '${actionInputs.upstreamRepo.defaultBranch}' branch to make sure it up-to-date open-source repo ...`
         )
 
         await upstreamGit.push('origin', actionInputs.upstreamRepo.defaultBranch)
 
-        logExtendLastLine('Done!')
+        logger.logExtendLastLine('Done!')
     }
 
-    logWriteLine('Upstream', `Get last commit oid...`)
+    logger.logWriteLine('Upstream', `Get last commit oid...`)
 
     const upstreamLastCommitId = await upstreamGit.revparse('HEAD')
 
-    logExtendLastLine(`Done! -> ${upstreamLastCommitId}`)
+    logger.logExtendLastLine(`Done! -> ${upstreamLastCommitId}`)
 
     await checkoutAndPullLastVersion(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch)
 
@@ -62,5 +59,5 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
         )
     }
 
-    logWriteLine('Slice', `Up to date`)
+    logger.logWriteLine('Slice', `Up to date`)
 }

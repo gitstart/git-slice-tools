@@ -49,8 +49,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)("Performing raise-pr job with " + JSON.stringify({ sliceBranch: sliceBranch }) + "...\n");
+                common_1.logger.logInputs('raise-pr', { sliceBranch: sliceBranch });
                 upstreamRepo = actionInputs.upstreamRepo, sliceRepo = actionInputs.sliceRepo, isOpenSourceFlow = actionInputs.isOpenSourceFlow, openSourceUrl = actionInputs.openSourceUrl;
                 upstreamGitUrlObject = (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
                 openSourceGitUrlObject = isOpenSourceFlow ? (0, git_url_parse_1.default)(openSourceUrl) : null;
@@ -58,7 +57,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                 if (upstreamGitUrlObject.source !== 'github.com') {
                     throw new Error("Unsuported codehost '" + upstreamGitUrlObject.source + "'");
                 }
-                (0, common_1.logWriteLine)('Slice', "Finding PR (" + sliceRepo.defaultBranch + " <- " + sliceBranch + ") ...");
+                common_1.logger.logWriteLine('Slice', "Finding PR (" + sliceRepo.defaultBranch + " <- " + sliceBranch + ") ...");
                 sliceOctokit = new octokit_1.Octokit({
                     auth: sliceRepo.userToken,
                 });
@@ -72,12 +71,12 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
             case 1:
                 listResponse = _b.sent();
                 if (listResponse.data.length === 0) {
-                    (0, common_1.logExtendLastLine)("Not found!");
+                    common_1.logger.logExtendLastLine("Not found!");
                     throw new Error("Couldn't find PR (" + sliceRepo.defaultBranch + " <- " + sliceBranch + ") for getting title/description");
                     return [2 /*return*/];
                 }
                 _a = listResponse.data[0], title = _a.title, body = _a.body, slicePrNumber = _a.number;
-                (0, common_1.logExtendLastLine)("PR #" + slicePrNumber);
+                common_1.logger.logExtendLastLine("PR #" + slicePrNumber);
                 if (!body) {
                     throw new Error('PR #${slicePrNumber} has an empty description');
                 }
@@ -93,7 +92,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                     targetGitUrlRepo = openSourceGitUrlObject.name;
                     targetLogScope = 'OpenSource';
                 }
-                (0, common_1.logWriteLine)(targetLogScope, "Checking existing PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
+                common_1.logger.logWriteLine(targetLogScope, "Checking existing PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.list({
                         owner: targetGitUrlOwner,
                         repo: targetGitUrlRepo,
@@ -104,12 +103,12 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
             case 2:
                 listResponse = _b.sent();
                 if (listResponse.data.length !== 0) {
-                    (0, common_1.logExtendLastLine)("Found PR #" + listResponse.data[0].number + " (" + listResponse.data[0].html_url + ")");
-                    (0, common_1.logWriteLine)(targetLogScope, "Done!");
+                    common_1.logger.logExtendLastLine("Found PR #" + listResponse.data[0].number + " (" + listResponse.data[0].html_url + ")");
+                    common_1.logger.logWriteLine(targetLogScope, "Done!");
                     return [2 /*return*/];
                 }
-                (0, common_1.logExtendLastLine)("Not found!");
-                (0, common_1.logWriteLine)(targetLogScope, "Raising new PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
+                common_1.logger.logExtendLastLine("Not found!");
+                common_1.logger.logWriteLine(targetLogScope, "Raising new PR (" + upstreamRepo.defaultBranch + " <- " + upstreamBranch + ")...");
                 return [4 /*yield*/, upstreamOctokit.rest.pulls.create({
                         owner: targetGitUrlOwner,
                         repo: targetGitUrlRepo,
@@ -123,8 +122,8 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
             case 3:
                 createResponse = _b.sent();
                 prNumber = createResponse.data.number;
-                (0, common_1.logExtendLastLine)("Done PR #" + prNumber);
-                (0, common_1.logWriteLine)(targetLogScope, "Adding assignees into PR #" + prNumber + "...");
+                common_1.logger.logExtendLastLine("Done PR #" + prNumber);
+                common_1.logger.logWriteLine(targetLogScope, "Adding assignees into PR #" + prNumber + "...");
                 _b.label = 4;
             case 4:
                 _b.trys.push([4, 6, , 7]);
@@ -136,7 +135,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                     })];
             case 5:
                 _b.sent();
-                (0, common_1.logExtendLastLine)("Done!");
+                common_1.logger.logExtendLastLine("Done!");
                 return [3 /*break*/, 7];
             case 6:
                 error_1 = _b.sent();
@@ -147,7 +146,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                 return [3 /*break*/, 7];
             case 7:
                 if (!actionInputs.prLabels.length) return [3 /*break*/, 11];
-                (0, common_1.logWriteLine)(targetLogScope, "Adding labels into PR #" + prNumber + "...");
+                common_1.logger.logWriteLine(targetLogScope, "Adding labels into PR #" + prNumber + "...");
                 _b.label = 8;
             case 8:
                 _b.trys.push([8, 10, , 11]);
@@ -159,7 +158,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                     })];
             case 9:
                 _b.sent();
-                (0, common_1.logExtendLastLine)("Done!");
+                common_1.logger.logExtendLastLine("Done!");
                 return [3 /*break*/, 11];
             case 10:
                 error_2 = _b.sent();
@@ -169,7 +168,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
                 }
                 return [3 /*break*/, 11];
             case 11:
-                (0, common_1.logWriteLine)(targetLogScope, "Created PR #" + prNumber + " (" + createResponse.data.html_url + ") successfully");
+                common_1.logger.logWriteLine(targetLogScope, "Created PR #" + prNumber + " (" + createResponse.data.html_url + ") successfully");
                 return [2 /*return*/];
         }
     });

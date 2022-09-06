@@ -46,15 +46,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pull = void 0;
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(void 0, void 0, void 0, function () {
     var upstreamLastCommitId, upstreamGitSliceIgnore, resolvedGitSliceIgnoreFiles, diffFiles;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)('Performing pull job...\n');
+                common_1.logger.logInputs('pull');
                 return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch)];
             case 1:
                 _a.sent();
@@ -62,18 +60,18 @@ var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(voi
                 return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(upstreamGit, 'OpenSource', actionInputs.upstreamRepo.defaultBranch, true)];
             case 2:
                 _a.sent();
-                (0, common_1.logWriteLine)('Upstream', "Push '" + actionInputs.upstreamRepo.defaultBranch + "' branch to make sure it up-to-date open-source repo ...");
+                common_1.logger.logWriteLine('Upstream', "Push '" + actionInputs.upstreamRepo.defaultBranch + "' branch to make sure it up-to-date open-source repo ...");
                 return [4 /*yield*/, upstreamGit.push('origin', actionInputs.upstreamRepo.defaultBranch)];
             case 3:
                 _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
+                common_1.logger.logExtendLastLine('Done!');
                 _a.label = 4;
             case 4:
-                (0, common_1.logWriteLine)('Upstream', "Get last commit oid...");
+                common_1.logger.logWriteLine('Upstream', "Get last commit oid...");
                 return [4 /*yield*/, upstreamGit.revparse('HEAD')];
             case 5:
                 upstreamLastCommitId = _a.sent();
-                (0, common_1.logExtendLastLine)("Done! -> " + upstreamLastCommitId);
+                common_1.logger.logExtendLastLine("Done! -> " + upstreamLastCommitId);
                 return [4 /*yield*/, (0, common_1.checkoutAndPullLastVersion)(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch)];
             case 6:
                 _a.sent();
@@ -94,7 +92,7 @@ var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(voi
                 _a.sent();
                 _a.label = 11;
             case 11:
-                (0, common_1.logWriteLine)('Slice', "Up to date");
+                common_1.logger.logWriteLine('Slice', "Up to date");
                 return [2 /*return*/];
         }
     });

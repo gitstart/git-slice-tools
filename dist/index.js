@@ -54,6 +54,19 @@ var terminal_kit_1 = require("terminal-kit");
 var yargs_1 = __importDefault(require("yargs/yargs"));
 var config_1 = require("./config");
 var jobs_1 = require("./jobs");
+var loadActionInputs = function (envFilePath, cb) { return __awaiter(void 0, void 0, void 0, function () {
+    var actionInputs;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                actionInputs = (0, config_1.loadValidateActionInputs)(envFilePath, true);
+                return [4 /*yield*/, cb({ actionInputs: actionInputs })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
 var loadActionInputsAndInit = function (envFilePath, cb) { return __awaiter(void 0, void 0, void 0, function () {
     var actionInputs, _a, sliceGit, upstreamGit;
     return __generator(this, function (_b) {
@@ -189,8 +202,12 @@ var GLOBAL_OPTIONS_CONFIG = {
         alias: 'to',
         desc: 'Number of the slice issue you want to update',
         default: 0,
+    }, triggerBy: {
+        type: 'string',
+        alias: 'trigger-by',
+        desc: 'username of github account who executed this job',
     } }), function (_a) {
-    var env = _a.env, fromIssueNumber = _a.fromIssueNumber, toIssueNumber = _a.toIssueNumber;
+    var env = _a.env, fromIssueNumber = _a.fromIssueNumber, toIssueNumber = _a.toIssueNumber, triggerBy = _a.triggerBy;
     return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_b) {
             if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
@@ -201,10 +218,155 @@ var GLOBAL_OPTIONS_CONFIG = {
             }
             return [2 /*return*/, loadActionInputsAndInit(env, function (_a) {
                     var actionInputs = _a.actionInputs;
-                    return (0, jobs_1.pullIssue)(actionInputs, fromIssueNumber, toIssueNumber);
+                    return (0, jobs_1.pullIssue)(actionInputs, fromIssueNumber, toIssueNumber, triggerBy);
                 })];
         });
     });
+})
+    .command('open-source', 'Open source tools', function (openSourceArgv) {
+    return openSourceArgv
+        .command('add-issue <repo> <issue-number>', 'Add an issue to open source project', function (argv) {
+        return argv
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('issue-number', { desc: 'Issue number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.addIssue(actionInputs, argv['repo'], argv['issue-number']);
+                })];
+        });
+    }); })
+        .command('reviewer-approve-issue <reviewer> <repo> <issue-number>', 'Reviewer approves an issue in open source project', function (argv) {
+        return argv
+            .positional('reviewer', { desc: 'Username of reviewer', type: 'string' })
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('issue-number', { desc: 'Issue number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.reviewerApproveIssue(actionInputs, argv['reviewer'], argv['repo'], argv['issue-number']);
+                })];
+        });
+    }); })
+        .command('reviewer-reject-issue <reviewer> <repo> <issue-number>', 'Reviewer rejects an issue in open source project', function (argv) {
+        return argv
+            .positional('reviewer', { desc: 'Username of reviewer', type: 'string' })
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('issue-number', { desc: 'Issue number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.reviewerRejectIssue(actionInputs, argv['reviewer'], argv['repo'], argv['issue-number']);
+                })];
+        });
+    }); })
+        .command('update-estimate <repo> <issue-number> <credits>', 'Update estimate credits of an issue in open source project', function (argv) {
+        return argv
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('issue-number', { desc: 'Issue number', type: 'number' })
+            .positional('credits', { desc: 'Estimate credits', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.updateEstimate(actionInputs, argv['repo'], argv['issue-number'], argv['credits']);
+                })];
+        });
+    }); })
+        .command('assign-dev <assignee> <repo> <issue-number>', 'Assign dev an issue', function (argv) {
+        return argv
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('issue-number', { desc: 'Issue number', type: 'number' })
+            .positional('assignee', { desc: 'Assignee username', type: 'string' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.assignDev(actionInputs, argv['assignee'], argv['repo'], argv['issue-number']);
+                })];
+        });
+    }); })
+        .command('request-review-pr <maintainer> <repo> <pr-number>', 'Request review pull request', function (argv) {
+        return argv
+            .positional('maintainer', { desc: 'Maintainer username', type: 'string' })
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.requestReviewPR(actionInputs, argv['maintainer'], argv['repo'], argv['pr-number']);
+                })];
+        });
+    }); })
+        .command('reviewer-approve-pr <reviewer> <repo> <pr-number>', 'Reviewer approves a pull request', function (argv) {
+        return argv
+            .positional('reviewer', { desc: 'Reviewer username', type: 'string' })
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.reviewerApprovePR(actionInputs, argv['reviewer'], argv['repo'], argv['pr-number']);
+                })];
+        });
+    }); })
+        .command('reviewer-request-changes-pr <reviewer> <repo> <pr-number>', 'Reviewer requests changes in a pull request', function (argv) {
+        return argv
+            .positional('reviewer', { desc: 'Reviewer username', type: 'string' })
+            .positional('repo', { desc: 'Repository name', type: 'string' })
+            .positional('pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.reviewerRequestChangesPR(actionInputs, argv['reviewer'], argv['repo'], argv['pr-number']);
+                })];
+        });
+    }); })
+        .command('push-pr <push-pr-maintainer> <push-pr-repo> <push-pr-pr-number>', 'Mark a PR as pushed to client', function (argv) {
+        return argv
+            .positional('push-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+            .positional('push-pr-repo', { desc: 'Repository name', type: 'string' })
+            .positional('push-pr-pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.pushPR(actionInputs, argv['push-pr-maintainer'], argv['push-pr-repo'], argv['push-pr-pr-number']);
+                })];
+        });
+    }); })
+        .command('merge-pr <merge-pr-maintainer> <merge-pr-repo> <merge-pr-pr-number>', 'Mark a PR as merged by client', function (argv) {
+        return argv
+            .positional('merge-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+            .positional('merge-pr-repo', { desc: 'Repository name', type: 'string' })
+            .positional('merge-pr-pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.mergePr(actionInputs, argv['merge-pr-maintainer'], argv['merge-pr-repo'], argv['merge-pr-pr-number']);
+                })];
+        });
+    }); })
+        .command('close-pr <close-pr-maintainer> <close-pr-repo> <close-pr-pr-number>', 'Mark a PR as discontinued (closed)', function (argv) {
+        return argv
+            .positional('close-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+            .positional('close-pr-repo', { desc: 'Repository name', type: 'string' })
+            .positional('close-pr-pr-number', { desc: 'Pull request number', type: 'number' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, loadActionInputs(argv.env, function (_a) {
+                    var actionInputs = _a.actionInputs;
+                    return jobs_1.openSource.closePR(actionInputs, argv['close-pr-maintainer'], argv['close-pr-repo'], argv['close-pr-pr-number']);
+                })];
+        });
+    }); });
 })
     .parseAsync();
 //# sourceMappingURL=index.js.map

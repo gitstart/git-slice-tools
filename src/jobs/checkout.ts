@@ -1,5 +1,5 @@
 import { CleanOptions, SimpleGit } from 'simple-git'
-import { terminal } from 'terminal-kit'
+import { logger } from '../common'
 import { ActionInputs } from '../types'
 
 export const checkout = async (
@@ -7,22 +7,21 @@ export const checkout = async (
     upstreamGit: SimpleGit,
     actionInputs: ActionInputs
 ): Promise<void> => {
-    terminal('-'.repeat(30) + '\n')
-    terminal('Performing checkout job...\n')
+    logger.logInputs('checkout', {})
 
-    terminal(`Slice: Clean...`)
+    logger.logWriteLine('Slice', `Cleaning...`)
     await sliceGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
-    terminal(`Done!\n`)
+    logger.logExtendLastLine(`Done!`)
 
-    terminal(`Slice: Checkout default branch...`)
+    logger.logWriteLine('Slice', `Checking out default branch...`)
     await sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)
-    terminal(`Done!\n`)
+    logger.logExtendLastLine(`Done!`)
 
-    terminal(`Upstream: Clean...`)
+    logger.logWriteLine('Upstream', `Cleaning...`)
     await upstreamGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
-    terminal(`Done!\n`)
+    logger.logExtendLastLine(`Done!`)
 
-    terminal(`Upstream: Checkout default branch...`)
+    logger.logWriteLine('Upstream', `Checking out default branch...`)
     await upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)
-    terminal(`Done!\n`)
+    logger.logExtendLastLine(`Done!`)
 }

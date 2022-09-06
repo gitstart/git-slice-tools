@@ -1,14 +1,7 @@
 import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
 import { CleanOptions, ResetMode, SimpleGit } from 'simple-git'
-import { terminal } from 'terminal-kit'
-import {
-    cleanAndDeleteLocalBranch,
-    copyFiles,
-    createCommitAndPushCurrentChanges,
-    logExtendLastLine,
-    logWriteLine,
-} from '../common'
+import { cleanAndDeleteLocalBranch, copyFiles, createCommitAndPushCurrentChanges, logger } from '../common'
 import { ActionInputs } from '../types'
 
 export const pullBranch = async (
@@ -18,49 +11,37 @@ export const pullBranch = async (
     upstreamBranch: string,
     targetSliceBranch?: string
 ): Promise<void> => {
-    terminal('-'.repeat(30) + '\n')
-    terminal(`Performing pull-branch job with ${JSON.stringify({ upstreamBranch, targetSliceBranch })}...\n`)
+    logger.logInputs('pull-branch', { upstreamBranch, targetSliceBranch })
 
     const sliceBranch = `upstream-${upstreamBranch}`
 
-    logWriteLine('Upstream', `Checkout and pull last versions '${upstreamBranch}' branch...`)
-
+    logger.logWriteLine('Upstream', `Checkout and pull last versions '${upstreamBranch}' branch...`)
     await upstreamGit.reset(ResetMode.HARD)
     await upstreamGit.checkout(upstreamBranch)
     await upstreamGit.reset(['--hard', `origin/${upstreamBranch}`])
     await upstreamGit.pull('origin', upstreamBranch)
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Upstream', `Clean...`)
-
+    logger.logWriteLine('Upstream', `Clean...`)
     await upstreamGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Slice', `Checkout and pull last versions '${actionInputs.sliceRepo.defaultBranch}' branch...`)
-
+    logger.logWriteLine('Slice', `Checkout and pull last versions '${actionInputs.sliceRepo.defaultBranch}' branch...`)
     await sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)
     await sliceGit.reset(['--hard', `origin/${actionInputs.sliceRepo.defaultBranch}`])
     await sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch)
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Slice', `Clean...`)
-
+    logger.logWriteLine('Slice', `Clean...`)
     await sliceGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Slice', `Checkout new branch '${sliceBranch}'...`)
-
+    logger.logWriteLine('Slice', `Checkout new branch '${sliceBranch}'...`)
     await cleanAndDeleteLocalBranch(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch, sliceBranch)
     await sliceGit.checkoutLocalBranch(sliceBranch)
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Slice', `Copying diffs from upstream branch to slice branch...`)
-
+    logger.logWriteLine('Slice', `Copying diffs from upstream branch to slice branch...`)
     await copyFiles(
         sliceGit,
         actionInputs.upstreamRepo.dir,
@@ -68,14 +49,11 @@ export const pullBranch = async (
         actionInputs.sliceIgnores,
         'Slice'
     )
+    logger.logExtendLastLine('Done!')
 
-    logExtendLastLine('Done!')
-
-    logWriteLine('Slice', `Staging diffs...`)
-
+    logger.logWriteLine('Slice', `Staging diffs...`)
     await sliceGit.raw('add', '.', '--force')
-
-    logExtendLastLine('Done!')
+    logger.logExtendLastLine('Done!')
 
     await createCommitAndPushCurrentChanges(
         sliceGit,
@@ -86,7 +64,7 @@ export const pullBranch = async (
     )
 
     if (!targetSliceBranch) {
-        logWriteLine('Slice', `Pulled upstream branch '${upstreamBranch}' to slice branch ${sliceBranch}`)
+        logger.logWriteLine('Slice', `Pulled upstream branch '${upstreamBranch}' to slice branch ${sliceBranch}`)
         return
     }
 
@@ -95,7 +73,7 @@ export const pullBranch = async (
         auth: actionInputs.sliceRepo.userToken,
     })
 
-    logWriteLine('Slice', `Finding PR (${targetSliceBranch} <- ${sliceBranch}) ...`)
+    logger.logWriteLine('Slice', `Finding PR (${targetSliceBranch} <- ${sliceBranch}) ...`)
 
     const listResponse = await sliceOctokit.rest.pulls.list({
         owner: sliceGitUrlObject.owner,
@@ -108,18 +86,17 @@ export const pullBranch = async (
     if (listResponse.data.length !== 0) {
         const { number: slicePrNumber, html_url } = listResponse.data[0]
 
-        logExtendLastLine(`PR #${slicePrNumber}`)
+        logger.logExtendLastLine(`PR #${slicePrNumber}`)
 
-        logWriteLine(
+        logger.logWriteLine(
             'Slice',
             `Pulled upstream branch '${upstreamBranch}' to slice branch ${sliceBranch} and PR ${slicePrNumber} (${html_url}) is available`
         )
     }
 
-    logExtendLastLine(`Not found!`)
+    logger.logExtendLastLine(`Not found!`)
 
-    logWriteLine('Slice', `Raising new PR (${targetSliceBranch} <- ${sliceBranch})...`)
-
+    logger.logWriteLine('Slice', `Raising new PR (${targetSliceBranch} <- ${sliceBranch})...`)
     const createResponse = await sliceOctokit.rest.pulls.create({
         owner: sliceGitUrlObject.owner,
         repo: sliceGitUrlObject.name,
@@ -130,10 +107,9 @@ export const pullBranch = async (
         draft: actionInputs.prDraft,
         maintainer_can_modifyboolean: true,
     })
+    logger.logExtendLastLine(`Done PR #${createResponse.data.number}`)
 
-    logExtendLastLine(`Done PR #${createResponse.data.number}`)
-
-    logWriteLine(
+    logger.logWriteLine(
         'Slice',
         `Pulled upstream branch '${upstreamBranch}' to slice branch ${sliceBranch} and PR ${createResponse.data.number} (${createResponse.data.html_url}) is available`
     )

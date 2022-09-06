@@ -38,33 +38,32 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkout = void 0;
 var simple_git_1 = require("simple-git");
-var terminal_kit_1 = require("terminal-kit");
+var common_1 = require("../common");
 var checkout = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)('Performing checkout job...\n');
-                (0, terminal_kit_1.terminal)("Slice: Clean...");
+                common_1.logger.logInputs('checkout', {});
+                common_1.logger.logWriteLine('Slice', "Cleaning...");
                 return [4 /*yield*/, sliceGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
             case 1:
                 _a.sent();
-                (0, terminal_kit_1.terminal)("Done!\n");
-                (0, terminal_kit_1.terminal)("Slice: Checkout default branch...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine('Slice', "Checking out default branch...");
                 return [4 /*yield*/, sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)];
             case 2:
                 _a.sent();
-                (0, terminal_kit_1.terminal)("Done!\n");
-                (0, terminal_kit_1.terminal)("Upstream: Clean...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine('Upstream', "Cleaning...");
                 return [4 /*yield*/, upstreamGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
             case 3:
                 _a.sent();
-                (0, terminal_kit_1.terminal)("Done!\n");
-                (0, terminal_kit_1.terminal)("Upstream: Checkout default branch...");
+                common_1.logger.logExtendLastLine("Done!");
+                common_1.logger.logWriteLine('Upstream', "Checking out default branch...");
                 return [4 /*yield*/, upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)];
             case 4:
                 _a.sent();
-                (0, terminal_kit_1.terminal)("Done!\n");
+                common_1.logger.logExtendLastLine("Done!");
                 return [2 /*return*/];
         }
     });

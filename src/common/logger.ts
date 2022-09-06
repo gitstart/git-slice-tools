@@ -16,3 +16,8 @@ export const logExtendLastLine = (content: string) => {
 
     terminal.up(1)(`${lastLogLine}${content.trim()} (${duration.toFixed(3)}s)\n`)
 }
+
+export const logInputs = (jobName: string, ipnuts: unknown = {}) => {
+    terminal('-'.repeat(30) + '\n')
+    terminal(`Performing '${jobName}' job with ${JSON.stringify(ipnuts)}...\n`)
+}

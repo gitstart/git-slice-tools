@@ -208,10 +208,11 @@ Support `open source flow`
 
 Command arguments
 
-| Arg      | Description                                             |
-| -------- | ------------------------------------------------------- |
-| `--from` | Number of the upstream issue you want to pull           |
-| `--to`   | (optional) Number of the slice issue you want to update |
+| Arg            | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `--from`       | Number of the upstream issue you want to pull           |
+| `--to`         | (optional) Number of the slice issue you want to update |
+| `--trigger-by` | (optional) Username who executed this job               |
 
 ```bash
 yarn pull-issue --from 123

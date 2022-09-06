@@ -5,6 +5,8 @@ inputs:
     required: true
   slice-issue:
     required: false
+  trigger-by:
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -18,12 +20,13 @@ runs:
         key: cache-repo-${{ env.GIT_SLICE_CHECKOUT_CACHED_KEY }}
 
     - name: Install git-slice-tools
-      run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.2.0
+      run: yarn global add https://github.com/GitStartHQ/git-slice-tools#open-source-workflow
       shell: bash
 
     - name: Execute `git-slice-tools pull-issue`
-      run: git-slice-tools pull-issue --from "$UPSTREAM_ISSUE" --to "$SLICE_ISSUE"
+      run: git-slice-tools pull-issue --from "$UPSTREAM_ISSUE" --to "$SLICE_ISSUE" --trigger-by "$TRIGGER_BY"
       env:
         UPSTREAM_ISSUE: ${{ inputs.upstream-issue }}
         SLICE_ISSUE: ${{ inputs.slice-issue }}
+        TRIGGER_BY: ${{ inputs.trigger-by }}
       shell: bash

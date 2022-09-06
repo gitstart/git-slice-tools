@@ -1,7 +1,6 @@
 import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
-import { terminal } from 'terminal-kit'
-import { delay, logExtendLastLine, logWriteLine } from '../common'
+import { delay, logger } from '../common'
 import { ActionInputs, LogScope } from '../types'
 
 export const pullReview = async (
@@ -9,8 +8,7 @@ export const pullReview = async (
     slicePrNumber: number,
     upstreamPrReviewLink: string
 ): Promise<void> => {
-    terminal('-'.repeat(30) + '\n')
-    terminal(`Performing pull-review job with ${JSON.stringify({ slicePrNumber, upstreamPrReviewLink })}...\n`)
+    logger.logInputs('pull-review', { slicePrNumber, upstreamPrReviewLink })
 
     const { sliceRepo, upstreamRepo, isOpenSourceFlow, openSourceUrl } = actionInputs
     const upstreamGitUrlObject = gitUrlParse(upstreamRepo.gitHttpUri)
@@ -46,7 +44,7 @@ export const pullReview = async (
         targetLogScope = 'OpenSource'
     }
 
-    logWriteLine(targetLogScope, `Getting PR review...`)
+    logger.logWriteLine(targetLogScope, `Getting PR review...`)
 
     const { data: upstreamReview } = await upstreamOctokit.rest.pulls.getReview({
         owner: targetGitUrlOwner,
@@ -55,9 +53,9 @@ export const pullReview = async (
         review_id: targetPrReviewNumber,
     })
 
-    logExtendLastLine(`Done!`)
+    logger.logExtendLastLine(`Done!`)
 
-    logWriteLine(targetLogScope, `Getting PR review comments...`)
+    logger.logWriteLine(targetLogScope, `Getting PR review comments...`)
 
     const { data: targetReviewComments } = await upstreamOctokit.rest.pulls.listCommentsForReview({
         owner: targetGitUrlOwner,
@@ -69,9 +67,9 @@ export const pullReview = async (
         page: 1,
     })
 
-    logExtendLastLine(`Done!`)
+    logger.logExtendLastLine(`Done!`)
 
-    logWriteLine(targetLogScope, `Getting PR review comments details...`)
+    logger.logWriteLine(targetLogScope, `Getting PR review comments details...`)
 
     const detailedPullReviewComments: {
         path: string
@@ -107,9 +105,9 @@ export const pullReview = async (
         await delay(500)
     }
 
-    logExtendLastLine(`Done!`)
+    logger.logExtendLastLine(`Done!`)
 
-    logWriteLine('Slice', `Creating PR review...`)
+    logger.logWriteLine('Slice', `Creating PR review...`)
 
     const { data: sliceReview } = await sliceOctokit.rest.pulls.createReview({
         owner: sliceGitUrlObject.owner,
@@ -122,5 +120,5 @@ export const pullReview = async (
         comments: detailedPullReviewComments,
     })
 
-    logExtendLastLine(`Done! -> ${sliceReview.html_url}`)
+    logger.logExtendLastLine(`Done! -> ${sliceReview.html_url}`)
 }

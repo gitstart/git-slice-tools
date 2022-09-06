@@ -43,17 +43,15 @@ exports.pullBranch = void 0;
 var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
 var simple_git_1 = require("simple-git");
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var pullBranch = function (sliceGit, upstreamGit, actionInputs, upstreamBranch, targetSliceBranch) { return __awaiter(void 0, void 0, void 0, function () {
     var sliceBranch, sliceGitUrlObject, sliceOctokit, listResponse, _a, slicePrNumber, html_url, createResponse;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                (0, terminal_kit_1.terminal)('-'.repeat(30) + '\n');
-                (0, terminal_kit_1.terminal)("Performing pull-branch job with " + JSON.stringify({ upstreamBranch: upstreamBranch, targetSliceBranch: targetSliceBranch }) + "...\n");
+                common_1.logger.logInputs('pull-branch', { upstreamBranch: upstreamBranch, targetSliceBranch: targetSliceBranch });
                 sliceBranch = "upstream-" + upstreamBranch;
-                (0, common_1.logWriteLine)('Upstream', "Checkout and pull last versions '" + upstreamBranch + "' branch...");
+                common_1.logger.logWriteLine('Upstream', "Checkout and pull last versions '" + upstreamBranch + "' branch...");
                 return [4 /*yield*/, upstreamGit.reset(simple_git_1.ResetMode.HARD)];
             case 1:
                 _b.sent();
@@ -66,13 +64,13 @@ var pullBranch = function (sliceGit, upstreamGit, actionInputs, upstreamBranch, 
                 return [4 /*yield*/, upstreamGit.pull('origin', upstreamBranch)];
             case 4:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Upstream', "Clean...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Upstream', "Clean...");
                 return [4 /*yield*/, upstreamGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
             case 5:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Checkout and pull last versions '" + actionInputs.sliceRepo.defaultBranch + "' branch...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Slice', "Checkout and pull last versions '" + actionInputs.sliceRepo.defaultBranch + "' branch...");
                 return [4 /*yield*/, sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)];
             case 6:
                 _b.sent();
@@ -82,42 +80,42 @@ var pullBranch = function (sliceGit, upstreamGit, actionInputs, upstreamBranch, 
                 return [4 /*yield*/, sliceGit.pull('origin', actionInputs.sliceRepo.defaultBranch)];
             case 8:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Clean...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Slice', "Clean...");
                 return [4 /*yield*/, sliceGit.clean(simple_git_1.CleanOptions.FORCE + simple_git_1.CleanOptions.RECURSIVE + simple_git_1.CleanOptions.IGNORED_INCLUDED)];
             case 9:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Checkout new branch '" + sliceBranch + "'...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Slice', "Checkout new branch '" + sliceBranch + "'...");
                 return [4 /*yield*/, (0, common_1.cleanAndDeleteLocalBranch)(sliceGit, 'Slice', actionInputs.sliceRepo.defaultBranch, sliceBranch)];
             case 10:
                 _b.sent();
                 return [4 /*yield*/, sliceGit.checkoutLocalBranch(sliceBranch)];
             case 11:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Copying diffs from upstream branch to slice branch...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Slice', "Copying diffs from upstream branch to slice branch...");
                 return [4 /*yield*/, (0, common_1.copyFiles)(sliceGit, actionInputs.upstreamRepo.dir, actionInputs.sliceRepo.dir, actionInputs.sliceIgnores, 'Slice')];
             case 12:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                (0, common_1.logWriteLine)('Slice', "Staging diffs...");
+                common_1.logger.logExtendLastLine('Done!');
+                common_1.logger.logWriteLine('Slice', "Staging diffs...");
                 return [4 /*yield*/, sliceGit.raw('add', '.', '--force')];
             case 13:
                 _b.sent();
-                (0, common_1.logExtendLastLine)('Done!');
+                common_1.logger.logExtendLastLine('Done!');
                 return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(sliceGit, "feat: pull changes from upstream branch " + upstreamBranch, sliceBranch, 'Slice', true)];
             case 14:
                 _b.sent();
                 if (!targetSliceBranch) {
-                    (0, common_1.logWriteLine)('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch);
+                    common_1.logger.logWriteLine('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch);
                     return [2 /*return*/];
                 }
                 sliceGitUrlObject = (0, git_url_parse_1.default)(actionInputs.sliceRepo.gitHttpUri);
                 sliceOctokit = new octokit_1.Octokit({
                     auth: actionInputs.sliceRepo.userToken,
                 });
-                (0, common_1.logWriteLine)('Slice', "Finding PR (" + targetSliceBranch + " <- " + sliceBranch + ") ...");
+                common_1.logger.logWriteLine('Slice', "Finding PR (" + targetSliceBranch + " <- " + sliceBranch + ") ...");
                 return [4 /*yield*/, sliceOctokit.rest.pulls.list({
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
@@ -129,11 +127,11 @@ var pullBranch = function (sliceGit, upstreamGit, actionInputs, upstreamBranch, 
                 listResponse = _b.sent();
                 if (listResponse.data.length !== 0) {
                     _a = listResponse.data[0], slicePrNumber = _a.number, html_url = _a.html_url;
-                    (0, common_1.logExtendLastLine)("PR #" + slicePrNumber);
-                    (0, common_1.logWriteLine)('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch + " and PR " + slicePrNumber + " (" + html_url + ") is available");
+                    common_1.logger.logExtendLastLine("PR #" + slicePrNumber);
+                    common_1.logger.logWriteLine('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch + " and PR " + slicePrNumber + " (" + html_url + ") is available");
                 }
-                (0, common_1.logExtendLastLine)("Not found!");
-                (0, common_1.logWriteLine)('Slice', "Raising new PR (" + targetSliceBranch + " <- " + sliceBranch + ")...");
+                common_1.logger.logExtendLastLine("Not found!");
+                common_1.logger.logWriteLine('Slice', "Raising new PR (" + targetSliceBranch + " <- " + sliceBranch + ")...");
                 return [4 /*yield*/, sliceOctokit.rest.pulls.create({
                         owner: sliceGitUrlObject.owner,
                         repo: sliceGitUrlObject.name,
@@ -146,8 +144,8 @@ var pullBranch = function (sliceGit, upstreamGit, actionInputs, upstreamBranch, 
                     })];
             case 16:
                 createResponse = _b.sent();
-                (0, common_1.logExtendLastLine)("Done PR #" + createResponse.data.number);
-                (0, common_1.logWriteLine)('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch + " and PR " + createResponse.data.number + " (" + createResponse.data.html_url + ") is available");
+                common_1.logger.logExtendLastLine("Done PR #" + createResponse.data.number);
+                common_1.logger.logWriteLine('Slice', "Pulled upstream branch '" + upstreamBranch + "' to slice branch " + sliceBranch + " and PR " + createResponse.data.number + " (" + createResponse.data.html_url + ") is available");
                 return [2 /*return*/];
         }
     });

@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { ActionInputs } from '../types'
 
-export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => {
+export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs = false): ActionInputs => {
     if (envFilePath && !fs.existsSync(path.resolve(process.cwd(), envFilePath))) {
         throw new Error(`${envFilePath} doesn't exist`)
     }
@@ -13,15 +13,17 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
     const forceInit = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false'
 
     if (
-        !process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
-        !fs.existsSync(path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR))
+        !ignoreCheckDirs &&
+        (!process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
+            !fs.existsSync(path.resolve(process.cwd(), process.env.GIT_SLICE_UPSTREAM_REPO_DIR)))
     ) {
         throw new Error(`Missing 'UPSTREAM_REPO_DIR' or 'UPSTREAM_REPO_DIR' doesn't exist `)
     }
 
     if (
-        !process.env.GIT_SLICE_SLICE_REPO_DIR ||
-        !fs.existsSync(path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR))
+        !ignoreCheckDirs &&
+        (!process.env.GIT_SLICE_SLICE_REPO_DIR ||
+            !fs.existsSync(path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR)))
     ) {
         throw new Error(`Missing 'SLICE_REPO_DIR' or 'SLICE_REPO_DIR' doesn't exist `)
     }
@@ -117,6 +119,9 @@ export const loadValidateActionInputs = (envFilePath?: string): ActionInputs => 
         prDraft,
         isOpenSourceFlow,
         openSourceUrl,
+        openSourceInstanceName: process.env.GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME,
+        openSourceManagerProjectView: process.env.GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW,
+        openSourceTeamReviewingCommittee: process.env.GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE,
         sliceRepo: {
             name: 'Slice',
             dir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

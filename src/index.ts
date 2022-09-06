@@ -2,8 +2,19 @@ import { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import yargs from 'yargs/yargs'
 import { loadValidateActionInputs } from './config'
-import { checkout, init, pull, pullBranch, pullIssue, pullReview, push, raisePr } from './jobs'
+import { checkout, init, openSource, pull, pullBranch, pullIssue, pullReview, push, raisePr } from './jobs'
 import { ActionInputs } from './types'
+
+const loadActionInputs = async (
+    envFilePath: string,
+    cb: (parameters: { actionInputs: ActionInputs }) => Promise<unknown>
+): Promise<void> => {
+    const actionInputs = loadValidateActionInputs(envFilePath, true)
+
+    await cb({ actionInputs })
+
+    return
+}
 
 const loadActionInputsAndInit = async (
     envFilePath: string,
@@ -152,8 +163,13 @@ yargs(process.argv.slice(2))
                 desc: 'Number of the slice issue you want to update',
                 default: 0,
             },
+            triggerBy: {
+                type: 'string',
+                alias: 'trigger-by',
+                desc: 'username of github account who executed this job',
+            },
         },
-        async ({ env, fromIssueNumber, toIssueNumber }) => {
+        async ({ env, fromIssueNumber, toIssueNumber, triggerBy }) => {
             if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
                 throw new Error(`pull-issue job: 'from' in number is required`)
             }
@@ -163,8 +179,205 @@ yargs(process.argv.slice(2))
             }
 
             return loadActionInputsAndInit(env, ({ actionInputs }) =>
-                pullIssue(actionInputs, fromIssueNumber, toIssueNumber)
+                pullIssue(actionInputs, fromIssueNumber, toIssueNumber, triggerBy)
             )
         }
     )
+    .command('open-source', 'Open source tools', openSourceArgv => {
+        return openSourceArgv
+            .command(
+                'add-issue <repo> <issue-number>',
+                'Add an issue to open source project',
+                argv => {
+                    return argv
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('issue-number', { desc: 'Issue number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.addIssue(actionInputs, argv['repo'], argv['issue-number'])
+                    )
+                }
+            )
+            .command(
+                'reviewer-approve-issue <reviewer> <repo> <issue-number>',
+                'Reviewer approves an issue in open source project',
+                argv => {
+                    return argv
+                        .positional('reviewer', { desc: 'Username of reviewer', type: 'string' })
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('issue-number', { desc: 'Issue number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.reviewerApproveIssue(
+                            actionInputs,
+                            argv['reviewer'],
+                            argv['repo'],
+                            argv['issue-number']
+                        )
+                    )
+                }
+            )
+            .command(
+                'reviewer-reject-issue <reviewer> <repo> <issue-number>',
+                'Reviewer rejects an issue in open source project',
+                argv => {
+                    return argv
+                        .positional('reviewer', { desc: 'Username of reviewer', type: 'string' })
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('issue-number', { desc: 'Issue number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.reviewerRejectIssue(
+                            actionInputs,
+                            argv['reviewer'],
+                            argv['repo'],
+                            argv['issue-number']
+                        )
+                    )
+                }
+            )
+            .command(
+                'update-estimate <repo> <issue-number> <credits>',
+                'Update estimate credits of an issue in open source project',
+                argv => {
+                    return argv
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('issue-number', { desc: 'Issue number', type: 'number' })
+                        .positional('credits', { desc: 'Estimate credits', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.updateEstimate(actionInputs, argv['repo'], argv['issue-number'], argv['credits'])
+                    )
+                }
+            )
+            .command(
+                'assign-dev <assignee> <repo> <issue-number>',
+                'Assign dev an issue',
+                argv => {
+                    return argv
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('issue-number', { desc: 'Issue number', type: 'number' })
+                        .positional('assignee', { desc: 'Assignee username', type: 'string' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.assignDev(actionInputs, argv['assignee'], argv['repo'], argv['issue-number'])
+                    )
+                }
+            )
+            .command(
+                'request-review-pr <maintainer> <repo> <pr-number>',
+                'Request review pull request',
+                argv => {
+                    return argv
+                        .positional('maintainer', { desc: 'Maintainer username', type: 'string' })
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.requestReviewPR(actionInputs, argv['maintainer'], argv['repo'], argv['pr-number'])
+                    )
+                }
+            )
+            .command(
+                'reviewer-approve-pr <reviewer> <repo> <pr-number>',
+                'Reviewer approves a pull request',
+                argv => {
+                    return argv
+                        .positional('reviewer', { desc: 'Reviewer username', type: 'string' })
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.reviewerApprovePR(actionInputs, argv['reviewer'], argv['repo'], argv['pr-number'])
+                    )
+                }
+            )
+            .command(
+                'reviewer-request-changes-pr <reviewer> <repo> <pr-number>',
+                'Reviewer requests changes in a pull request',
+                argv => {
+                    return argv
+                        .positional('reviewer', { desc: 'Reviewer username', type: 'string' })
+                        .positional('repo', { desc: 'Repository name', type: 'string' })
+                        .positional('pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.reviewerRequestChangesPR(
+                            actionInputs,
+                            argv['reviewer'],
+                            argv['repo'],
+                            argv['pr-number']
+                        )
+                    )
+                }
+            )
+            .command(
+                'push-pr <push-pr-maintainer> <push-pr-repo> <push-pr-pr-number>',
+                'Mark a PR as pushed to client',
+                argv => {
+                    return argv
+                        .positional('push-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+                        .positional('push-pr-repo', { desc: 'Repository name', type: 'string' })
+                        .positional('push-pr-pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.pushPR(
+                            actionInputs,
+                            argv['push-pr-maintainer'],
+                            argv['push-pr-repo'],
+                            argv['push-pr-pr-number']
+                        )
+                    )
+                }
+            )
+            .command(
+                'merge-pr <merge-pr-maintainer> <merge-pr-repo> <merge-pr-pr-number>',
+                'Mark a PR as merged by client',
+                argv => {
+                    return argv
+                        .positional('merge-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+                        .positional('merge-pr-repo', { desc: 'Repository name', type: 'string' })
+                        .positional('merge-pr-pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.mergePr(
+                            actionInputs,
+                            argv['merge-pr-maintainer'],
+                            argv['merge-pr-repo'],
+                            argv['merge-pr-pr-number']
+                        )
+                    )
+                }
+            )
+            .command(
+                'close-pr <close-pr-maintainer> <close-pr-repo> <close-pr-pr-number>',
+                'Mark a PR as discontinued (closed)',
+                argv => {
+                    return argv
+                        .positional('close-pr-maintainer', { desc: 'Maintainer username', type: 'string' })
+                        .positional('close-pr-repo', { desc: 'Repository name', type: 'string' })
+                        .positional('close-pr-pr-number', { desc: 'Pull request number', type: 'number' })
+                },
+                async argv => {
+                    return loadActionInputs(argv.env, ({ actionInputs }) =>
+                        openSource.closePR(
+                            actionInputs,
+                            argv['close-pr-maintainer'],
+                            argv['close-pr-repo'],
+                            argv['close-pr-pr-number']
+                        )
+                    )
+                }
+            )
+    })
     .parseAsync()

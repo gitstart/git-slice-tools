@@ -11,6 +11,9 @@ export * from './constants'
 export * from './gitInit'
 export * from './ignore'
 export * from './logger'
+export * from './github'
+export * as logger from './logger'
+export * as error from './error'
 
 export const isErrorLike = (value: unknown): value is ErrorLike =>
     typeof value === 'object' && value !== null && ('stack' in value || 'message' in value)
