@@ -208,11 +208,11 @@ Support `open source flow`
 
 Command arguments
 
-| Arg            | Description                                             |
-| -------------- | ------------------------------------------------------- |
-| `--from`       | Number of the upstream issue you want to pull           |
-| `--to`         | (optional) Number of the slice issue you want to update |
-| `--trigger-by` | (optional) Username who executed this job               |
+| Arg            | Description                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| `--from`       | Number of the upstream issue you want to pull                                                          |
+| `--to`         | (optional) Number of the slice issue you want to update                                                |
+| `--trigger-by` | (optional) Username who executed this job, this username will be put in a comment on top of issue body |
 
 ```bash
 yarn pull-issue --from 123
@@ -243,16 +243,16 @@ You can setup `git-slice-tools` easily in Github Action by coping our prepared `
 | `GIT_SLICE_SLICE_REPO_PASSWORD`     | it's PAT of the Github Account for slice repo                                                                                                         |
 | `GIT_SLICE_UPSTREAM_REPO_CACHE_KEY` | it's a key for caching a version of sourcecode of both upstream and slice repos. You should change it when you see it takes longer time for pull jobs |
 
-A note about Github Account for slice repo, please make sure it has right permissions for force-push changes on default branch, we recommend to give it `admin` permission.
+A note about Github Account for slice repo, please make sure it has right permissions for force-push changes on default branch, we recommend to give it `maintainer` permission.
 
 Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
 
-These are `/git-slice ...` command you can use in PR comments:
+These are `/git-slice ...` comment commands you can use in PR comments:
 
-| Name                                                | Description                                                                                           |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `/git-slice push -m "comment message" [-f] [-pr]`   | Push changes of current branch in slice repo to upstream repo                                         |
-| `/git-slice pull-review -from "<pull review link>"` | Pull a review from upstream PR to slice PR. Please make sure you wrap the pull review link in `"..."` |
+| Name                                                | Description                                                                                                                                                                                  |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/git-slice push -m "comment message" [-f] [-pr]`   | Push changes of current branch in slice repo to upstream repo. `[-f]` is for using force-push and `[-pr]` is for raising PRs. <br /> Please make sure you wrap the commit meesage in `"..."` |
+| `/git-slice pull-review -from "<pull review link>"` | Pull a review from upstream PR to slice PR. <br /> Please make sure you wrap the pull review link in `"..."`                                                                                 |
 
 These are features you can trigger with using workflow dispatch in actions page, you can select the `job` you want:
 
@@ -263,41 +263,35 @@ These are features you can trigger with using workflow dispatch in actions page,
 
 ## Ignore files in `pull` and `push` jobs
 
-Env `GIT_SLICE_SLICE_IGNORES` is used for ignoring files in `pull` and `push` jobs, this configuration is defined in slice repo.
+Env `GIT_SLICE_SLICE_IGNORES` is used for ignoring files in `pull` and `push` jobs, this configuration is defined in slice repo side.
 
-To allow upstream repos control this, `git-slice-tools` supports to load glob patterns from `.gitsliceignore` file from upstream repo from version 1.2.0.
+To allow upstream repos control this also, since version 1.2.0, `git-slice-tools` supports `.gitsliceignore` file, upstream repos now can put glob patterns in `.gitsliceignore` file to define which files should be ignored in `git-slice-tools` `pull` and `push` jobs. Please note that `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
 
-Please note that `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
-
-Example:
+Example of a `.gitsliceignore` file:
 
 ```
-# .gitsliceignore
 third-party-licenses
-
 ui
-
 # We still need this file
 !ui/**/.gitignore
 ```
 
-## Projects are using `git-slice-tools` instead of `git-slice` from engine team
+## Repositories are using `git-slice-tools`
 
-These are list of projects which are using `git-slice-tools` instead of `git-slice` from engine
-
-- [HelloAlice - Mad Hatter instance](https://github.com/GitStartHQ/client-helloalice-mad-hatter) - @davidokonji
-- [Appsmith - Opensource Instance](https://github.com/GitStartHQ/client-appsmith) - @BikashSah999
-- [Cypress - Opensource Instance](https://github.com/GitStartHQ/cypress) - @raph941
-- [SourceGraph - Front-end instance](https://github.com/GitStartHQ/client-sourcegrapph-gitslice-test) - @raph941
-- [SourceGraph - Opensource front-end instance](https://github.com/GitStartHQ/client-sourcegraph) @raph941
-- [SourceGraph - Opensource back-end instance](https://github.com/GitStartHQ/client-sourcegaph-devx-oss) @Valentine-Mario
+Projects which are using `git-slice-tools` instead of `git-slice` from engine are listed in this pinned issue #31
 
 ## Contributions
 
-This project works well with these features but we need more hands to make it stable and better with tests covering, docker image and K8S supports. We greatly appreciate all your PRs to resolve them. If you want to have an onboarding tour, let's ping @phunguyenmurcul, this nice guy (me) would help you to understand the project quickly.
+This project works well with these features but we need more hands to make it stable and better with tests covering, docker image and K8S supports. We greatly appreciate all your PRs to resolve them. If you want to have an onboarding tour, let's ping @phunguyenmurcul, this nice guy (me :smile:) would help you to understand the project quickly.
 
-## Future jobs
+## Future features
 
 | Job                            | Description                                                               |
 | ------------------------------ | ------------------------------------------------------------------------- |
 | GitStart dashboard integration | Support GitStart authentication and fetching repos details from dashboard |
+
+## `GitStart` only
+
+### Open-source issues management workflow in Github Project V2
+
+Since version 1.3.0, `git-slice-tools` supports multiple `open-source <sub-command> [...]` which are used in multiple Github Actions for tracking all open source issues across repositories in a Github Project v2 table. For more information, please take a look at [open-source-issues-workflow](./docs/open-source-issues-workflow)

@@ -102,7 +102,7 @@ var reviewerApproveIssue = function (actionInputs, reviewer, repoName, issueNumb
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Leaving comment to infom devs...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, ":rocket: Heads up @" + issueAddedBy + ", @" + reviewer + " approved this issue.\n- [ ] Don't forget to set credits estimate by using `/open-source estimate <credits>` command.")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, common_1.OPEN_SOURCE_COMMENT_ISSUE_APPROVED.replace('{issueAddedBy}', issueAddedBy).replace('{reviewer}', reviewer))];
             case 15:
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");

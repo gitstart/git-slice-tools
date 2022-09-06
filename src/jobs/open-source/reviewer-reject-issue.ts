@@ -13,6 +13,7 @@ import {
     getProjectV2,
     isMemberOfTeam,
     logger,
+    OPEN_SOURCE_COMMENT_ISSUE_REJECTED,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -89,7 +90,11 @@ export const reviewerRejectIssue = async (
     logger.logExtendLastLine(`Done!`)
 
     logger.logWriteLine('OpenSource', `Leaving comment to infom devs...`)
-    await addComment(sliceOctokit, issueId, `:disappointed: Sorry @${issueAddedBy}, @${reviewer} rejected this issue.`)
+    await addComment(
+        sliceOctokit,
+        issueId,
+        OPEN_SOURCE_COMMENT_ISSUE_REJECTED.replace('{issueAddedBy}', issueAddedBy).replace('{reviewer}', reviewer)
+    )
     logger.logExtendLastLine(`Done!`)
 
     await closeIssue(sliceOctokit, issueId)

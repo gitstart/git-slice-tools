@@ -95,12 +95,12 @@ var addIssue = function (actionInputs, repoName, issueNumber) { return __awaiter
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Saving oss project data comment...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, "OSS data:\n        - itemId: " + itemId + "\n        - issueId: " + issueId + "\n        \n\n_Do not delete this comment_\n        ")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, "OSS data:\n        - itemId: " + itemId + "\n        - issueId: " + issueId + "\n        \n\n_Do not edit or delete this comment_\n        ")];
             case 9:
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Tagging reviewing comittee...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, ":rocket: Heads up @" + projectManangerView.org + "/" + actionInputs.openSourceTeamReviewingCommittee + ", this open source issue is ready for review")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, common_1.OPEN_SOURCE_COMMENT_REQUEST_ISSUE_REVIEW.replace('{reviewing_committee_team}', projectManangerView.org + "/" + actionInputs.openSourceTeamReviewingCommittee))];
             case 10:
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");

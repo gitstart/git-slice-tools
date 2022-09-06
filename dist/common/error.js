@@ -47,7 +47,7 @@ var github_1 = require("./github");
 var throwWithGithubComment = function (octokit, subjectId, message) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, github_1.addComment)(octokit, subjectId, ":warning: Error is thrown from `git-slice-tools` job:\n" + message)];
+            case 0: return [4 /*yield*/, (0, github_1.addComment)(octokit, subjectId, ":warning: Error from `git-slice-tools`:\n" + message)];
             case 1:
                 _a.sent();
                 throw new Error(message);

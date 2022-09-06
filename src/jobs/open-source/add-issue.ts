@@ -7,6 +7,7 @@ import {
     getProjectManagerViewInfo,
     getProjectV2,
     logger,
+    OPEN_SOURCE_COMMENT_REQUEST_ISSUE_REVIEW,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -94,7 +95,7 @@ export const addIssue = async (actionInputs: ActionInputs, repoName: string, iss
         `OSS data:
         - itemId: ${itemId}
         - issueId: ${issueId}
-        \n\n_Do not delete this comment_
+        \n\n_Do not edit or delete this comment_
         `
     )
     logger.logExtendLastLine(`Done!`)
@@ -103,7 +104,10 @@ export const addIssue = async (actionInputs: ActionInputs, repoName: string, iss
     await addComment(
         sliceOctokit,
         issueId,
-        `:rocket: Heads up @${projectManangerView.org}/${actionInputs.openSourceTeamReviewingCommittee}, this open source issue is ready for review`
+        OPEN_SOURCE_COMMENT_REQUEST_ISSUE_REVIEW.replace(
+            '{reviewing_committee_team}',
+            `${projectManangerView.org}/${actionInputs.openSourceTeamReviewingCommittee}`
+        )
     )
     logger.logExtendLastLine(`Done!`)
 }

@@ -10,6 +10,7 @@ import {
     getProjectV2,
     isMemberOfTeam,
     logger,
+    OPEN_SOURCE_COMMENT_ISSUE_APPROVED,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -89,7 +90,7 @@ export const reviewerApproveIssue = async (
     await addComment(
         sliceOctokit,
         issueId,
-        `:rocket: Heads up @${issueAddedBy}, @${reviewer} approved this issue.\n- [ ] Don't forget to set credits estimate by using \`/open-source estimate <credits>\` command.`
+        OPEN_SOURCE_COMMENT_ISSUE_APPROVED.replace('{issueAddedBy}', issueAddedBy).replace('{reviewer}', reviewer)
     )
     logger.logExtendLastLine(`Done!`)
 }

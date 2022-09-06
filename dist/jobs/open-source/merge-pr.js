@@ -104,7 +104,7 @@ var mergePr = function (actionInputs, maintainer, repoName, prNumber) { return _
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Leaving comment...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, ":tada: This PR is merged by client")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, common_1.OPEN_SOURCE_COMMENT_PR_MERGED)];
             case 16:
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");

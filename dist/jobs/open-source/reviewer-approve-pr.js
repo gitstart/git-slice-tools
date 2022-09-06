@@ -110,7 +110,7 @@ var reviewerApprovePR = function (actionInputs, reviewer, repoName, prNumber) { 
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Leaving comment to infom maintainer...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, ":tada: @" + reviewer + " approved this PR. Let's push this PR upstream")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, common_1.OPEN_SOURCE_COMMENT_PR_APPROVED.replace('{reviewer}', reviewer))];
             case 17:
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");

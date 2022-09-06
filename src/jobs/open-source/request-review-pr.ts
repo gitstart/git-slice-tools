@@ -10,6 +10,7 @@ import {
     getPullRequest,
     isMaintainerOfRepo,
     logger,
+    OPEN_SOURCE_COMMENT_REQUEST_PR_REVIEW,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -93,7 +94,10 @@ export const requestReviewPR = async (
     await addComment(
         sliceOctokit,
         prId,
-        `:rocket: Heads up @${projectManangerView.org}/${actionInputs.openSourceTeamReviewingCommittee}, this PR is ready for final review`
+        OPEN_SOURCE_COMMENT_REQUEST_PR_REVIEW.replace(
+            '{reviewing_committee_team}',
+            `${projectManangerView.org}/${actionInputs.openSourceTeamReviewingCommittee}`
+        )
     )
     logger.logExtendLastLine(`Done!`)
 }

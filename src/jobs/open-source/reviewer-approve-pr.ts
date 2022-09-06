@@ -10,6 +10,7 @@ import {
     getPullRequest,
     isMemberOfTeam,
     logger,
+    OPEN_SOURCE_COMMENT_PR_APPROVED,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -95,6 +96,6 @@ export const reviewerApprovePR = async (
     logger.logExtendLastLine(`Done!`)
 
     logger.logWriteLine('OpenSource', `Leaving comment to infom maintainer...`)
-    await addComment(sliceOctokit, prId, `:tada: @${reviewer} approved this PR. Let's push this PR upstream`)
+    await addComment(sliceOctokit, prId, OPEN_SOURCE_COMMENT_PR_APPROVED.replace('{reviewer}', reviewer))
     logger.logExtendLastLine(`Done!`)
 }

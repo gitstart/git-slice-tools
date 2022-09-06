@@ -8,6 +8,6 @@ import { addComment } from './github'
  * @param message Error message and comment body
  */
 export const throwWithGithubComment = async (octokit: Octokit, subjectId: string, message: string): Promise<void> => {
-    await addComment(octokit, subjectId, `:warning: Error is thrown from \`git-slice-tools\` job:\n${message}`)
+    await addComment(octokit, subjectId, `:warning: Error from \`git-slice-tools\`:\n${message}`)
     throw new Error(message)
 }

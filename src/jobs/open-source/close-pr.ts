@@ -12,6 +12,8 @@ import {
     getPullRequest,
     isMaintainerOfRepo,
     logger,
+    OPEN_SOURCE_COMMENT_ISSUE_DISCONTINUED,
+    OPEN_SOURCE_COMMENT_PR_DISCONTINUED,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -93,8 +95,8 @@ export const closePR = async (
     logger.logExtendLastLine(`Done!`)
 
     logger.logWriteLine('OpenSource', `Leaving comments...`)
-    await addComment(sliceOctokit, prId, `:disappointed: This PR is discontinued`)
-    await addComment(sliceOctokit, issueId, `:disappointed: This issue is discontinued`)
+    await addComment(sliceOctokit, prId, OPEN_SOURCE_COMMENT_PR_DISCONTINUED)
+    await addComment(sliceOctokit, issueId, OPEN_SOURCE_COMMENT_ISSUE_DISCONTINUED)
     logger.logExtendLastLine(`Done!`)
 
     await closeGithubIssue(sliceOctokit, prId, prNumber)

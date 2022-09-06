@@ -110,7 +110,7 @@ var reviewerRequestChangesPR = function (actionInputs, reviewer, repoName, prNum
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Leaving comment to infom maintainer...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, ":rocket: Heads up devs, @" + reviewer + " requested changes in this PR.")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, common_1.OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES.replace('{reviewer}', reviewer))];
             case 17:
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");

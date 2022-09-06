@@ -102,7 +102,7 @@ var reviewerRejectIssue = function (actionInputs, reviewer, repoName, issueNumbe
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Leaving comment to infom devs...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, ":disappointed: Sorry @" + issueAddedBy + ", @" + reviewer + " rejected this issue.")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, issueId, common_1.OPEN_SOURCE_COMMENT_ISSUE_REJECTED.replace('{issueAddedBy}', issueAddedBy).replace('{reviewer}', reviewer))];
             case 15:
                 _c.sent();
                 common_1.logger.logExtendLastLine("Done!");

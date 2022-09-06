@@ -12,6 +12,7 @@ import {
     getPullRequest,
     isMaintainerOfRepo,
     logger,
+    OPEN_SOURCE_COMMENT_PR_MERGED,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -85,7 +86,7 @@ export const mergePr = async (
     logger.logExtendLastLine(`Done!`)
 
     logger.logWriteLine('OpenSource', `Leaving comment...`)
-    await addComment(sliceOctokit, prId, `:tada: This PR is merged by client`)
+    await addComment(sliceOctokit, prId, OPEN_SOURCE_COMMENT_PR_MERGED)
     logger.logExtendLastLine(`Done!`)
 
     await closePR(sliceOctokit, prId, prNumber)

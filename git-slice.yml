@@ -68,8 +68,8 @@ env:
   GIT_SLICE_OPEN_SOURCE_URL: https://github.com/cypress-io/cypress.git
   GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME: Cypress
 
-  GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW: https://github.com/orgs/GitStartHQ/projects/5/views/1
-  GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE: test-team-reviewing-committee
+  GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW: ${{ secrets.OPEN_SOURCE_MANAGER_PROJECT_VIEW }}
+  GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE: ${{ secrets.OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE }}
 
 jobs:
   git-slice-checkout:

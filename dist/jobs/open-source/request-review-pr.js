@@ -108,7 +108,7 @@ var requestReviewPR = function (actionInputs, maintainer, repoName, prNumber) { 
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 common_1.logger.logWriteLine('OpenSource', "Tagging reviewing comittee...");
-                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, ":rocket: Heads up @" + projectManangerView.org + "/" + actionInputs.openSourceTeamReviewingCommittee + ", this PR is ready for final review")];
+                return [4 /*yield*/, (0, common_1.addComment)(sliceOctokit, prId, common_1.OPEN_SOURCE_COMMENT_REQUEST_PR_REVIEW.replace('{reviewing_committee_team}', projectManangerView.org + "/" + actionInputs.openSourceTeamReviewingCommittee))];
             case 16:
                 _d.sent();
                 common_1.logger.logExtendLastLine("Done!");

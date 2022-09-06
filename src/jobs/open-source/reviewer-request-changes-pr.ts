@@ -10,6 +10,7 @@ import {
     getPullRequest,
     isMemberOfTeam,
     logger,
+    OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES,
     OPEN_SOURCE_FIELDS,
     OPEN_SOURCE_STATUS_OPTIONS,
     updateIssueFieldValue,
@@ -96,6 +97,6 @@ export const reviewerRequestChangesPR = async (
     logger.logExtendLastLine(`Done!`)
 
     logger.logWriteLine('OpenSource', `Leaving comment to infom maintainer...`)
-    await addComment(sliceOctokit, prId, `:rocket: Heads up devs, @${reviewer} requested changes in this PR.`)
+    await addComment(sliceOctokit, prId, OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES.replace('{reviewer}', reviewer))
     logger.logExtendLastLine(`Done!`)
 }
