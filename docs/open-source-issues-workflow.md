@@ -46,6 +46,39 @@ git-slice-tools open-source setup-workflow
 
 ```
 
+Example:
+
+```shell
+
+Setup git-slice-open-source workflow in this local repository: /Users/kentnguyen/Projects/client-sourcegraph
+git-slice-open-source.yml already exists. Do you want to override it? (y/n) y
+Loading template...
+Please enter following inputs (enter 'q' to exit):
+Name of open source instance: Cypress
+Open source git url (Ex: https://github.com/cypress-io/cypress.git): https://github.com/cypress-io/cypress.git
+Upstream repo (forked repo) git url (Ex: https://github.com/GitStartHQ/cypress.git): fasdfasdf
+  Invalid 'Upstream repo (forked repo) git url', should be matched /^https:\/\/(github.com|gitlab.com)\/[\w-]+\/[\w-]+\.git$/i
+Upstream repo (forked repo) git url (Ex: https://github.com/GitStartHQ/cypress.git): https://github.com/GitStartHQ/cypress.g
+it
+Upstream repo (forked repo) default branch: develop
+Slice repo (internal repo) git url (Ex: https://github.com/GitStartHQ/client-cypress.git): https://github.com/GitStartHQ/cli
+ent-cypress.git
+Slice repo (internal repo) default branch: main
+Writing git-slice-open-source.yml file with entered inputs...
+  - GIT_SLICE_CHECKOUT_CACHED_KEY: abe89ff8-5e28-4e38-a4d8-a91042b06774
+  - GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME: Cypress
+  - GIT_SLICE_OPEN_SOURCE_URL: https://github.com/cypress-io/cypress.git
+  - GIT_SLICE_UPSTREAM_REPO_URL: https://github.com/GitStartHQ/cypress.git
+  - GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: develop
+  - GIT_SLICE_SLICE_REPO_URL: https://github.com/GitStartHQ/client-cypress.git
+  - GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH: main
+Done!
+Please remember to:
+  - Push '.github/workflows/git-slice-open-source.yml' file to default branch of slice repo.
+  - Invite 'gitstart' (bot@gitstart.com) as a maintainer of both slice and upstream repos.
+
+```
+
 ### Manually
 
 Repo maintainers copy `git-slice-open-source.yml` into `.github/workflows` of repositories and complete all variables in `env:` section. Outside of [`git-slice-tools` env variables](../README.md#environment-variables), open source issues workflow requires 3 extra variables:
