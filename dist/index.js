@@ -366,6 +366,18 @@ var GLOBAL_OPTIONS_CONFIG = {
                     return jobs_1.openSource.closePR(actionInputs, argv['close-pr-maintainer'], argv['close-pr-repo'], argv['close-pr-pr-number']);
                 })];
         });
+    }); })
+        .command('setup-workflow [dir]', 'Setup git-slice-open-source Github Actions', function (argv) {
+        return argv.positional('dir', { desc: 'Repo directory', type: 'string', default: '.' });
+    }, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, jobs_1.openSource.setupWorkflow(argv['dir'])];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
     }); });
 })
     .parseAsync();

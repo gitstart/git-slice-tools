@@ -21,4 +21,5 @@ __exportStar(require("./reviewer-request-changes-pr"), exports);
 __exportStar(require("./push-pr"), exports);
 __exportStar(require("./merge-pr"), exports);
 __exportStar(require("./close-pr"), exports);
+__exportStar(require("./setup-workflow"), exports);
 //# sourceMappingURL=index.js.map

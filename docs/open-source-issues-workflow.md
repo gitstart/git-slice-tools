@@ -31,6 +31,23 @@ We need to create a new Github Project v2 with following custom fields:
 
 ## Setup workflow in repositories
 
+### Script
+
+```shell
+
+# Install `git-slice-tools` globally
+yarn global add https://github.com/GitStartHQ/git-slice-tools
+
+# Navigate into local repository
+cd client-cypress
+
+# Execute setup script and follow instructions
+git-slice-tools open-source setup-workflow
+
+```
+
+### Manually
+
 Repo maintainers copy `git-slice-open-source.yml` into `.github/workflows` of repositories and complete all variables in `env:` section. Outside of [`git-slice-tools` env variables](../README.md#environment-variables), open source issues workflow requires 3 extra variables:
 
 | Options                                          | Description                                                                                                                                                                             |

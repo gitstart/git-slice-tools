@@ -379,5 +379,15 @@ yargs(process.argv.slice(2))
                     )
                 }
             )
+            .command(
+                'setup-workflow [dir]',
+                'Setup git-slice-open-source Github Actions',
+                argv => {
+                    return argv.positional('dir', { desc: 'Repo directory', type: 'string', default: '.' })
+                },
+                async argv => {
+                    await openSource.setupWorkflow(argv['dir'])
+                }
+            )
     })
     .parseAsync()
