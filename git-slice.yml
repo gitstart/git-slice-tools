@@ -92,7 +92,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools CHECKOUT
-        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.3.1
 
   git-slice-pull:
     runs-on: ubuntu-latest
@@ -119,7 +119,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL
-        uses: GitStartHQ/git-slice-tools/actions/pull@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/pull@v1.3.1
 
   git-slice-pull-branch:
     runs-on: ubuntu-latest
@@ -139,7 +139,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-BRANCH
-        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.3.1
         with:
           branch: ${{ github.event.inputs.branch }}
           target-branch: ${{ github.event.inputs.targetBranch }}
@@ -160,7 +160,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW
-        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.3.1
         with:
           pr-number: ${{ github.event.inputs.prNumber }}
           pr-review-link: ${{ github.event.inputs.prReivewLink }}
@@ -183,7 +183,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW-COMMENT (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.3.1
 
   git-slice-push:
     runs-on: ubuntu-latest
@@ -203,7 +203,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH
-        uses: GitStartHQ/git-slice-tools/actions/push@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/push@v1.3.1
         with:
           branch: ${{ github.event.inputs.branch }}
           message: ${{ github.event.inputs.commitMessage }}
@@ -231,7 +231,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.3.1
 
   git-slice-pull-issue:
     runs-on: ubuntu-latest
@@ -249,7 +249,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-ISSUE
-        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.3.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.3.1
         with:
           upstream-issue: ${{ github.event.inputs.upstreamIssue }}
           slice-issue: ${{ github.event.inputs.sliceIssue }}

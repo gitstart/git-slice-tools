@@ -93,10 +93,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.1
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.1
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
