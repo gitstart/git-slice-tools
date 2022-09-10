@@ -42,9 +42,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupWorkflow = void 0;
 var crypto_1 = __importDefault(require("crypto"));
 var fs_1 = __importDefault(require("fs"));
-var node_fetch_1 = __importDefault(require("node-fetch"));
 var path_1 = __importDefault(require("path"));
 var terminal_kit_1 = require("terminal-kit");
+var child_process_1 = require("child_process");
 var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0, function () {
     var repoAbsFolder, workflowFilePath, shouldOverride, template, content, requiredInputs, i, requiredInput, desc, ex, defaultValue, _a, regex, _b;
     return __generator(this, function (_c) {
@@ -65,10 +65,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                 _c.label = 2;
             case 2:
                 (0, terminal_kit_1.terminal)("Loading template...\n");
-                return [4 /*yield*/, (0, node_fetch_1.default)('https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-open-source.yml')];
-            case 3: return [4 /*yield*/, (_c.sent()).text()];
-            case 4:
-                template = _c.sent();
+                template = (0, child_process_1.execSync)('curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-open-source.yml').toString('utf8');
                 content = template;
                 (0, terminal_kit_1.terminal)("Please enter following inputs (enter 'q' to exit):\n");
                 requiredInputs = [
@@ -106,9 +103,9 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                     },
                 ];
                 i = 0;
-                _c.label = 5;
-            case 5:
-                if (!(i < requiredInputs.length)) return [3 /*break*/, 8];
+                _c.label = 3;
+            case 3:
+                if (!(i < requiredInputs.length)) return [3 /*break*/, 6];
                 requiredInput = requiredInputs[i];
                 desc = requiredInput.desc, ex = requiredInput.ex, defaultValue = requiredInput.defaultValue, _a = requiredInput.regex, regex = _a === void 0 ? /.{1}/ : _a;
                 (0, terminal_kit_1.terminal)("" + desc + (ex ? " (Ex: " + ex + ")" : '') + ": ");
@@ -117,7 +114,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                         cancelable: false,
                         default: defaultValue,
                     }).promise];
-            case 6:
+            case 4:
                 _b.value = _c.sent();
                 if (requiredInput.value === 'q') {
                     (0, terminal_kit_1.terminal)("\nYou entered 'q'. Existing... \n");
@@ -129,11 +126,11 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                     i -= 1;
                 }
                 (0, terminal_kit_1.terminal)("\n");
-                _c.label = 7;
-            case 7:
+                _c.label = 5;
+            case 5:
                 i++;
-                return [3 /*break*/, 5];
-            case 8:
+                return [3 /*break*/, 3];
+            case 6:
                 (0, terminal_kit_1.terminal)('Writing git-slice-open-source.yml file with entered inputs...\n');
                 requiredInputs.unshift({ env: 'GIT_SLICE_CHECKOUT_CACHED_KEY', desc: '', value: crypto_1.default.randomUUID() });
                 requiredInputs.forEach(function (_a) {

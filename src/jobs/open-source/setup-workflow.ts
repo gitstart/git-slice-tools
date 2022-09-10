@@ -1,8 +1,9 @@
 import crypto from 'crypto'
 import fs from 'fs'
-import fetch from 'node-fetch'
 import path from 'path'
 import { terminal } from 'terminal-kit'
+import { WorkflowInput } from 'types'
+import { execSync } from 'child_process'
 
 export const setupWorkflow = async (repoDir: string): Promise<void> => {
     const repoAbsFolder = path.resolve(process.cwd(), repoDir)
@@ -23,21 +24,14 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
 
     terminal(`Loading template...\n`)
 
-    const template = await (
-        await fetch('https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-open-source.yml')
-    ).text()
+    const template = execSync(
+        'curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-open-source.yml'
+    ).toString('utf8')
     let content = template
 
     terminal(`Please enter following inputs (enter 'q' to exit):\n`)
 
-    const requiredInputs: {
-        env: string
-        desc: string
-        regex?: RegExp
-        ex?: string
-        defaultValue?: string
-        value?: string
-    }[] = [
+    const requiredInputs: WorkflowInput[] = [
         {
             env: 'GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME',
             desc: 'Name of open source instance',

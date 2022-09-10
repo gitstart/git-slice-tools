@@ -93,10 +93,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.1
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.2
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.1
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.2
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -234,6 +234,64 @@ In this flow:
 - `pull-issue` and `pull-review` will look for issues and reviews on open source repo.
 
 ## Use `git-slice-tools` in Github Action
+
+### Setup workflow with global cli
+
+```shell
+
+# Install `git-slice-tools` globally
+
+# With yarn
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+
+# With npm
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+
+# Navigate into local repository
+cd client-cypress
+
+# Execute setup script and follow instructions
+git-slice-tools setup-workflow
+
+```
+
+Example:
+
+```shell
+Setup git-slice workflow in this local repository: /Users/kentnguyen/Projects/client-helloalice-mad-hatter
+git-slice.yml already exists. Do you want to override it? (y/n) y
+Loading template...
+Loading template...
+Do you want to use open-source workflow?: (y/n) n
+Slice repo (internal repo) git url (Ex: https://github.com/GitStartHQ/client-cypress.git): https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
+Slice repo (internal repo) default branch: main
+Slice repo (internal repo) username: gitstart
+Slice repo (internal repo) email: bot@gitstart.com
+Upstream repo (client repo) git url: https://github.com/thecircularboard/mad-hatter.git
+Upstream repo (client repo) default branch: dev
+Upstream repo (client repo) username: gitstart-helloalice
+Upstream repo (client repo) email: helloalice@gitstart.com
+Writing git-slice.yml file with entered inputs...
+  - GIT_SLICE_OPEN_SOURCE_FLOW: false
+  - GIT_SLICE_OPEN_SOURCE_URL: ""
+  - GIT_SLICE_SLICE_REPO_URL: https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
+  - GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH: main
+  - GIT_SLICE_SLICE_REPO_USERNAME: gitstart
+  - GIT_SLICE_SLICE_REPO_EMAIL: bot@gitstart.com
+  - GIT_SLICE_UPSTREAM_REPO_URL: https://github.com/thecircularboard/mad-hatter.git
+  - GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: dev
+  - GIT_SLICE_UPSTREAM_REPO_USERNAME: gitstart-helloalice
+  - GIT_SLICE_UPSTREAM_REPO_EMAIL: helloalice@gitstart.com
+Done!
+Please remember to:
+  - Push '.github/workflows/git-slice.yml' file to default branch of slice repo.
+  - Create a repo secret with name is 'GIT_SLICE_SLICE_REPO_PASSWORD' and value is the PAT of 'gitstart' account.
+  - Create a repo secret with name is 'GIT_SLICE_UPSTREAM_REPO_PASSWORD' and value is the PAT of 'gitstart-helloalice' account.
+  - Create a repo secret with name is 'GIT_SLICE_UPSTREAM_REPO_CACHE_KEY' and value is a dummy string value.
+✨  Done in 123.92s.
+```
+
+### Setup workflow manually
 
 You can setup `git-slice-tools` easily in Github Action by coping our prepared `git-slice.yml` file into your `.github/workflows` folder and correct the root `env:` object with your slice/upstream/opensource repo you want. It requires 3 extra secret variables:
 

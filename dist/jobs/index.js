@@ -31,5 +31,6 @@ __exportStar(require("./pull-review"), exports);
 __exportStar(require("./pull-issue"), exports);
 __exportStar(require("./push"), exports);
 __exportStar(require("./raise-pr"), exports);
+__exportStar(require("./setup-workflow"), exports);
 exports.openSource = __importStar(require("./open-source"));
 //# sourceMappingURL=index.js.map

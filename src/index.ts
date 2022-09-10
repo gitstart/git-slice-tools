@@ -2,7 +2,18 @@ import { SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
 import yargs from 'yargs/yargs'
 import { loadValidateActionInputs } from './config'
-import { checkout, init, openSource, pull, pullBranch, pullIssue, pullReview, push, raisePr } from './jobs'
+import {
+    checkout,
+    init,
+    openSource,
+    pull,
+    pullBranch,
+    pullIssue,
+    pullReview,
+    push,
+    raisePr,
+    setupWorkflow,
+} from './jobs'
 import { ActionInputs } from './types'
 
 const loadActionInputs = async (
@@ -39,6 +50,16 @@ const GLOBAL_OPTIONS_CONFIG = {
 
 yargs(process.argv.slice(2))
     .option(GLOBAL_OPTIONS_CONFIG)
+    .command(
+        'setup-workflow [dir]',
+        'Setup git-slice Github Actions',
+        argv => {
+            return argv.positional('dir', { desc: 'Repo directory', type: 'string', default: '.' })
+        },
+        async argv => {
+            await setupWorkflow(argv['dir'])
+        }
+    )
     .command(
         'checkout',
         'Fetch `origin` and checkout default branch of both upstream and slice repos',

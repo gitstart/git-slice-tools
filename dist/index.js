@@ -92,6 +92,18 @@ var GLOBAL_OPTIONS_CONFIG = {
 };
 (0, yargs_1.default)(process.argv.slice(2))
     .option(GLOBAL_OPTIONS_CONFIG)
+    .command('setup-workflow [dir]', 'Setup git-slice Github Actions', function (argv) {
+    return argv.positional('dir', { desc: 'Repo directory', type: 'string', default: '.' });
+}, function (argv) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, (0, jobs_1.setupWorkflow)(argv['dir'])];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); })
     .command('checkout', 'Fetch `origin` and checkout default branch of both upstream and slice repos', GLOBAL_OPTIONS_CONFIG, function (_a) {
     var env = _a.env;
     return __awaiter(void 0, void 0, void 0, function () {

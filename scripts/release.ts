@@ -23,7 +23,7 @@ if (relaseType === 'branch') {
 } else {
     const semverReleaseType = relaseType as semver.ReleaseType
 
-    nextVersion = semver.inc(mainVersion, semverReleaseType)
+    nextVersion = semver.inc(mainVersion, semverReleaseType) ?? ''
 }
 
 console.log(`Releasing version ${nextVersion}`)

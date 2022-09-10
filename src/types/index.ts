@@ -76,3 +76,12 @@ export interface IssueTimelineDisconnectedEvent extends IssueTimelineBaseEvent {
 }
 
 export type IssueTimelineEvent = IssueTimelineConnectedEvent | IssueTimelineDisconnectedEvent
+
+export type WorkflowInput = {
+    env: string
+    desc: string
+    regex?: RegExp
+    ex?: string
+    defaultValue?: string
+    value?: string
+}
