@@ -247,7 +247,8 @@ yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.2
 # With npm
 npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.2
 
-# Navigate into local repository
+# Navigate to local cloned slice repo,
+# If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`
 cd client-cypress
 
 # Execute setup script and follow instructions
@@ -260,7 +261,6 @@ Example:
 ```shell
 Setup git-slice workflow in this local repository: /Users/kentnguyen/Projects/client-helloalice-mad-hatter
 git-slice.yml already exists. Do you want to override it? (y/n) y
-Loading template...
 Loading template...
 Do you want to use open-source workflow?: (y/n) n
 Slice repo (internal repo) git url (Ex: https://github.com/GitStartHQ/client-cypress.git): https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
