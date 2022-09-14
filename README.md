@@ -301,7 +301,7 @@ You can setup `git-slice-tools` easily in Github Action by coping our prepared `
 | `GIT_SLICE_SLICE_REPO_PASSWORD`     | it's PAT of the Github Account for slice repo                                                                                                         |
 | `GIT_SLICE_UPSTREAM_REPO_CACHE_KEY` | it's a key for caching a version of sourcecode of both upstream and slice repos. You should change it when you see it takes longer time for pull jobs |
 
-A note about Github Account for slice repo, please make sure it has right permissions for force-push changes on default branch, we recommend to give it `maintainer` permission.
+A note about Github Account for slice repo, please make sure it has right permissions on default branch, we recommend to give it `maintainer` role but if you already set up branch protection for slice default branch with `Require a pull request before merging` you should add that account into `Allow specified actors to bypass required pull requests` account list, if you still get permission issues, then please give it `admin` role.
 
 Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
 
