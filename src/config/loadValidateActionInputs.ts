@@ -68,7 +68,7 @@ export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs =
         throw new Error(`Missing 'GIT_SLICE_UPSTREAM_REPO_EMAIL'`)
     }
 
-    const sliceIgnores: string[] = ['.github/workflows', 'git-slice.json']
+    const sliceIgnores: string[] = ['.github', '!.github/PULL_REQUEST_TEMPLATE', 'git-slice.json']
     if (process.env.GIT_SLICE_SLICE_IGNORES) {
         try {
             const parsedSliceIgnores = JSON.parse(process.env.GIT_SLICE_SLICE_IGNORES)
