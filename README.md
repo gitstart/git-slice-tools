@@ -247,7 +247,8 @@ yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 # With npm
 npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 
-# Navigate into local repository
+# Navigate to local cloned slice repo,
+# If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`
 cd client-cypress
 
 # Execute setup script and follow instructions
@@ -260,7 +261,6 @@ Example:
 ```shell
 Setup git-slice workflow in this local repository: /Users/kentnguyen/Projects/client-helloalice-mad-hatter
 git-slice.yml already exists. Do you want to override it? (y/n) y
-Loading template...
 Loading template...
 Do you want to use open-source workflow?: (y/n) n
 Slice repo (internal repo) git url (Ex: https://github.com/GitStartHQ/client-cypress.git): https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
@@ -301,7 +301,7 @@ You can setup `git-slice-tools` easily in Github Action by coping our prepared `
 | `GIT_SLICE_SLICE_REPO_PASSWORD`     | it's PAT of the Github Account for slice repo                                                                                                         |
 | `GIT_SLICE_UPSTREAM_REPO_CACHE_KEY` | it's a key for caching a version of sourcecode of both upstream and slice repos. You should change it when you see it takes longer time for pull jobs |
 
-A note about Github Account for slice repo, please make sure it has right permissions for force-push changes on default branch, we recommend to give it `maintainer` permission.
+A note about Github Account for slice repo, please make sure it has right permissions on default branch, we recommend to give it `maintainer` role but if you already set up branch protection for slice default branch with `Require a pull request before merging` you should add that account into `Allow specified actors to bypass required pull requests` account list, if you still get permission issues, then please give it `admin` role.
 
 Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
 
