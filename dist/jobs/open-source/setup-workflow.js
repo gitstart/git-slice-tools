@@ -138,6 +138,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                     (0, terminal_kit_1.terminal)("  - " + env + ": " + value + "\n");
                     content = content.replace("<input-" + env + ">", value);
                 });
+                fs_1.default.mkdirSync(path_1.default.dirname(workflowFilePath), { recursive: true });
                 fs_1.default.writeFileSync(workflowFilePath, "" + content, { flag: 'w' });
                 (0, terminal_kit_1.terminal)('Done!\n');
                 (0, terminal_kit_1.terminal)('Please remember to: \n');

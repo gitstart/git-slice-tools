@@ -189,6 +189,7 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
         )
     }
 
+    fs.mkdirSync(path.dirname(workflowFilePath), { recursive: true })
     fs.writeFileSync(workflowFilePath, `${content}`, { flag: 'w' })
 
     terminal('Done!\n')

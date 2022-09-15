@@ -93,10 +93,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -242,10 +242,10 @@ In this flow:
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.3.2
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.4.0
 
 # Navigate into local repository
 cd client-cypress

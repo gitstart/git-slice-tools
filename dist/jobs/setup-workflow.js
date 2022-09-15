@@ -200,6 +200,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                     // we should use `${{ secrets.OPEN_SOURCE_GITSTART_ACCOUNT_PAT }}` instead of `${{ secrets.GIT_SLICE_UPSTREAM_REPO_PASSWORD }}`
                     content = content.replace('secrets.GIT_SLICE_UPSTREAM_REPO_PASSWORD', 'secrets.OPEN_SOURCE_GITSTART_ACCOUNT_PAT');
                 }
+                fs_1.default.mkdirSync(path_1.default.dirname(workflowFilePath), { recursive: true });
                 fs_1.default.writeFileSync(workflowFilePath, "" + content, { flag: 'w' });
                 (0, terminal_kit_1.terminal)('Done!\n');
                 (0, terminal_kit_1.terminal)('Please remember to: \n');
