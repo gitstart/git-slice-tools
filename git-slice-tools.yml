@@ -1,3 +1,13 @@
+# git-slice-tools workflow
+# https://github.com/GitStartHQ/git-slice-tools
+# Please look at git-slice-tools repo for more details.
+# Setup steps:
+# - You need to correct "<input-*>" placeholders in "env:" object
+# - Create GIT_SLICE_UPSTREAM_REPO_PASSWORD repo secret with value is a PAT of GIT_SLICE_UPSTREAM_REPO_USERNAME account
+# - Create GIT_SLICE_SLICE_REPO_PASSWORD repo secret with value is a PAT of GIT_SLICE_SLICE_REPO_USERNAME account
+# - Create GIT_SLICE_UPSTREAM_REPO_CACHE_KEY repo secret with value is a dummy string
+# - Invite GIT_SLICE_SLICE_REPO_USERNAME account with "maintainer" role to slice repo. If slice repo has "Require a pull request before merging" config, please add GIT_SLICE_SLICE_REPO_USERNAME into "Allow specified actors to bypass required pull requests"
+
 name: git-slice-tools
 
 on:
@@ -44,27 +54,46 @@ on:
       sliceIssue:
         description: '[pull-an-issue] Slice issue number to update (optional)'
 
+# Terms:
+# - Upstream repo: client repo or forked repo in open source flow
+# - Slice repo: internal (private) repo
+
 env:
   GIT_SLICE_UPSTREAM_REPO_DIR: ./upstream-repo
+  # Http git url of upstream repo, should be in this format : https://github.com/sourcegraph/sourcegraph.git
   GIT_SLICE_UPSTREAM_REPO_URL: <input-GIT_SLICE_UPSTREAM_REPO_URL>
+  # Name of default branch of upstream repo
   GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH: <input-GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH>
+  # Username for git authentication and commit details on upstream repo
   GIT_SLICE_UPSTREAM_REPO_USERNAME: <input-GIT_SLICE_UPSTREAM_REPO_USERNAME>
+  # User email for git authentication and commit details on upstream repo
   GIT_SLICE_UPSTREAM_REPO_EMAIL: <input-GIT_SLICE_UPSTREAM_REPO_EMAIL>
   GIT_SLICE_UPSTREAM_REPO_PASSWORD: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_PASSWORD }}
   GIT_SLICE_SLICE_REPO_DIR: ./slice-repo
+  # Http git url of slice repo, should be in this format : https://github.com/GitStartHQ/client-sourcegraph.git
   GIT_SLICE_SLICE_REPO_URL: <input-GIT_SLICE_SLICE_REPO_URL>
+  # Name of default branch of slice repo
   GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH: <input-GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH>
+  # Username for git authentication and commit details on slice repo
   GIT_SLICE_SLICE_REPO_USERNAME: <input-GIT_SLICE_SLICE_REPO_USERNAME>
+  # User email for git authentication and commit details on slice repo
   GIT_SLICE_SLICE_REPO_EMAIL: <input-GIT_SLICE_SLICE_REPO_EMAIL>
+  # Personal Access Token for git authentication on slice repo
   GIT_SLICE_SLICE_REPO_PASSWORD: ${{ secrets.GIT_SLICE_SLICE_REPO_PASSWORD }}
+  # Array of glob patterns which are used to ignore files when syncing changes between 2 repos. ex: `['.git-slice.json', 'dev/*']`
   GIT_SLICE_SLICE_IGNORES: '[]'
+  # Pattern for building branch name in upstream repo when pushing a branch in slice repo, git-slice-tools would replace '<branch_name>' with the name pushing branch. ex: 'dev/<branch_name>'
   GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE: '<branch_name>'
+  # Regular expression which is used to validate commit messages
   GIT_SLICE_PUSH_COMMIT_MSG_REGEX: '.*'
   GIT_SLICE_CHECKOUT_CACHED_KEY: ${{ secrets.GIT_SLICE_UPSTREAM_REPO_CACHE_KEY }}
+  # Array of labels which git-slice-tools will add into new PR. Ex: ex: '["gitstart","team/frontend-platform"]'
   GIT_SLICE_PR_LABELS: '[]'
+  # (`true` or `false`) git-slice-tools would raise new PR as draft PR or not
   GIT_SLICE_PR_DRAFT: true
-
+  # (`true` or `false`) Use open source flow or not
   GIT_SLICE_OPEN_SOURCE_FLOW: <input-GIT_SLICE_OPEN_SOURCE_FLOW>
+  # Http git url of open source repo, should be in this format : https://github.com/cypress.io/cypress.git, please user empty string "" if it's not
   GIT_SLICE_OPEN_SOURCE_URL: <input-GIT_SLICE_OPEN_SOURCE_URL>
 
 jobs:
@@ -88,7 +117,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools CHECKOUT
-        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.5.0
 
   git-slice-pull:
     runs-on: ubuntu-latest
@@ -115,7 +144,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL
-        uses: GitStartHQ/git-slice-tools/actions/pull@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/pull@v1.5.0
 
   git-slice-pull-branch:
     runs-on: ubuntu-latest
@@ -135,7 +164,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-BRANCH
-        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.5.0
         with:
           branch: ${{ github.event.inputs.branch }}
           target-branch: ${{ github.event.inputs.targetBranch }}
@@ -156,7 +185,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW
-        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.5.0
         with:
           pr-number: ${{ github.event.inputs.prNumber }}
           pr-review-link: ${{ github.event.inputs.prReivewLink }}
@@ -179,7 +208,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW-COMMENT (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.5.0
 
   git-slice-push:
     runs-on: ubuntu-latest
@@ -199,7 +228,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH
-        uses: GitStartHQ/git-slice-tools/actions/push@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/push@v1.5.0
         with:
           branch: ${{ github.event.inputs.branch }}
           message: ${{ github.event.inputs.commitMessage }}
@@ -227,7 +256,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.5.0
 
   git-slice-pull-issue:
     runs-on: ubuntu-latest
@@ -245,7 +274,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-ISSUE
-        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.4.0
+        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.5.0
         with:
           upstream-issue: ${{ github.event.inputs.upstreamIssue }}
           slice-issue: ${{ github.event.inputs.sliceIssue }}

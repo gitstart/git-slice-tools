@@ -16,7 +16,7 @@ A new version of git-slice, super high performance and more features.
 | `GIT_SLICE_UPSTREAM_REPO_URL`            | Http git url of upstream repo, should be in this format : https://github.com/GitStartHQ/client-sourcegraph.git                                                                             |
 | `GIT_SLICE_OPEN_SOURCE_FLOW`             | (`true` or `false`). Default is `false`. Set `true` if you want to use opensource flow                                                                                                     |
 | `GIT_SLICE_OPEN_SOURCE_URL`              | Http git url of the opensource repo, should be in this format : https://github.com/sourcegraph/sourcegraph.git                                                                             |
-| `GIT_SLICE_SLICE_REPO_DIR`               | Relation/absolute path to directory which contains slice source                                                                                                                            |
+| `GIT_SLICE_SLICE_REPO_DIR`               | Relation/absolute path to directory which contains slice source f                                                                                                                          |
 | `GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH`    | Name of default branch of slice repo                                                                                                                                                       |
 | `GIT_SLICE_SLICE_REPO_USERNAME`          | Username for git authentication and commit details on slice repo                                                                                                                           |
 | `GIT_SLICE_SLICE_REPO_EMAIL`             | User email for git authentication and commit details on slice repo                                                                                                                         |
@@ -26,8 +26,10 @@ A new version of git-slice, super high performance and more features.
 | `GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE`    | Pattern for building branch name in upstream repo when pushing a branch in slice repo, git-slice-tools would replace `<branch_name>` with the name pushing branch. ex: `dev/<branch_name>` |
 | `GIT_SLICE_PUSH_COMMIT_MSG_REGEX`        | Regular expression which is used to validate commit messages                                                                                                                               |
 | `GIT_SLICE_FORCE_GIT_INIT`               | (`true` or `false`). Default is `true`. git-slice-tools would reset git configs in every run times                                                                                         |
-| `GIT_SLICE_PR_LABELS`                    | Array of labels which git-slice-tools will add into new PR. Ex: ex: `["gitstart","team/frontend-platform"`                                                                                 |
+| `GIT_SLICE_PR_LABELS`                    | Array of labels which git-slice-tools will add into new PR. Ex: ex: `["gitstart","team/frontend-platform"]`                                                                                |
 | `GIT_SLICE_PR_DRAFT`                     | (`true` or `false`). Default is `true`. git-slice-tools would raise new PR as draft PR                                                                                                     |
+| `GIT_SLICE_OPEN_SOURCE_FLOW`             | (`true` or `false`). Default is `false`. git-slice-tools should use open source flow or not                                                                                                |
+| `GIT_SLICE_OPEN_SOURCE_URL`              | Http git url of open source repo, should be in this format : https://github.com/cypress.io/cypress.git, please user empty string "" if it's not                                            |
 
 Sample `.env` file
 
@@ -55,7 +57,7 @@ GIT_SLICE_PR_LABELS='["gitstart","team/frontend-platform"]'
 GIT_SLICE_PR_DRAFT=true
 
 GIT_SLICE_OPEN_SOURCE_FLOW=false
-GIT_SLICE_OPEN_SOURCE_URL=https://github.com/sourcegraph/sourcegraph.git
+GIT_SLICE_OPEN_SOURCE_URL=""
 ```
 
 ## Development
@@ -93,10 +95,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.4.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.5.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.4.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.5.0
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -235,6 +237,18 @@ In this flow:
 
 ## Use `git-slice-tools` in Github Action
 
+### Setup workflow manually
+
+You can setup `git-slice-tools` easily in Github Action by coping our prepared `git-slice-tools.yml` file into your `.github/workflows` folder and follow these steps:
+
+Setup steps:
+
+- You need to correct all `<input-*>` placeholders in `env:` object
+- Create GIT_SLICE_UPSTREAM_REPO_PASSWORD repo secret with value is a PAT of GIT_SLICE_UPSTREAM_REPO_USERNAME account
+- Create GIT_SLICE_SLICE_REPO_PASSWORD repo secret with value is a PAT of GIT_SLICE_SLICE_REPO_USERNAME account
+- Create GIT_SLICE_UPSTREAM_REPO_CACHE_KEY repo secret with value is a dummy string
+- Invite GIT_SLICE_SLICE_REPO_USERNAME account with "maintainer" role to slice repo. If slice repo has "Require a pull request before merging" config, please add GIT_SLICE_SLICE_REPO_USERNAME into "Allow specified actors to bypass required pull requests"
+
 ### Setup workflow with global cli
 
 ```shell
@@ -242,10 +256,10 @@ In this flow:
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.4.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.5.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.4.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.5.0
 
 # Navigate to local cloned slice repo,
 # If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`
@@ -260,7 +274,7 @@ Example:
 
 ```shell
 Setup git-slice workflow in this local repository: /Users/kentnguyen/Projects/client-helloalice-mad-hatter
-git-slice.yml already exists. Do you want to override it? (y/n) y
+git-slice-tools.yml already exists. Do you want to override it? (y/n) y
 Loading template...
 Do you want to use open-source workflow?: (y/n) n
 Slice repo (internal repo) git url (Ex: https://github.com/GitStartHQ/client-cypress.git): https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
@@ -271,7 +285,7 @@ Upstream repo (client repo) git url: https://github.com/thecircularboard/mad-hat
 Upstream repo (client repo) default branch: dev
 Upstream repo (client repo) username: gitstart-helloalice
 Upstream repo (client repo) email: helloalice@gitstart.com
-Writing git-slice.yml file with entered inputs...
+Writing git-slice-tools.yml file with entered inputs...
   - GIT_SLICE_OPEN_SOURCE_FLOW: false
   - GIT_SLICE_OPEN_SOURCE_URL: ""
   - GIT_SLICE_SLICE_REPO_URL: https://github.com/GitStartHQ/client-helloalice-mad-hatter.git
@@ -284,24 +298,14 @@ Writing git-slice.yml file with entered inputs...
   - GIT_SLICE_UPSTREAM_REPO_EMAIL: helloalice@gitstart.com
 Done!
 Please remember to:
-  - Push '.github/workflows/git-slice.yml' file to default branch of slice repo.
+  - Push '.github/workflows/git-slice-tools.yml' file to default branch of slice repo.
   - Create a repo secret with name is 'GIT_SLICE_SLICE_REPO_PASSWORD' and value is the PAT of 'gitstart' account.
   - Create a repo secret with name is 'GIT_SLICE_UPSTREAM_REPO_PASSWORD' and value is the PAT of 'gitstart-helloalice' account.
   - Create a repo secret with name is 'GIT_SLICE_UPSTREAM_REPO_CACHE_KEY' and value is a dummy string value.
 ✨  Done in 123.92s.
 ```
 
-### Setup workflow manually
-
-You can setup `git-slice-tools` easily in Github Action by coping our prepared `git-slice.yml` file into your `.github/workflows` folder and correct the root `env:` object with your slice/upstream/opensource repo you want. It requires 3 extra secret variables:
-
-| Name                                | Description                                                                                                                                           |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GIT_SLICE_UPSTREAM_REPO_PASSWORD`  | it's PAT of the Github Account for upstream repo                                                                                                      |
-| `GIT_SLICE_SLICE_REPO_PASSWORD`     | it's PAT of the Github Account for slice repo                                                                                                         |
-| `GIT_SLICE_UPSTREAM_REPO_CACHE_KEY` | it's a key for caching a version of sourcecode of both upstream and slice repos. You should change it when you see it takes longer time for pull jobs |
-
-A note about Github Account for slice repo, please make sure it has right permissions on default branch, we recommend to give it `maintainer` role but if you already set up branch protection for slice default branch with `Require a pull request before merging` you should add that account into `Allow specified actors to bypass required pull requests` account list, if you still get permission issues, then please give it `admin` role.
+### git-slice-tools workflow features
 
 Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
 

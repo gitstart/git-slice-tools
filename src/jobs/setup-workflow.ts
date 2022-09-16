@@ -31,13 +31,13 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
     }
 
     const repoAbsFolder = path.resolve(process.cwd(), repoDir)
-    const workflowFilePath = path.resolve(repoAbsFolder, '.github/workflows/git-slice.yml')
+    const workflowFilePath = path.resolve(repoAbsFolder, '.github/workflows/git-slice-tools.yml')
     const gitUriRegex = /^https:\/\/(github.com|gitlab.com)\/[\w-]+\/[\w-]+\.git$/i
 
-    terminal(`Setup git-slice workflow in this local repository: ${repoAbsFolder}\n`)
+    terminal(`Setup git-slice-tools workflow in this local repository: ${repoAbsFolder}\n`)
 
     if (fs.existsSync(workflowFilePath)) {
-        terminal('git-slice.yml already exists. Do you want to override it? (y/n) ')
+        terminal('git-slice-tools.yml already exists. Do you want to override it? (y/n) ')
         const shouldOverride = await terminal.inputField({ cancelable: false }).promise
 
         if (shouldOverride.toLowerCase() !== 'y') {
@@ -50,7 +50,7 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
     terminal(`Loading template...\n`)
 
     const template = execSync(
-        'curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice.yml'
+        'curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-tools.yml'
     ).toString('utf8')
     let content = template
 
@@ -166,7 +166,7 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
 
     requiredInputs.push(upstreamRepoEmailInput)
 
-    terminal('Writing git-slice.yml file with entered inputs...\n')
+    terminal('Writing git-slice-tools.yml file with entered inputs...\n')
 
     requiredInputs.forEach(({ env, value }) => {
         terminal(`  - ${env}: ${value}\n`)
@@ -194,7 +194,7 @@ export const setupWorkflow = async (repoDir: string): Promise<void> => {
 
     terminal('Done!\n')
     terminal('Please remember to: \n')
-    terminal(`  - Push '.github/workflows/git-slice.yml' file to default branch of slice repo.\n`)
+    terminal(`  - Push '.github/workflows/git-slice-tools.yml' file to default branch of slice repo.\n`)
 
     if (useOpensourceWorkflow) {
         if (upstreamRepoUsernameInput.value !== sliceRepoUsernameInput.value) {

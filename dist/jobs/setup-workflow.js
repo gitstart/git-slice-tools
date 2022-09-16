@@ -66,11 +66,11 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                 _c.label = 2;
             case 2:
                 repoAbsFolder = path_1.default.resolve(process.cwd(), repoDir);
-                workflowFilePath = path_1.default.resolve(repoAbsFolder, '.github/workflows/git-slice.yml');
+                workflowFilePath = path_1.default.resolve(repoAbsFolder, '.github/workflows/git-slice-tools.yml');
                 gitUriRegex = /^https:\/\/(github.com|gitlab.com)\/[\w-]+\/[\w-]+\.git$/i;
-                (0, terminal_kit_1.terminal)("Setup git-slice workflow in this local repository: " + repoAbsFolder + "\n");
+                (0, terminal_kit_1.terminal)("Setup git-slice-tools workflow in this local repository: " + repoAbsFolder + "\n");
                 if (!fs_1.default.existsSync(workflowFilePath)) return [3 /*break*/, 4];
-                (0, terminal_kit_1.terminal)('git-slice.yml already exists. Do you want to override it? (y/n) ');
+                (0, terminal_kit_1.terminal)('git-slice-tools.yml already exists. Do you want to override it? (y/n) ');
                 return [4 /*yield*/, terminal_kit_1.terminal.inputField({ cancelable: false }).promise];
             case 3:
                 shouldOverride = _c.sent();
@@ -81,7 +81,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                 _c.label = 4;
             case 4:
                 (0, terminal_kit_1.terminal)("Loading template...\n");
-                template = (0, child_process_1.execSync)('curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice.yml').toString('utf8');
+                template = (0, child_process_1.execSync)('curl -s https://raw.githubusercontent.com/GitStartHQ/git-slice-tools/main/git-slice-tools.yml').toString('utf8');
                 content = template;
                 requiredInputs = [];
                 (0, terminal_kit_1.terminal)('Do you want to use open-source workflow?: (y/n) ');
@@ -184,7 +184,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
             case 16:
                 upstreamRepoEmailInput = _c.sent();
                 requiredInputs.push(upstreamRepoEmailInput);
-                (0, terminal_kit_1.terminal)('Writing git-slice.yml file with entered inputs...\n');
+                (0, terminal_kit_1.terminal)('Writing git-slice-tools.yml file with entered inputs...\n');
                 requiredInputs.forEach(function (_a) {
                     var env = _a.env, value = _a.value;
                     (0, terminal_kit_1.terminal)("  - " + env + ": " + value + "\n");
@@ -204,7 +204,7 @@ var setupWorkflow = function (repoDir) { return __awaiter(void 0, void 0, void 0
                 fs_1.default.writeFileSync(workflowFilePath, "" + content, { flag: 'w' });
                 (0, terminal_kit_1.terminal)('Done!\n');
                 (0, terminal_kit_1.terminal)('Please remember to: \n');
-                (0, terminal_kit_1.terminal)("  - Push '.github/workflows/git-slice.yml' file to default branch of slice repo.\n");
+                (0, terminal_kit_1.terminal)("  - Push '.github/workflows/git-slice-tools.yml' file to default branch of slice repo.\n");
                 if (useOpensourceWorkflow) {
                     if (upstreamRepoUsernameInput.value !== sliceRepoUsernameInput.value) {
                         (0, terminal_kit_1.terminal)("  - Invite '" + sliceRepoUsernameInput.value + "' as a maintainer of slice repo.\n");

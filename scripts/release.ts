@@ -36,7 +36,7 @@ const nextPackageJson = originalPackageJson.replace(`"version": "${version}"`, `
 
 fs.writeFileSync(packageJsonFilePath, nextPackageJson)
 
-const files = ['git-slice-open-source.yml', 'git-slice.yml', 'docs/open-source-issues-workflow.md', 'README.md']
+const files = ['git-slice-open-source.yml', 'git-slice-tools.yml', 'docs/open-source-issues-workflow.md', 'README.md']
 
 // Get yml files in /actions
 const actionFiles = globby.sync('actions/**/*.yml', { cwd: rootDir })
