@@ -31,7 +31,7 @@ on:
         required: true
       branch:
         description: '[push-a-branch][pull-a-branch] Which branch should be pushed/pulled?'
-        default: 'issue-'
+        default: ''
       commitMessage:
         description: '[push-a-branch] Commit message for the client?'
       overide:
@@ -93,7 +93,7 @@ env:
   GIT_SLICE_PR_DRAFT: true
   # (`true` or `false`) Use open source flow or not
   GIT_SLICE_OPEN_SOURCE_FLOW: <input-GIT_SLICE_OPEN_SOURCE_FLOW>
-  # Http git url of open source repo, should be in this format : https://github.com/cypress.io/cypress.git, please user empty string "" if it's not
+  # Http git url of open source repo, should be in this format : https://github.com/cypress.io/cypress.git, please use empty string "" if it's not
   GIT_SLICE_OPEN_SOURCE_URL: <input-GIT_SLICE_OPEN_SOURCE_URL>
 
 jobs:

@@ -305,6 +305,10 @@ Please remember to:
 ✨  Done in 123.92s.
 ```
 
+### Upgrade git-slice-tools workflow
+
+We keep `git-slice-tools.yml` template up-to-date with the last version of `git-slice-tools` version, we suggest repo owners to override their in-used `git-slice-tools.yml` with `git-slice-tools.yml` from this repo then sync back `env` section.
+
 ### git-slice-tools workflow features
 
 Once the setup is done, you can use `/git-slice ...` comments to trigger `git-slice-tools` jobs or use workflow dispatch if you want.
