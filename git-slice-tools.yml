@@ -36,7 +36,7 @@ on:
         description: '[push-a-branch] Commit message for the client?'
       overide:
         type: boolean
-        description: '[push-a-branch] Overide pervious push (force push)?'
+        description: '[push-a-branch] Override previous push (force push)?'
         default: false
       pushPr:
         type: boolean
@@ -236,7 +236,7 @@ jobs:
           push-pr: ${{ github.event.inputs.pushPr }}
 
   # Trigger git-slice push action with pull request comment: /git-slice push -m "<commit message>" [-f] [-pr]
-  # -f : Overide pervious push (force push)
+  # -f : Override previous push (force push)
   # -pr : Create a PR with the same title and body on the client side
   git-slice-push-comment:
     runs-on: ubuntu-latest

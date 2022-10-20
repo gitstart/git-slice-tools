@@ -1,5 +1,5 @@
 # Trigger git-slice push action with pull request comment: /git-slice push -m "<commit message>" [-f] [-pr]
-# -f : Overide pervious push (force push)
+# -f : Override previous push (force push)
 # -pr : Create a PR with the same title and body on the client side
 name: 'git-slice-tools PUSH (trigger by comments)'
 description: 'Perform cache and git-slice-tools push and raise-pr jobs - trigger by comments'
