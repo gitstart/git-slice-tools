@@ -1,5 +1,6 @@
 import { compareSync, DifferenceState, Reason } from 'dir-compare'
 import fs from 'fs-extra'
+import globby from 'globby'
 import path from 'path'
 import { CleanOptions, GitError, ResetMode, SimpleGit } from 'simple-git'
 import { terminal } from 'terminal-kit'
@@ -118,17 +119,25 @@ export const copyFiles = async (
 ): Promise<string[]> => {
     logWriteLine(scope, `Copy files from '${fromDir}' to '${toDir}'...`)
 
+    const ingoredFilesFromFromDir = await globby(sliceIgnores, { cwd: fromDir })
+    const ingoredFilesFromToDir = await globby(sliceIgnores, { cwd: toDir })
+    const excludeFilterFiles = Array.from(
+        new Set([
+            // It requires to have `**/` as prefix to work with dir-compare filter
+            '**/.DS_Store',
+            '**/.git/**',
+            // It requires to have `/` as prefix to work with dir-compare filter
+            ...ingoredFilesFromToDir.map(x => `/${x.replace(/^\/+/, '')}`),
+            ...ingoredFilesFromFromDir.map(x => `/${x.replace(/^\/+/, '')}`),
+        ])
+    )
+
     const compareResponse = compareSync(toDir, fromDir, {
         compareContent: true,
         compareDate: false,
         compareSize: false,
         compareSymlink: true,
-        excludeFilter: [
-            '**/.DS_Store',
-            '**/.git/**',
-            // It requires to have `**/` as prefix to work with dir-compare filter
-            ...sliceIgnores.map(x => (x.startsWith('**/') ? x : `**/${x.replace(/^\/+/, '')}`)),
-        ].join(','),
+        excludeFilter: excludeFilterFiles.join(','),
     })
 
     logExtendLastLine('Done!')
@@ -148,8 +157,17 @@ export const copyFiles = async (
 
     for (let i = 0; i < onlyOnToDirFiles.length; i++) {
         const diff = onlyOnToDirFiles[i]
-
         const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+        const lstat = await fs.lstat(path.join(toDir, filePath))
+
+        if (lstat.isDirectory()) {
+            // We don't handle directories here .i.e deleting directories since git focuses on files
+            // this may be an empty directory or all its files are in ignored files list
+            logWriteLine(scope, `Ignored: ${filePath}`)
+
+            continue
+        }
+
         const absPath = path.join(toDir, filePath)
 
         logWriteLine(scope, `Deleting: ${filePath}...`)
@@ -185,7 +203,11 @@ export const copyFiles = async (
                 reason: diff.reason,
                 state: diff.state,
             })
-        } else if (lstat.isFile()) {
+
+            continue
+        }
+
+        if (lstat.isFile()) {
             logWriteLine(scope, `Copying: ${filePath}...`)
 
             fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
@@ -197,7 +219,13 @@ export const copyFiles = async (
             fileChanges.push(path.join(toDir, filePath))
 
             logExtendLastLine('Done!')
+
+            continue
         }
+
+        // This happens when:
+        // 1. This is a directory and all its files are in ignored files list
+        logWriteLine(scope, `Ignored: ${filePath}`)
     }
 
     const distinctFiles = compareResponse.diffSet.filter(dif => dif.state === 'distinct')
@@ -218,7 +246,11 @@ export const copyFiles = async (
                 reason: diff.reason,
                 state: diff.state,
             })
-        } else if (lstat.isFile()) {
+
+            continue
+        }
+
+        if (lstat.isFile()) {
             logWriteLine(scope, `Overriding: ${filePath}...`)
 
             fs.copySync(path.join(fromDir, filePath), path.join(toDir, filePath), {
@@ -230,7 +262,13 @@ export const copyFiles = async (
             fileChanges.push(path.join(toDir, filePath))
 
             logExtendLastLine('Done!')
+
+            continue
         }
+
+        // This happens when:
+        // 1. This is a directory and all its files are in ignored files list
+        logWriteLine(scope, `Ignored: ${filePath}`)
     }
 
     logWriteLine(scope, `Found ${symlinkFiles.length} symlinks!`)
@@ -265,7 +303,7 @@ export const copyFiles = async (
             continue
         }
 
-        logExtendLastLine('Ignored!')
+        logExtendLastLine(`Ignored!`)
     }
 
     const status = await git.status()

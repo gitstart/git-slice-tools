@@ -697,11 +697,6 @@ buffer-equal-constant-time@1.0.1:
   resolved "https://registry.yarnpkg.com/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz#f8e71132f7ffe6e01a5c9697a4c6f3e48d5cc819"
   integrity sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==
 
-buffer-equal@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/buffer-equal/-/buffer-equal-1.0.0.tgz#59616b498304d556abd466966b22eeda3eca5fbe"
-  integrity sha1-WWFrSYME1Var1GaWayLu2j7KX74=
-
 buffer@4.9.2:
   version "4.9.2"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-4.9.2.tgz#230ead344002988644841ab0244af8c44bbe3ef8"
@@ -920,13 +915,13 @@ diff@^4.0.1:
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
 
-dir-compare@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/dir-compare/-/dir-compare-3.3.0.tgz#2c749f973b5c4b5d087f11edaae730db31788416"
-  integrity sha512-J7/et3WlGUCxjdnD3HAAzQ6nsnc0WL6DD7WcwJb7c39iH1+AWfg+9OqzJNaI6PkBwBvm1mhZNL9iY/nRiZXlPg==
+dir-compare@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/dir-compare/-/dir-compare-4.0.0.tgz#264835502ae5b41e2aa8980a6797cde5440b8bdb"
+  integrity sha512-wC7thVKL3V656tO61rbEDE4LTeeYrUC2pAUL00AaXYghBhjjVNRyBlpH6POzb44ZuK23OSrqF6TbSC/QYeqfAg==
   dependencies:
-    buffer-equal "^1.0.0"
     minimatch "^3.0.4"
+    p-limit "^3.1.0 "
 
 dir-glob@^3.0.1:
   version "3.0.1"
@@ -1877,6 +1872,13 @@ p-cancelable@^1.0.0:
   resolved "https://registry.yarnpkg.com/p-cancelable/-/p-cancelable-1.1.0.tgz#d078d15a3af409220c886f1d9a0ca2e441ab26cc"
   integrity sha512-s73XxOZ4zpt1edZYZzvhqFa6uvQc1vwUa0K0BdtIZgQMAJj9IbebH+JkgKZc9h+B05PKHLOTl4ajG1BmNrVZlw==
 
+"p-limit@^3.1.0 ":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-3.1.0.tgz#e1daccbe78d0d1388ca18c64fea38e3e57e3706b"
+  integrity sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==
+  dependencies:
+    yocto-queue "^0.1.0"
+
 package-json@^6.3.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/package-json/-/package-json-6.5.0.tgz#6feedaca35e75725876d0b0e64974697fed145b0"
@@ -2515,3 +2517,8 @@ yn@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
+
+yocto-queue@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
+  integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==

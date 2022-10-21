@@ -1,9 +1,8 @@
-import { SimpleGit } from 'simple-git'
+import { ResetMode, SimpleGit } from 'simple-git'
 import {
     cleanAndDeleteLocalBranch,
     copyFiles,
     createCommitAndPushCurrentChanges,
-    deleteGitSliceIgnoreFiles,
     getGitSliceIgoreConfig,
     logger,
     pullRemoteBranchIntoCurrentBranch,
@@ -23,6 +22,14 @@ export const push = async (
     if (!actionInputs.pushCommitMsgRegex.test(commitMsg)) {
         throw new Error('Commit message failed PUSH_COMMIT_MSG_REGEX')
     }
+
+    // we need to checkout the upstream main branch to get the last '.gitsliceignore'
+    await upstreamGit.reset(ResetMode.HARD)
+    await upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)
+
+    const upstreamGitSliceIgnore = getGitSliceIgoreConfig(actionInputs.upstreamRepo.dir)
+    // We will never push changes of `.gitsliceignore`, this file belongs to upstream only
+    const resolvedGitSliceIgnoreFiles = [...upstreamGitSliceIgnore, ...actionInputs.sliceIgnores, '.gitsliceignore']
 
     const upstreamBranch = actionInputs.pushBranchNameTemplate.replace('<branch_name>', sliceBranch)
 
@@ -61,12 +68,6 @@ export const push = async (
     await pullRemoteBranchIntoCurrentBranch('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)
     await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)
 
-    const upstreamGitSliceIgnore = getGitSliceIgoreConfig(actionInputs.upstreamRepo.dir)
-    // We will never push changes of `.gitsliceignore`, this file belongs to upstream only;
-    const resolvedGitSliceIgnoreFiles = [...upstreamGitSliceIgnore, ...actionInputs.sliceIgnores, '.gitsliceignore']
-
-    await deleteGitSliceIgnoreFiles(resolvedGitSliceIgnoreFiles, actionInputs.sliceRepo.dir, 'Slice')
-
     let upstreamBranchExists = false
 
     try {
@@ -92,7 +93,7 @@ export const push = async (
             upstreamGit,
             actionInputs.sliceRepo.dir,
             actionInputs.upstreamRepo.dir,
-            actionInputs.sliceIgnores,
+            resolvedGitSliceIgnoreFiles,
             'Upstream'
         )
 
@@ -133,7 +134,7 @@ export const push = async (
         upstreamGit,
         actionInputs.sliceRepo.dir,
         actionInputs.upstreamRepo.dir,
-        actionInputs.sliceIgnores,
+        resolvedGitSliceIgnoreFiles,
         'Upstream'
     )
 
