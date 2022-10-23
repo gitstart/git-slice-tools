@@ -25,11 +25,11 @@ runs:
             const args = body.replace(/^\s*\/git-slice\s+pull-review\s+/gi, "");
             const matches = [...args.matchAll(/((-\w+)($|\s+("(.*)"|(\w+)))?)/gi)];
             const friendlyOptions = {
-              "-from": "prReviewLink"
+              "-from": "from"
             };
 
             let pullOptions = {
-              "prReviewLink": "",
+              "from": "",
               "prNumber": context.issue.number
             };
 
@@ -60,4 +60,4 @@ runs:
       uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.5.1
       with:
         pr-number: ${{ fromJSON(steps.get-pull-options.outputs.result).prNumber }}
-        pr-review-link: ${{ fromJSON(steps.get-pull-options.outputs.result).prReviewLink }}
+        from: ${{ fromJSON(steps.get-pull-options.outputs.result).from }}

@@ -48,7 +48,7 @@ on:
       prNumber:
         description: '[pull-a-review] PR number on slice repo'
       prReivewLink:
-        description: '[pull-a-review] Link to a PR review on upstream repo (GitHub only)'
+        description: '[pull-a-review] Link to a PR review or comment on upstream repo (GitHub only)'
       upstreamIssue:
         description: '[pull-an-issue] Upstream issue number'
       sliceIssue:
@@ -188,10 +188,10 @@ jobs:
         uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.5.1
         with:
           pr-number: ${{ github.event.inputs.prNumber }}
-          pr-review-link: ${{ github.event.inputs.prReivewLink }}
+          from: ${{ github.event.inputs.prReivewLink }}
 
   # Trigger git-slice pull-review action with pull request comment: /git-slice pull-review -from https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
-  # -from : Link to pull request review (GitHub only)
+  # -from : Link to pull request review or comment (GitHub only)
   git-slice-pull-review-comment:
     runs-on: ubuntu-latest
 

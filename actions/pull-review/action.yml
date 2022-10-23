@@ -3,7 +3,7 @@ description: 'Perform git-slice-tools pull-review job'
 inputs:
   pr-number:
     required: true
-  pr-review-link:
+  from:
     required: true
 runs:
   using: 'composite'
@@ -22,8 +22,8 @@ runs:
       shell: bash
 
     - name: Execute `git-slice-tools pull-review`
-      run: git-slice-tools pull-review --pr-number "$PR_NUMBER" --pr-review-link "$PR_REVIEW_LINK"
+      run: git-slice-tools pull-review --pr-number "$PR_NUMBER" --from "$FROM"
       env:
         PR_NUMBER: ${{ inputs.pr-number }}
-        PR_REVIEW_LINK: ${{ inputs.pr-review-link }}
+        FROM: ${{ inputs.from }}
       shell: bash

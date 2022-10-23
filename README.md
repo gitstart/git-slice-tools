@@ -193,15 +193,19 @@ git-slice-tools pull-branch --branch dev-test
 
 Command arguments
 
-| Arg                | Description                                                                                                                                                                                                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--pr-number`      | PR number on slice repo which you want to pull a review into                                                                                                                                                                                                                                |
-| `--pr-review-link` | The link of pull request review you want to pull from, ex: https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547 . Actually git-slice-tools only care about `/pull/<pull_id>#pullrequestreview-<review_id>` part for getting pull request number and review id |
+| Arg           | Description                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--pr-number` | PR number on slice repo which you want to pull a review into                                                                                                                                                                                                                                                                                                                                                                           |
+| `--from`      | The link of pull request review or comment you want to pull from, ex: https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547 or https://github.com/supabase/supabase/pull/9538#issuecomment-1279003669. Actually git-slice-tools only care about `/pull/<pull_id>#pullrequestreview-<review_id>` or `/pull/<pull_id>#issuecomment-<comment_id>` part for getting pull request number and review/comment id |
 
 ```bash
-yarn pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
+yarn pull-review --pr-number 123 --from https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
 
-git-slice-tools pull-review --pr-number 123 --pr-review-link https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
+yarn pull-review --pr-number 123 --from https://github.com/supabase/supabase/pull/9538#issuecomment-1279003669
+
+git-slice-tools pull-review --pr-number 123 --from https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547
+
+git-slice-tools pull-review --pr-number 123 --from https://github.com/supabase/supabase/pull/9538#issuecomment-1279003669
 ```
 
 Support `open source flow`
@@ -233,7 +237,7 @@ In this flow:
 
 - `pull` job will update forked-repo default branch with last version of that branch on open source repo,
 - `raise-pr` job will create a PR on open source repo with `head` is a branch on forked-repo (upstream repo).
-- `pull-issue` and `pull-review` will look for issues and reviews on open source repo.
+- `pull-issue` and `pull-review` will look for issues and reviews/comments on open source repo.
 
 ## Use `git-slice-tools` in Github Action
 
@@ -315,10 +319,10 @@ Once the setup is done, you can use `/git-slice ...` comments to trigger `git-sl
 
 These are `/git-slice ...` comment commands you can use in PR comments:
 
-| Name                                                | Description                                                                                                                                                                                  |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/git-slice push -m "comment message" [-f] [-pr]`   | Push changes of current branch in slice repo to upstream repo. `[-f]` is for using force-push and `[-pr]` is for raising PRs. <br /> Please make sure you wrap the commit meesage in `"..."` |
-| `/git-slice pull-review -from "<pull review link>"` | Pull a review from upstream PR to slice PR. <br /> Please make sure you wrap the pull review link in `"..."`                                                                                 |
+| Name                                                             | Description                                                                                                                                                                                  |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/git-slice push -m "comment message" [-f] [-pr]`                | Push changes of current branch in slice repo to upstream repo. `[-f]` is for using force-push and `[-pr]` is for raising PRs. <br /> Please make sure you wrap the commit meesage in `"..."` |
+| `/git-slice pull-review -from "<pull review link/comment link>"` | Pull a review/comment from upstream PR to slice PR. <br /> Please make sure you wrap the pull review link in `"..."`                                                                         |
 
 These are features you can trigger with using workflow dispatch in actions page, you can select the `job` you want:
 

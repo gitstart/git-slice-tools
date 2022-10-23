@@ -6,9 +6,9 @@ import { ActionInputs, LogScope } from '../types'
 export const pullReview = async (
     actionInputs: ActionInputs,
     slicePrNumber: number,
-    upstreamPrReviewLink: string
+    upstreamPrReviewOrCommentLink: string
 ): Promise<void> => {
-    logger.logInputs('pull-review', { slicePrNumber, upstreamPrReviewLink })
+    logger.logInputs('pull-review', { slicePrNumber, upstreamPrReviewOrCommentLink })
 
     const { sliceRepo, upstreamRepo, isOpenSourceFlow, openSourceUrl } = actionInputs
     const upstreamGitUrlObject = gitUrlParse(upstreamRepo.gitHttpUri)
@@ -25,14 +25,12 @@ export const pullReview = async (
         throw new Error(`Unsuported codehost '${upstreamGitUrlObject.source}'`)
     }
 
-    const prReivewLinkRegResult = /\/pull\/(\d+)#pullrequestreview-(\d+)$/i.exec(upstreamPrReviewLink)
+    const inputLinkRegex = /\/pull\/(\d+)#(pullrequestreview|issuecomment)-(\d+)/i
+    const inputLinkRegexResult = inputLinkRegex.exec(upstreamPrReviewOrCommentLink)
 
-    if (!prReivewLinkRegResult || !prReivewLinkRegResult[1] || !prReivewLinkRegResult[2]) {
-        throw new Error(`Invalid pr-preview-link '${upstreamPrReviewLink}'`)
+    if (!inputLinkRegexResult) {
+        throw new Error(`Invalid PR review/comment url: '${upstreamPrReviewOrCommentLink}'`)
     }
-
-    const targetPrNumber = Number(prReivewLinkRegResult[1])
-    const targetPrReviewNumber = Number(prReivewLinkRegResult[2])
 
     let targetGitUrlOwner = upstreamGitUrlObject.owner
     let targetGitUrlRepo = upstreamGitUrlObject.name
@@ -44,13 +42,80 @@ export const pullReview = async (
         targetLogScope = 'OpenSource'
     }
 
+    const targetPrNumber = Number(inputLinkRegexResult[1])
+    const instanceNumber = Number(inputLinkRegexResult[3])
+    const instanceType = inputLinkRegexResult[2] as keyof typeof PullReviewActions
+
+    await PullReviewActions[instanceType](
+        targetLogScope,
+        upstreamPrReviewOrCommentLink,
+        upstreamOctokit,
+        targetGitUrlOwner,
+        targetGitUrlRepo,
+        targetPrNumber,
+        instanceNumber,
+        sliceOctokit,
+        sliceGitUrlObject.owner,
+        sliceGitUrlObject.name,
+        slicePrNumber
+    )
+}
+
+const pullPrComment = async (
+    targetLogScope: LogScope,
+    upstreamPrReviewOrCommentLink: string,
+    upstreamOctokit: Octokit,
+    targetGitUrlOwner: string,
+    targetGitUrlRepo: string,
+    _targetPrNumber: number,
+    targetComment: number,
+    sliceOctokit: Octokit,
+    sliceGitUrlOwner: string,
+    sliceGitUrlRepo: string,
+    slicePrNumber: number
+) => {
+    logger.logWriteLine(targetLogScope, `Getting PR comment...`)
+
+    const { data: upstreamComment } = await upstreamOctokit.rest.issues.getComment({
+        owner: targetGitUrlOwner,
+        repo: targetGitUrlRepo,
+        comment_id: targetComment,
+    })
+
+    logger.logWriteLine('Slice', `Creating PR review...`)
+
+    const { data: sliceComment } = await sliceOctokit.rest.issues.createComment({
+        owner: sliceGitUrlOwner,
+        repo: sliceGitUrlRepo,
+        issue_number: slicePrNumber,
+        body: `Pull request comment is synched from ${upstreamPrReviewOrCommentLink} by git-slice-tools:\nFrom **_${
+            upstreamComment.user?.login
+        }_**:\n${upstreamComment.body ?? ''}`,
+    })
+
+    logger.logExtendLastLine(`Done! -> ${sliceComment.html_url}`)
+}
+
+const pullPrReview = async (
+    targetLogScope: LogScope,
+    upstreamPrReviewOrCommentLink: string,
+    upstreamOctokit: Octokit,
+    targetGitUrlOwner: string,
+    targetGitUrlRepo: string,
+    targetPrNumber: number,
+    targetReviewId: number,
+    sliceOctokit: Octokit,
+    sliceGitUrlOwner: string,
+    sliceGitUrlRepo: string,
+    slicePrNumber: number
+) => {
     logger.logWriteLine(targetLogScope, `Getting PR review...`)
 
     const { data: upstreamReview } = await upstreamOctokit.rest.pulls.getReview({
         owner: targetGitUrlOwner,
         repo: targetGitUrlRepo,
         pull_number: targetPrNumber,
-        review_id: targetPrReviewNumber,
+        review_id: targetReviewId,
     })
 
     logger.logExtendLastLine(`Done!`)
@@ -61,7 +126,7 @@ export const pullReview = async (
         owner: targetGitUrlOwner,
         repo: targetGitUrlRepo,
         pull_number: targetPrNumber,
-        review_id: targetPrReviewNumber,
+        review_id: targetReviewId,
         // Assume that 100 comments per review is good limit
         per_page: 100,
         page: 1,
@@ -86,7 +151,7 @@ export const pullReview = async (
             owner: targetGitUrlOwner,
             repo: targetGitUrlRepo,
             pull_number: targetPrNumber,
-            review_id: targetPrReviewNumber,
+            review_id: targetReviewId,
             comment_id: comment.id,
         })
 
@@ -110,11 +175,11 @@ export const pullReview = async (
     logger.logWriteLine('Slice', `Creating PR review...`)
 
     const { data: sliceReview } = await sliceOctokit.rest.pulls.createReview({
-        owner: sliceGitUrlObject.owner,
-        repo: sliceGitUrlObject.name,
+        owner: sliceGitUrlOwner,
+        repo: sliceGitUrlRepo,
         pull_number: slicePrNumber,
         event: 'COMMENT',
-        body: `Pull request review is synched from ${upstreamPrReviewLink} by git-slice-tools:\nFrom **_${
+        body: `Pull request review is synched from ${upstreamPrReviewOrCommentLink} by git-slice-tools:\nFrom **_${
             upstreamReview.user?.login
         }_**:\n${upstreamReview.body ?? ''}`,
         comments: detailedPullReviewComments,
@@ -122,3 +187,8 @@ export const pullReview = async (
 
     logger.logExtendLastLine(`Done! -> ${sliceReview.html_url}`)
 }
+
+const PullReviewActions = {
+    issuecomment: pullPrComment,
+    pullrequestreview: pullPrReview,
+} as const
