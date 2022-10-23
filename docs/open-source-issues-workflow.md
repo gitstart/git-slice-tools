@@ -38,10 +38,10 @@ We need to create a new Github Project v2 with following custom fields:
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.5.1
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.6.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.5.1
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.6.0
 
 # Navigate into local repository
 cd client-cypress

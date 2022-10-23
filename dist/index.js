@@ -186,8 +186,8 @@ var GLOBAL_OPTIONS_CONFIG = {
         desc: 'PR number on slice repo which you want to pull a review into',
     }, prReivewLink: {
         type: 'string',
-        alias: 'pr-review-link',
-        desc: 'The link of pull request review you want to pull from, ex: https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547 . Actually git-slice-tools only care about `/pull/<pull_id>#pullrequestreview-<review_id>` part for getting pull request number and review id',
+        alias: 'from',
+        desc: ' The link of pull request review or comment you want to pull from, ex: https://github.com/sourcegraph/sourcegraph/pull/37919#pullrequestreview-1025518547 or https://github.com/supabase/supabase/pull/9538#issuecomment-1279003669. Actually git-slice-tools only care about `/pull/<pull_id>#pullrequestreview-<review_id>` or `/pull/<pull_id>#issuecomment-<comment_id>` part for getting pull request number and review/comment id',
     } }), function (_a) {
     var env = _a.env, prNumber = _a.prNumber, prReivewLink = _a.prReivewLink;
     return __awaiter(void 0, void 0, void 0, function () {
@@ -196,7 +196,7 @@ var GLOBAL_OPTIONS_CONFIG = {
                 throw new Error("pull-review job: 'pr-number' in string is required");
             }
             if (!prReivewLink || typeof prReivewLink !== 'string') {
-                throw new Error("pull-review job: 'pr-review-link' in string is required");
+                throw new Error("pull-review job: 'from' in string is required");
             }
             return [2 /*return*/, loadActionInputsAndInit(env, function (_a) {
                     var actionInputs = _a.actionInputs;

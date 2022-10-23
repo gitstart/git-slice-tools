@@ -73,6 +73,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = exports.error = exports.logger = void 0;
 var dir_compare_1 = require("dir-compare");
 var fs_extra_1 = __importDefault(require("fs-extra"));
+var globby_1 = __importDefault(require("globby"));
 var path_1 = __importDefault(require("path"));
 var simple_git_1 = require("simple-git");
 var terminal_kit_1 = require("terminal-kit");
@@ -173,20 +174,28 @@ var createCommitAndPushCurrentChanges = function (git, commitMsg, branch, scope,
 };
 exports.createCommitAndPushCurrentChanges = createCommitAndPushCurrentChanges;
 var copyFiles = function (git, fromDir, toDir, sliceIgnores, scope) { return __awaiter(void 0, void 0, void 0, function () {
-    var compareResponse, fileChanges, onlyOnToDirFiles, i, diff, filePath, absPath, symlinkFiles, onlyOnFromDirFiles, i, diff, filePath, lstat, targetLink, distinctFiles, i, diff, filePath, lstat, targetLink, i, _a, filePath, targetLink, reason, state, symlinkPath, symlinkPath, status;
+    var ingoredFilesFromFromDir, ingoredFilesFromToDir, excludeFilterFiles, compareResponse, fileChanges, onlyOnToDirFiles, i, diff, filePath, lstat, absPath, symlinkFiles, onlyOnFromDirFiles, i, diff, filePath, lstat, targetLink, distinctFiles, i, diff, filePath, lstat, targetLink, i, _a, filePath, targetLink, reason, state, symlinkPath, symlinkPath, status;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 (0, logger_1.logWriteLine)(scope, "Copy files from '" + fromDir + "' to '" + toDir + "'...");
+                return [4 /*yield*/, (0, globby_1.default)(sliceIgnores, { cwd: fromDir })];
+            case 1:
+                ingoredFilesFromFromDir = _b.sent();
+                return [4 /*yield*/, (0, globby_1.default)(sliceIgnores, { cwd: toDir })];
+            case 2:
+                ingoredFilesFromToDir = _b.sent();
+                excludeFilterFiles = Array.from(new Set(__spreadArray(__spreadArray([
+                    // It requires to have `**/` as prefix to work with dir-compare filter
+                    '**/.DS_Store',
+                    '**/.git/**'
+                ], ingoredFilesFromToDir.map(function (x) { return "/" + x.replace(/^\/+/, ''); }), true), ingoredFilesFromFromDir.map(function (x) { return "/" + x.replace(/^\/+/, ''); }), true)));
                 compareResponse = (0, dir_compare_1.compareSync)(toDir, fromDir, {
                     compareContent: true,
                     compareDate: false,
                     compareSize: false,
                     compareSymlink: true,
-                    excludeFilter: __spreadArray([
-                        '**/.DS_Store',
-                        '**/.git/**'
-                    ], sliceIgnores.map(function (x) { return (x.startsWith('**/') ? x : "**/" + x.replace(/^\/+/, '')); }), true).join(','),
+                    excludeFilter: excludeFilterFiles.join(','),
                 });
                 (0, logger_1.logExtendLastLine)('Done!');
                 if (!compareResponse.diffSet || compareResponse.diffSet.length === 0) {
@@ -196,62 +205,40 @@ var copyFiles = function (git, fromDir, toDir, sliceIgnores, scope) { return __a
                 fileChanges = [];
                 onlyOnToDirFiles = compareResponse.diffSet.filter(function (dif) { return dif.state === 'left'; });
                 (0, logger_1.logWriteLine)(scope, "Found " + onlyOnToDirFiles.length + " onlyOnToDir file(s)!");
-                for (i = 0; i < onlyOnToDirFiles.length; i++) {
-                    diff = onlyOnToDirFiles[i];
-                    filePath = diff.relativePath.substring(1) + "/" + diff.name1;
-                    absPath = path_1.default.join(toDir, filePath);
-                    (0, logger_1.logWriteLine)(scope, "Deleting: " + filePath + "...");
-                    fs_extra_1.default.rmSync(absPath, { force: true, recursive: true });
-                    fileChanges.push(absPath);
-                    (0, logger_1.logExtendLastLine)('Done!');
+                i = 0;
+                _b.label = 3;
+            case 3:
+                if (!(i < onlyOnToDirFiles.length)) return [3 /*break*/, 6];
+                diff = onlyOnToDirFiles[i];
+                filePath = diff.relativePath.substring(1) + "/" + diff.name1;
+                return [4 /*yield*/, fs_extra_1.default.lstat(path_1.default.join(toDir, filePath))];
+            case 4:
+                lstat = _b.sent();
+                if (lstat.isDirectory()) {
+                    // We don't handle directories here .i.e deleting directories since git focuses on files
+                    // this may be an empty directory or all its files are in ignored files list
+                    (0, logger_1.logWriteLine)(scope, "Ignored: " + filePath);
+                    return [3 /*break*/, 5];
                 }
+                absPath = path_1.default.join(toDir, filePath);
+                (0, logger_1.logWriteLine)(scope, "Deleting: " + filePath + "...");
+                fs_extra_1.default.rmSync(absPath, { force: true, recursive: true });
+                fileChanges.push(absPath);
+                (0, logger_1.logExtendLastLine)('Done!');
+                _b.label = 5;
+            case 5:
+                i++;
+                return [3 /*break*/, 3];
+            case 6:
                 symlinkFiles = [];
                 onlyOnFromDirFiles = compareResponse.diffSet.filter(function (dif) { return dif.state === 'right'; });
                 (0, logger_1.logWriteLine)(scope, "Found " + onlyOnFromDirFiles.length + " onlyOnFromDir file(s)!");
                 i = 0;
-                _b.label = 1;
-            case 1:
-                if (!(i < onlyOnFromDirFiles.length)) return [3 /*break*/, 6];
-                diff = onlyOnFromDirFiles[i];
-                filePath = diff.relativePath.substring(1) + "/" + diff.name2;
-                return [4 /*yield*/, fs_extra_1.default.lstat(path_1.default.join(fromDir, filePath))];
-            case 2:
-                lstat = _b.sent();
-                if (!lstat.isSymbolicLink()) return [3 /*break*/, 4];
-                return [4 /*yield*/, fs_extra_1.default.readlink(path_1.default.join(fromDir, filePath))];
-            case 3:
-                targetLink = _b.sent();
-                symlinkFiles.push({
-                    filePath: filePath,
-                    targetLink: targetLink,
-                    reason: diff.reason,
-                    state: diff.state,
-                });
-                return [3 /*break*/, 5];
-            case 4:
-                if (lstat.isFile()) {
-                    (0, logger_1.logWriteLine)(scope, "Copying: " + filePath + "...");
-                    fs_extra_1.default.copySync(path_1.default.join(fromDir, filePath), path_1.default.join(toDir, filePath), {
-                        overwrite: true,
-                        dereference: false,
-                        recursive: false,
-                    });
-                    fileChanges.push(path_1.default.join(toDir, filePath));
-                    (0, logger_1.logExtendLastLine)('Done!');
-                }
-                _b.label = 5;
-            case 5:
-                i++;
-                return [3 /*break*/, 1];
-            case 6:
-                distinctFiles = compareResponse.diffSet.filter(function (dif) { return dif.state === 'distinct'; });
-                (0, logger_1.logWriteLine)(scope, "Found " + distinctFiles.length + " distinct file(s)!");
-                i = 0;
                 _b.label = 7;
             case 7:
-                if (!(i < distinctFiles.length)) return [3 /*break*/, 12];
-                diff = distinctFiles[i];
-                filePath = diff.relativePath.substring(1) + "/" + diff.name1;
+                if (!(i < onlyOnFromDirFiles.length)) return [3 /*break*/, 12];
+                diff = onlyOnFromDirFiles[i];
+                filePath = diff.relativePath.substring(1) + "/" + diff.name2;
                 return [4 /*yield*/, fs_extra_1.default.lstat(path_1.default.join(fromDir, filePath))];
             case 8:
                 lstat = _b.sent();
@@ -268,6 +255,48 @@ var copyFiles = function (git, fromDir, toDir, sliceIgnores, scope) { return __a
                 return [3 /*break*/, 11];
             case 10:
                 if (lstat.isFile()) {
+                    (0, logger_1.logWriteLine)(scope, "Copying: " + filePath + "...");
+                    fs_extra_1.default.copySync(path_1.default.join(fromDir, filePath), path_1.default.join(toDir, filePath), {
+                        overwrite: true,
+                        dereference: false,
+                        recursive: false,
+                    });
+                    fileChanges.push(path_1.default.join(toDir, filePath));
+                    (0, logger_1.logExtendLastLine)('Done!');
+                    return [3 /*break*/, 11];
+                }
+                // This happens when:
+                // 1. This is a directory and all its files are in ignored files list
+                (0, logger_1.logWriteLine)(scope, "Ignored: " + filePath);
+                _b.label = 11;
+            case 11:
+                i++;
+                return [3 /*break*/, 7];
+            case 12:
+                distinctFiles = compareResponse.diffSet.filter(function (dif) { return dif.state === 'distinct'; });
+                (0, logger_1.logWriteLine)(scope, "Found " + distinctFiles.length + " distinct file(s)!");
+                i = 0;
+                _b.label = 13;
+            case 13:
+                if (!(i < distinctFiles.length)) return [3 /*break*/, 18];
+                diff = distinctFiles[i];
+                filePath = diff.relativePath.substring(1) + "/" + diff.name1;
+                return [4 /*yield*/, fs_extra_1.default.lstat(path_1.default.join(fromDir, filePath))];
+            case 14:
+                lstat = _b.sent();
+                if (!lstat.isSymbolicLink()) return [3 /*break*/, 16];
+                return [4 /*yield*/, fs_extra_1.default.readlink(path_1.default.join(fromDir, filePath))];
+            case 15:
+                targetLink = _b.sent();
+                symlinkFiles.push({
+                    filePath: filePath,
+                    targetLink: targetLink,
+                    reason: diff.reason,
+                    state: diff.state,
+                });
+                return [3 /*break*/, 17];
+            case 16:
+                if (lstat.isFile()) {
                     (0, logger_1.logWriteLine)(scope, "Overriding: " + filePath + "...");
                     fs_extra_1.default.copySync(path_1.default.join(fromDir, filePath), path_1.default.join(toDir, filePath), {
                         overwrite: true,
@@ -276,12 +305,16 @@ var copyFiles = function (git, fromDir, toDir, sliceIgnores, scope) { return __a
                     });
                     fileChanges.push(path_1.default.join(toDir, filePath));
                     (0, logger_1.logExtendLastLine)('Done!');
+                    return [3 /*break*/, 17];
                 }
-                _b.label = 11;
-            case 11:
+                // This happens when:
+                // 1. This is a directory and all its files are in ignored files list
+                (0, logger_1.logWriteLine)(scope, "Ignored: " + filePath);
+                _b.label = 17;
+            case 17:
                 i++;
-                return [3 /*break*/, 7];
-            case 12:
+                return [3 /*break*/, 13];
+            case 18:
                 (0, logger_1.logWriteLine)(scope, "Found " + symlinkFiles.length + " symlinks!");
                 for (i = 0; i < symlinkFiles.length; i++) {
                     _a = symlinkFiles[i], filePath = _a.filePath, targetLink = _a.targetLink, reason = _a.reason, state = _a.state;
@@ -301,10 +334,10 @@ var copyFiles = function (git, fromDir, toDir, sliceIgnores, scope) { return __a
                         (0, logger_1.logExtendLastLine)('Done!');
                         continue;
                     }
-                    (0, logger_1.logExtendLastLine)('Ignored!');
+                    (0, logger_1.logExtendLastLine)("Ignored!");
                 }
                 return [4 /*yield*/, git.status()];
-            case 13:
+            case 19:
                 status = _b.sent();
                 (0, logger_1.logWriteLine)(scope, "Found " + fileChanges.length + " diff files during compare - Git status: " + status.files.length + " files");
                 return [2 /*return*/, fileChanges];
