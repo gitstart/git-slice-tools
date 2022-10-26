@@ -2,16 +2,24 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logInputs = exports.logExtendLastLine = exports.logWriteLine = void 0;
 var terminal_kit_1 = require("terminal-kit");
+var ignoreTimestamp = process.env.DISABLE_LOG_TIMESTAMP === 'true';
 var lastLogLine = '';
 var lastLogTime = new Date();
 var logWriteLine = function (scope, content) {
+    if (process.env.GIT_SLICE_UPSTREAM_REPO_PASSWORD) {
+        content = content.replace(new RegExp(process.env.GIT_SLICE_UPSTREAM_REPO_PASSWORD), '***');
+    }
+    if (process.env.GIT_SLICE_SLICE_REPO_PASSWORD) {
+        content = content.replace(new RegExp(process.env.GIT_SLICE_SLICE_REPO_PASSWORD), '***');
+    }
     lastLogTime = new Date();
-    lastLogLine = "[" + lastLogTime.toISOString() + "] " + scope + ": " + content.trim();
+    var timestamp = ignoreTimestamp ? '' : "[" + lastLogTime.toISOString() + "] ";
+    lastLogLine = "" + timestamp + scope + ": " + content.trim();
     (0, terminal_kit_1.terminal)(lastLogLine + "\n");
 };
 exports.logWriteLine = logWriteLine;
 var logExtendLastLine = function (content) {
-    var duration = (new Date().getTime() - lastLogTime.getTime()) / 1000;
+    var duration = ignoreTimestamp ? 0 : (new Date().getTime() - lastLogTime.getTime()) / 1000;
     terminal_kit_1.terminal.up(1)("" + lastLogLine + content.trim() + " (" + duration.toFixed(3) + "s)\n");
 };
 exports.logExtendLastLine = logExtendLastLine;

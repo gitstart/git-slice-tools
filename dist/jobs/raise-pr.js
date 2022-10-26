@@ -42,7 +42,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.raisePr = void 0;
 var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
-var terminal_kit_1 = require("terminal-kit");
 var common_1 = require("../common");
 var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, void 0, void 0, function () {
     var upstreamRepo, sliceRepo, isOpenSourceFlow, openSourceUrl, upstreamGitUrlObject, openSourceGitUrlObject, sliceGitUrlObject, sliceOctokit, listResponse, _a, title, body, slicePrNumber, upstreamOctokit, upstreamBranch, targetGitUrlOwner, targetGitUrlRepo, targetLogScope, createResponse, prNumber, error_1, error_2;
@@ -140,7 +139,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
             case 6:
                 error_1 = _b.sent();
                 if ((0, common_1.isErrorLike)(error_1)) {
-                    (0, terminal_kit_1.terminal)("Failed with following error: '" + error_1.message + "'\n");
+                    common_1.logger.logWriteLine(targetLogScope, "Failed with following error: '" + error_1.message + "'\n");
                     return [2 /*return*/];
                 }
                 return [3 /*break*/, 7];
@@ -163,7 +162,7 @@ var raisePr = function (actionInputs, sliceBranch) { return __awaiter(void 0, vo
             case 10:
                 error_2 = _b.sent();
                 if ((0, common_1.isErrorLike)(error_2)) {
-                    (0, terminal_kit_1.terminal)("Failed with following error: '" + error_2.message + "'\n");
+                    common_1.logger.logWriteLine(targetLogScope, "Failed with following error: '" + error_2.message + "'\n");
                     return [2 /*return*/];
                 }
                 return [3 /*break*/, 11];

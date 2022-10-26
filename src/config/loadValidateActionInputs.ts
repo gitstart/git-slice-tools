@@ -4,11 +4,15 @@ import path from 'path'
 import { ActionInputs } from '../types'
 
 export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs = false): ActionInputs => {
-    if (envFilePath && !fs.existsSync(path.resolve(process.cwd(), envFilePath))) {
-        throw new Error(`${envFilePath} doesn't exist`)
-    }
+    const ignoreDotenv = process.env.TEST_ENV === 'true'
 
-    dotenv.config(envFilePath ? { path: envFilePath } : undefined)
+    if (!ignoreDotenv) {
+        if (envFilePath && !fs.existsSync(path.resolve(process.cwd(), envFilePath))) {
+            throw new Error(`${envFilePath} doesn't exist`)
+        }
+
+        dotenv.config(envFilePath ? { path: envFilePath } : undefined)
+    }
 
     const forceInit = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false'
 
@@ -102,8 +106,7 @@ export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs =
     }
 
     const prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false'
-    const isOpenSourceFlow =
-        !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false'
+    const isOpenSourceFlow = process.env.GIT_SLICE_OPEN_SOURCE_FLOW === 'true'
     const openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL
 
     if (isOpenSourceFlow && !openSourceUrl) {

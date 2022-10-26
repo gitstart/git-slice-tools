@@ -1,8 +1,8 @@
 import fs from 'fs-extra'
-import globby from 'globby'
 import path from 'path'
 import { LogScope } from '../types'
 import { logExtendLastLine, logWriteLine } from './logger'
+import simpleGit from 'simple-git'
 
 export const getGitSliceIgoreConfig = (dir: string): string[] => {
     const filePath = path.resolve(dir, '.gitsliceignore')
@@ -23,6 +23,18 @@ export const getGitSliceIgoreConfig = (dir: string): string[] => {
     )
 }
 
+// For now we couldn't find a good npm package to handle ignore patterns like .gitignore
+// So we use git command `ls-files --ignored` for now
+export const getFilesMatchPatterns = async (patterns: string[], rootDir: string) => {
+    const git = simpleGit(rootDir, { binary: 'git' })
+    const raw = await git.raw(['ls-files', '--ignored', '--cached', ...patterns.flatMap(pattern => ['-x', pattern])])
+
+    return (raw ?? '')
+        .trim()
+        .split('\n')
+        .map(x => x.trim())
+}
+
 export const deleteGitSliceIgnoreFiles = async (
     sliceIgnores: string[],
     rootDir: string,
@@ -30,7 +42,7 @@ export const deleteGitSliceIgnoreFiles = async (
 ): Promise<void> => {
     logWriteLine(scope, `Getting git-slices ingoring files/directores...`)
 
-    const paths = await globby(sliceIgnores, { cwd: rootDir })
+    const paths = await getFilesMatchPatterns(sliceIgnores, rootDir)
 
     logExtendLastLine(`Found ${paths.length}`)
 

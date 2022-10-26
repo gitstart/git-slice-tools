@@ -1,4 +1,4 @@
-name: Lint - Format - Build
+name: Lint - Format - Build - Test
 
 on: [push]
 
@@ -52,3 +52,15 @@ jobs:
         if: ${{ failure() || success() }}
         run: |
           yarn build
+
+      - name: Test
+        if: ${{ failure() || success() }}
+        run: |
+          yarn coverage
+        env:
+          TEST_REPO_PASSWORD: ${{ secrets.TEST_GIT_SLICE_UPSTREAM_REPO_PASSWORD }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

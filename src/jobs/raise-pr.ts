@@ -1,6 +1,5 @@
 import gitUrlParse from 'git-url-parse'
 import { Octokit } from 'octokit'
-import { terminal } from 'terminal-kit'
 import { isErrorLike, logger } from '../common'
 import { ActionInputs, LogScope } from '../types'
 
@@ -109,7 +108,7 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
         logger.logExtendLastLine(`Done!`)
     } catch (error) {
         if (isErrorLike(error)) {
-            terminal(`Failed with following error: '${error.message}'\n`)
+            logger.logWriteLine(targetLogScope, `Failed with following error: '${error.message}'\n`)
 
             return
         }
@@ -128,7 +127,7 @@ export const raisePr = async (actionInputs: ActionInputs, sliceBranch: string): 
             logger.logExtendLastLine(`Done!`)
         } catch (error) {
             if (isErrorLike(error)) {
-                terminal(`Failed with following error: '${error.message}'\n`)
+                logger.logWriteLine(targetLogScope, `Failed with following error: '${error.message}'\n`)
 
                 return
             }

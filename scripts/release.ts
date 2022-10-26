@@ -3,7 +3,7 @@ import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import { version } from '../package.json'
-import globby from 'globby'
+import fastGlob from 'fast-glob'
 
 const relaseType = String(process.env.RELEASE_TYPE).toLowerCase()
 const rootDir = path.resolve(__dirname, '../')
@@ -39,7 +39,7 @@ fs.writeFileSync(packageJsonFilePath, nextPackageJson)
 const files = ['git-slice-open-source.yml', 'git-slice-tools.yml', 'docs/open-source-issues-workflow.md', 'README.md']
 
 // Get yml files in /actions
-const actionFiles = globby.sync('actions/**/*.yml', { cwd: rootDir })
+const actionFiles = fastGlob.sync('actions/**/*.yml', { cwd: rootDir })
 
 files.push(...actionFiles)
 

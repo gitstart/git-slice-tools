@@ -1,11 +1,10 @@
 import { compareSync, DifferenceState, Reason } from 'dir-compare'
 import fs from 'fs-extra'
-import globby from 'globby'
 import path from 'path'
 import { CleanOptions, GitError, ResetMode, SimpleGit } from 'simple-git'
-import { terminal } from 'terminal-kit'
 import { ErrorLike, LogScope } from '../types'
 import { OPEN_SOURCE_REMOTE } from './constants'
+import { getFilesMatchPatterns } from './ignore'
 import { logExtendLastLine, logWriteLine } from './logger'
 
 export * from './constants'
@@ -24,7 +23,7 @@ export const delay = (time: number): Promise<void> => {
 }
 
 export const pullRemoteBranchIntoCurrentBranch = async (
-    logPrefix: string,
+    logScope: LogScope,
     git: SimpleGit,
     remoteBranch: string,
     currentBranch: string,
@@ -32,7 +31,7 @@ export const pullRemoteBranchIntoCurrentBranch = async (
     noPush = false
 ) => {
     try {
-        terminal(`${logPrefix}: Try to pull remote branch '${remoteBranch}' into current branch '${currentBranch}'...`)
+        logWriteLine(logScope, `Try to pull remote branch '${remoteBranch}' into current branch '${currentBranch}'...`)
 
         await git.pull('origin', remoteBranch, ['--no-rebase'])
         const status = await git.status()
@@ -40,26 +39,26 @@ export const pullRemoteBranchIntoCurrentBranch = async (
         if (status.ahead) {
             if (!noPush) {
                 await git.push('origin', currentBranch)
-                terminal('Merged!\n')
+                logExtendLastLine('Merged!\n')
 
                 return
             }
 
-            terminal('Done!\n')
+            logExtendLastLine('Done!\n')
 
             return
         }
 
-        terminal('None!\n')
+        logExtendLastLine('None!\n')
     } catch (error) {
         if (ignoreMergeConflictsError && isErrorLike(error) && error instanceof GitError) {
-            terminal(`Skipped with following error: '${error.message}'\n`)
+            logWriteLine(logScope, `Skipped with following error: '${error.message}'\n`)
 
             return
         }
 
         // noop
-        terminal('Failed!\n')
+        logExtendLastLine('Failed!\n')
 
         throw error
     }
@@ -119,8 +118,8 @@ export const copyFiles = async (
 ): Promise<string[]> => {
     logWriteLine(scope, `Copy files from '${fromDir}' to '${toDir}'...`)
 
-    const ingoredFilesFromFromDir = await globby(sliceIgnores, { cwd: fromDir })
-    const ingoredFilesFromToDir = await globby(sliceIgnores, { cwd: toDir })
+    const ingoredFilesFromFromDir = await getFilesMatchPatterns(sliceIgnores, fromDir)
+    const ingoredFilesFromToDir = await getFilesMatchPatterns(sliceIgnores, toDir)
     const excludeFilterFiles = Array.from(
         new Set([
             // It requires to have `**/` as prefix to work with dir-compare filter

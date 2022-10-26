@@ -76,7 +76,6 @@ var fs_extra_1 = __importDefault(require("fs-extra"));
 var globby_1 = __importDefault(require("globby"));
 var path_1 = __importDefault(require("path"));
 var simple_git_1 = require("simple-git");
-var terminal_kit_1 = require("terminal-kit");
 var constants_1 = require("./constants");
 var logger_1 = require("./logger");
 __exportStar(require("./constants"), exports);
@@ -94,7 +93,7 @@ var delay = function (time) {
     return new Promise(function (resolve) { return setTimeout(resolve, time); });
 };
 exports.delay = delay;
-var pullRemoteBranchIntoCurrentBranch = function (logPrefix, git, remoteBranch, currentBranch, ignoreMergeConflictsError, noPush) {
+var pullRemoteBranchIntoCurrentBranch = function (logScope, git, remoteBranch, currentBranch, ignoreMergeConflictsError, noPush) {
     if (ignoreMergeConflictsError === void 0) { ignoreMergeConflictsError = false; }
     if (noPush === void 0) { noPush = false; }
     return __awaiter(void 0, void 0, void 0, function () {
@@ -103,7 +102,7 @@ var pullRemoteBranchIntoCurrentBranch = function (logPrefix, git, remoteBranch, 
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 6, , 7]);
-                    (0, terminal_kit_1.terminal)(logPrefix + ": Try to pull remote branch '" + remoteBranch + "' into current branch '" + currentBranch + "'...");
+                    (0, logger_1.logWriteLine)(logScope, "Try to pull remote branch '" + remoteBranch + "' into current branch '" + currentBranch + "'...");
                     return [4 /*yield*/, git.pull('origin', remoteBranch, ['--no-rebase'])];
                 case 1:
                     _a.sent();
@@ -115,22 +114,22 @@ var pullRemoteBranchIntoCurrentBranch = function (logPrefix, git, remoteBranch, 
                     return [4 /*yield*/, git.push('origin', currentBranch)];
                 case 3:
                     _a.sent();
-                    (0, terminal_kit_1.terminal)('Merged!\n');
+                    (0, logger_1.logExtendLastLine)('Merged!\n');
                     return [2 /*return*/];
                 case 4:
-                    (0, terminal_kit_1.terminal)('Done!\n');
+                    (0, logger_1.logExtendLastLine)('Done!\n');
                     return [2 /*return*/];
                 case 5:
-                    (0, terminal_kit_1.terminal)('None!\n');
+                    (0, logger_1.logExtendLastLine)('None!\n');
                     return [3 /*break*/, 7];
                 case 6:
                     error_1 = _a.sent();
                     if (ignoreMergeConflictsError && (0, exports.isErrorLike)(error_1) && error_1 instanceof simple_git_1.GitError) {
-                        (0, terminal_kit_1.terminal)("Skipped with following error: '" + error_1.message + "'\n");
+                        (0, logger_1.logWriteLine)(logScope, "Skipped with following error: '" + error_1.message + "'\n");
                         return [2 /*return*/];
                     }
                     // noop
-                    (0, terminal_kit_1.terminal)('Failed!\n');
+                    (0, logger_1.logExtendLastLine)('Failed!\n');
                     throw error_1;
                 case 7: return [2 /*return*/];
             }

@@ -87,6 +87,47 @@ We don't recommend to use `nodemon` for development since it could effect produc
 yarn dev --exec "yarn pull"
 ```
 
+## Test
+
+### For GitStart members
+
+By default, we run unit tests on our prepared repo `https://github.com/GitStartHQ/git-slice-tools-test-cases`, you should ask for following env vars `TEST_REPO_USERNAME` `TEST_REPO_EMAIL` `TEST_REPO_PASSWORD` before executing test scripts
+
+```bash
+export TEST_REPO_USERNAME=...
+export TEST_REPO_EMAIL=...
+export TEST_REPO_PASSWORD=...
+
+# To execute all test files
+yarn test
+
+# To execute single test file
+yarn test <path_to_test_file>
+
+# ... with coverage details
+yarn coverage
+```
+
+### For community
+
+You would have to fork `https://github.com/GitStartHQ/git-slice-tools-test-cases` repo and set your credentials into these env vars
+
+```bash
+export TEST_REPO_URL=<your_forked_repo>
+export TEST_REPO_USERNAME=<your_github_username>
+export TEST_REPO_EMAIL=<your_github_email>
+export TEST_REPO_PASSWORD=<your_github_PAT>
+
+# To execute all test files
+yarn test
+
+# To execute single test file
+yarn test <path_to_test_file>
+
+# ... with coverage details
+yarn coverage
+```
+
 ## Global CLI
 
 You can install and use `git-slice-tools` globally
@@ -335,7 +376,12 @@ These are features you can trigger with using workflow dispatch in actions page,
 
 Env `GIT_SLICE_SLICE_IGNORES` is used for ignoring files in `pull` and `push` jobs, this configuration is defined in slice repo side.
 
-To allow upstream repos control this also, since version 1.2.0, `git-slice-tools` supports `.gitsliceignore` file, upstream repos now can put glob patterns in `.gitsliceignore` file to define which files should be ignored in `git-slice-tools` `pull` and `push` jobs. Please note that `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
+To allow upstream repos control this also, since version 1.2.0, `git-slice-tools` supports `.gitsliceignore` file, upstream repos now can put glob patterns in `.gitsliceignore` file to define which files should be ignored in `git-slice-tools` `pull` and `push` jobs.
+
+Please note these:
+
+- `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
+- `.gitsliceignore` supports the same patterns as `.gitignore` does
 
 Example of a `.gitsliceignore` file:
 

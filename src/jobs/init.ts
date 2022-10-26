@@ -10,6 +10,7 @@ export const init = async (
 }> => {
     let sliceGit: SimpleGit
     let upstreamGit: SimpleGit
+    const ignorePrintRemotes = process.env.TEST_ENV === 'true'
 
     if (actionInputs.forceInit) {
         sliceGit = await gitInit('Slice', actionInputs.sliceRepo)
@@ -29,13 +30,11 @@ export const init = async (
 
     logExtendLastLine('Done!')
 
-    const sliceRemote = await sliceGit.remote(['-v'])
+    if (!ignorePrintRemotes) {
+        const sliceRemote = await sliceGit.remote(['-v'])
 
-    logWriteLine('Slice', `Repo:\n${sliceRemote}`)
-
-    // const sliceUser = await sliceGit.getConfig('user.name')
-
-    // terminal(`Slice: User: ${sliceUser.value}\n`)
+        logWriteLine('Slice', `Repo:\n${sliceRemote}`)
+    }
 
     logWriteLine('Upstream', 'Feching...')
 
@@ -51,13 +50,10 @@ export const init = async (
         logExtendLastLine('Done!')
     }
 
-    const upstreamRemote = await upstreamGit.remote(['-v'])
-
-    logWriteLine('Upstream', `Repo:\n${upstreamRemote}`)
-
-    // const upstreamUser = await upstreamGit.getConfig('user.name')
-
-    // terminal(`Upstream: User: ${upstreamUser.value}\n`)
+    if (!ignorePrintRemotes) {
+        const upstreamRemote = await upstreamGit.remote(['-v'])
+        logWriteLine('Upstream', `Repo:\n${upstreamRemote}`)
+    }
 
     return {
         sliceGit,

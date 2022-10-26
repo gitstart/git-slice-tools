@@ -13,7 +13,7 @@ export const checkout = async (
     await sliceGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
     logger.logExtendLastLine(`Done!`)
 
-    logger.logWriteLine('Slice', `Checking out default branch...`)
+    logger.logWriteLine('Slice', `Checking out default branch ${actionInputs.sliceRepo.defaultBranch}...`)
     await sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)
     logger.logExtendLastLine(`Done!`)
 
@@ -21,7 +21,7 @@ export const checkout = async (
     await upstreamGit.clean(CleanOptions.FORCE + CleanOptions.RECURSIVE + CleanOptions.IGNORED_INCLUDED)
     logger.logExtendLastLine(`Done!`)
 
-    logger.logWriteLine('Upstream', `Checking out default branch...`)
+    logger.logWriteLine('Upstream', `Checking out default branch ${actionInputs.upstreamRepo.defaultBranch}...`)
     await upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)
     logger.logExtendLastLine(`Done!`)
 }

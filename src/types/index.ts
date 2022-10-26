@@ -1,4 +1,4 @@
-export type LogScope = 'Upstream' | 'Slice' | 'OpenSource'
+export type LogScope = 'Upstream' | 'Slice' | 'OpenSource' | 'Common'
 
 export interface ActionInputs {
     sliceIgnores: string[]
