@@ -1,9 +1,9 @@
 <div align="center">
 
-  [![Built with TypeScript](https://img.shields.io/badge/built_with-TypeScript-007acc.svg?logo=typescript)](https://www.typescriptlang.org/)
-  [![Lint - Format - Build - Test](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml/badge.svg)](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml)
-  [![codecov](https://codecov.io/github/GitStartHQ/git-slice-tools/branch/main/graph/badge.svg?token=APZVXN9MD9)](https://codecov.io/github/GitStartHQ/git-slice-tools)
-  
+[![Built with TypeScript](https://img.shields.io/badge/built_with-TypeScript-007acc.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![Lint - Format - Build - Test](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml/badge.svg)](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml)
+[![codecov](https://codecov.io/github/GitStartHQ/git-slice-tools/branch/main/graph/badge.svg?token=APZVXN9MD9)](https://codecov.io/github/GitStartHQ/git-slice-tools)
+
 </div>
 
 # git-slice-tools
