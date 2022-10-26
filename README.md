@@ -1,3 +1,11 @@
+<div align="center">
+
+  [![Built with TypeScript](https://img.shields.io/badge/built_with-TypeScript-007acc.svg?logo=typescript)](https://www.typescriptlang.org/)
+  [![Lint - Format - Build - Test](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml/badge.svg)](https://github.com/GitStartHQ/git-slice-tools/actions/workflows/checks.yml)
+  [![codecov](https://codecov.io/github/GitStartHQ/git-slice-tools/branch/main/graph/badge.svg?token=APZVXN9MD9)](https://codecov.io/github/GitStartHQ/git-slice-tools)
+  
+</div>
+
 # git-slice-tools
 
 This utility can be used to take out folder(s) from a git repository, fork it into a new git repository and eventually provide commands to sync changes between both repositories.
