@@ -3,7 +3,7 @@ import { prepareTestEnvs } from '../../common/tests'
 import simpleGit from 'simple-git'
 
 describe('default flow - checkout', () => {
-    it('Default flow - Should setup slice & upstream repo correctly', async () => {
+    it('Default flow - Should setup slice & upstream repos correctly', async () => {
         const { sliceDir, upstreamDir, cleanUp } = await prepareTestEnvs('checkout')
         await runScript('checkout')
 

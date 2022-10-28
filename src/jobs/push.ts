@@ -112,7 +112,7 @@ export const push = async (
         return
     }
 
-    logger.logWriteLine('Upstream', `Upstream: Checkout branch '${upstreamBranch}'...`)
+    logger.logWriteLine('Upstream', `Checkout branch '${upstreamBranch}'...`)
 
     await upstreamGit.checkout(upstreamBranch)
     await upstreamGit.pull('origin', upstreamBranch)

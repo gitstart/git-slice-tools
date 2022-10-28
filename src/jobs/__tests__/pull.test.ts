@@ -1,5 +1,5 @@
 import { runScript } from '../../tests/runner'
-import { prepareTestEnvs } from '../../common/tests'
+import { prepareTestEnvs, SAMPLE_BRANCHES } from '../../common/tests'
 import simpleGit from 'simple-git'
 
 describe('default flow - pull', () => {
@@ -8,8 +8,8 @@ describe('default flow - pull', () => {
         const targetSliceBranch = `slice-main-${key}`
         const targetUpstreamBranch = `upstream-main-${key}`
 
-        await testRepo.createNewBranchFromBranch(targetUpstreamBranch, 'upstream-main')
-        await testRepo.createNewBranchFromBranch(targetSliceBranch, 'slice-main')
+        await testRepo.createNewBranchFromBranch(targetUpstreamBranch, SAMPLE_BRANCHES.upstreamMain)
+        await testRepo.createNewBranchFromBranch(targetSliceBranch, SAMPLE_BRANCHES.sliceMain)
 
         process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH = targetUpstreamBranch
         process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH = targetSliceBranch
@@ -19,17 +19,17 @@ describe('default flow - pull', () => {
         const sliceGit = simpleGit(sliceDir, { binary: 'git' })
 
         // we need to checkout `sliced-main` once for diff calling below
-        await sliceGit.checkout('sliced-main')
+        await sliceGit.checkout(SAMPLE_BRANCHES.correctedSlicedMain)
         await sliceGit.checkout(targetSliceBranch)
 
-        let diffs = await sliceGit.diffSummary(['sliced-main'])
+        let diffs = await sliceGit.diffSummary([SAMPLE_BRANCHES.correctedSlicedMain])
 
         // there should be some diffs between this branch and `sliced-branch` before pull job
         expect(diffs.files).not.toHaveLength(0)
 
         await runScript('pull')
 
-        diffs = await sliceGit.diffSummary(['sliced-main'])
+        diffs = await sliceGit.diffSummary([SAMPLE_BRANCHES.correctedSlicedMain])
 
         // there should be no diffs between this branch and `sliced-branch` after pull job
         expect(diffs.files).toHaveLength(0)
@@ -42,8 +42,8 @@ describe('default flow - pull', () => {
         const targetSliceBranch = `slice-main-${key}`
         const targetUpstreamBranch = `upstream-main-${key}`
 
-        await testRepo.createNewBranchFromBranch(targetUpstreamBranch, 'upstream-main')
-        await testRepo.createNewBranchFromBranch(targetSliceBranch, 'slice-main')
+        await testRepo.createNewBranchFromBranch(targetUpstreamBranch, SAMPLE_BRANCHES.upstreamMain)
+        await testRepo.createNewBranchFromBranch(targetSliceBranch, SAMPLE_BRANCHES.sliceMain)
 
         process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH = targetUpstreamBranch
         process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH = targetSliceBranch
@@ -55,19 +55,15 @@ describe('default flow - pull', () => {
         const sliceGit = simpleGit(sliceDir, { binary: 'git' })
 
         // we need to checkout `sliced-main` once for diff calling below
-        await sliceGit.checkout('sliced-main')
+        await sliceGit.checkout(SAMPLE_BRANCHES.correctedSlicedMain)
         await sliceGit.checkout(targetSliceBranch)
-
-        let diffs = await sliceGit.diffSummary(['sliced-main'])
-
-        // there should be some diffs between this branch and `sliced-branch` before pull job
-        expect(diffs.files).not.toHaveLength(0)
 
         await runScript('pull')
 
-        diffs = await sliceGit.diffSummary(['sliced-main'])
+        const diffs = await sliceGit.diffSummary([SAMPLE_BRANCHES.correctedSlicedMain])
 
-        // there should be no diffs between this branch and `sliced-branch` after pull job
+        // there should be some diffs (caused by process.env.GIT_SLICE_SLICE_IGNORES updates)
+        // between this branch and `sliced-branch` after pull job
         expect(diffs.files).toHaveLength(4)
 
         expect(diffs.files.map(file => file.file)).toEqual([

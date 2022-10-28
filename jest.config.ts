@@ -17,7 +17,7 @@ const config: JestConfigWithTsJest = {
     coverageReporters: ['json', 'lcov', 'text-summary'],
     setupFiles: [path.join(__dirname, 'src/tests/setupFiles.ts')],
     setupFilesAfterEnv: [path.join(__dirname, 'src/tests/setupFilesAfterEnv.ts')],
-    testTimeout: 30000,
+    testTimeout: 90000,
     globalSetup: path.join(__dirname, 'src/tests/jestGlobalSetup.ts'),
 }
 

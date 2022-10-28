@@ -1,15 +1,13 @@
 type StdOut = (content: string) => void
+type Terminal = StdOut & { up: () => Terminal; clear: () => Terminal; str: () => string }
 
 let currentContent = ''
 
-export const terminal: StdOut & { up: () => typeof terminal; clear: () => typeof terminal; str: () => string } = (
-    content: string
-) => {
+export const terminal: Terminal = (content: string) => {
     currentContent += content
 }
 
 terminal.up = () => {
-    // should be remote a line here
     const lastNewLinePos = currentContent.lastIndexOf('\n')
     const nextLastNewLinePos = currentContent.lastIndexOf('\n', lastNewLinePos - 1)
 

@@ -90,7 +90,7 @@ export const createCommitAndPushCurrentChanges = async (
             ...status.deleted.map(x => ({ filePath: x, changeType: '-' })),
             ...status.created.map(x => ({ filePath: x, changeType: '+' })),
         ]
-            .map(x => `${scope}: Commit (${x.changeType}) ${x.filePath}`)
+            .map(x => `Commit (${x.changeType}) ${x.filePath}`)
             .join('\n') + '\n'
     )
 

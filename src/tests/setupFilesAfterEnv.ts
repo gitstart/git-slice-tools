@@ -1,5 +1,11 @@
 import { terminal } from 'terminal-kit'
 
-afterAll(() => {
+const ORG_ENV_VARS = process.env
+
+beforeEach(() => {
+    process.env = { ...ORG_ENV_VARS }
+})
+
+afterEach(() => {
     terminal.clear()
 })

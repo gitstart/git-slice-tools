@@ -4,6 +4,12 @@ import process from 'process'
 import { Octokit } from 'octokit'
 import { terminal } from 'terminal-kit'
 
+export const SAMPLE_BRANCHES = {
+    upstreamMain: 'upstream-main',
+    sliceMain: 'slice-main',
+    correctedSlicedMain: 'sliced-main',
+} as const
+
 export const getCurrentTerminal = () => terminal.str()
 
 /**
@@ -21,18 +27,20 @@ export const prepareTestEnvs = async (name: string) => {
     fs.mkdirSync(sliceDir, { recursive: true })
 
     process.env.GIT_SLICE_UPSTREAM_REPO_DIR = upstreamDir
-    process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH = 'upstream-main'
+    process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH = SAMPLE_BRANCHES.upstreamMain
     process.env.GIT_SLICE_UPSTREAM_REPO_USERNAME = process.env.TEST_REPO_USERNAME
     process.env.GIT_SLICE_UPSTREAM_REPO_EMAIL = process.env.TEST_REPO_EMAIL
     process.env.GIT_SLICE_UPSTREAM_REPO_PASSWORD = process.env.TEST_REPO_PASSWORD
     process.env.GIT_SLICE_UPSTREAM_REPO_URL = process.env.TEST_REPO_URL
 
     process.env.GIT_SLICE_SLICE_REPO_DIR = sliceDir
-    process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH = 'slice-main'
+    process.env.GIT_SLICE_SLICE_REPO_DEFAULT_BRANCH = SAMPLE_BRANCHES.correctedSlicedMain
     process.env.GIT_SLICE_SLICE_REPO_USERNAME = process.env.TEST_REPO_USERNAME
     process.env.GIT_SLICE_SLICE_REPO_EMAIL = process.env.TEST_REPO_EMAIL
     process.env.GIT_SLICE_SLICE_REPO_PASSWORD = process.env.TEST_REPO_PASSWORD
     process.env.GIT_SLICE_SLICE_REPO_URL = process.env.TEST_REPO_URL
+
+    process.env.GIT_SLICE_PUSH_BRANCH_NAME_TEMPLATE = 'pushed-<branch_name>'
 
     const testRepo = new TestRepo(process.env.TEST_REPO_URL, process.env.TEST_REPO_PASSWORD)
 
@@ -59,6 +67,16 @@ export const prepareTestEnvs = async (name: string) => {
         testRepo,
         cleanUp,
     }
+}
+
+export const prependTextFile = async (rootDir: string, filePath: string, text: string) => {
+    const absFilePath = path.resolve(rootDir, filePath)
+    let fileContent = (await fs.readFile(absFilePath)).toString()
+    fileContent = `${text}\n${fileContent}`
+
+    await fs.writeFile(absFilePath, fileContent, { flag: 'w' })
+
+    return fileContent
 }
 
 class TestRepo {
@@ -100,20 +118,14 @@ class TestRepo {
 
     async deleteBranch(branchName: string): Promise<void> {
         const {
-            node: {
-                refs: { nodes: refNodes },
-            },
-        } = await this.octokit.graphql<{ node: { refs: { nodes: { id: string }[] } } }>(
+            node: { ref },
+        } = await this.octokit.graphql<{ node: { ref: { id: string } | undefined } }>(
             `
-            query($repositorId: ID!, $branchName: String!) {
+            query($repositorId: ID!, $qualifiedName: String!) {
                 node(id: $repositorId) {
                     ... on Repository {
-                        refs(first: 1, query: $branchName, refPrefix: "refs/heads/") {
-                            nodes {
-                                ... on Ref {
-                                    id
-                                }
-                            }
+                        ref(qualifiedName: $qualifiedName) {
+                            id
                         }
                     }
                 }
@@ -121,11 +133,13 @@ class TestRepo {
             `,
             {
                 repositorId: this.repositorId,
-                branchName,
+                qualifiedName: `refs/heads/${branchName}`,
             }
         )
 
-        const refId = refNodes[0].id
+        if (!ref?.id) {
+            return
+        }
 
         await this.octokit.graphql(
             `
@@ -140,7 +154,7 @@ class TestRepo {
             }
             `,
             {
-                refId,
+                refId: ref.id,
             }
         )
     }
@@ -148,20 +162,18 @@ class TestRepo {
     async createNewBranchFromBranch(branchName: string, fromBranchName: string): Promise<void> {
         const {
             node: {
-                refs: { nodes: refNodes },
+                ref: {
+                    target: { oid },
+                },
             },
-        } = await this.octokit.graphql<{ node: { refs: { nodes: { target: { oid: string } }[] } } }>(
+        } = await this.octokit.graphql<{ node: { ref: { target: { oid: string } } } }>(
             `
-            query($repositorId: ID!, $fromBranchName: String!) {
+            query($repositorId: ID!, $qualifiedName: String!) {
                 node(id: $repositorId) {
                     ... on Repository {
-                        refs(first: 1, query: $fromBranchName, refPrefix: "refs/heads/") {
-                            nodes {
-                                ... on Ref {
-                                    target {
-                                        oid
-                                    }
-                                }
+                        ref(qualifiedName: $qualifiedName) {
+                            target {
+                                oid
                             }
                         }
                     }
@@ -170,11 +182,9 @@ class TestRepo {
             `,
             {
                 repositorId: this.repositorId,
-                fromBranchName,
+                qualifiedName: `refs/heads/${fromBranchName}`,
             }
         )
-
-        const oid = refNodes[0].target.oid
 
         await this.octokit.graphql(
             `
@@ -196,5 +206,29 @@ class TestRepo {
                 oid,
             }
         )
+    }
+
+    async getBranchId(branchName: string): Promise<string | undefined> {
+        const {
+            node: { ref },
+        } = await this.octokit.graphql<{ node: { ref: { id: string } } }>(
+            `
+            query($repositorId: ID!, $qualifiedName: String!) {
+                node(id: $repositorId) {
+                    ... on Repository {
+                        ref(qualifiedName: $qualifiedName) {
+                            id
+                        }
+                    }
+                }
+            }
+            `,
+            {
+                repositorId: this.repositorId,
+                qualifiedName: `refs/heads/${branchName}`,
+            }
+        )
+
+        return ref?.id
     }
 }
