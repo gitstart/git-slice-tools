@@ -1,5 +1,5 @@
 import { runScript } from '../../tests/runner'
-import { prepareTestEnvs } from '../../common/tests'
+import { prepareTestEnvs } from '../../tests/common'
 import { getFilesMatchPatterns } from '../ignore'
 
 describe('ignore/getFilesMatchPatterns', () => {

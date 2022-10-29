@@ -4,6 +4,7 @@ type Terminal = StdOut & { up: () => Terminal; clear: () => Terminal; str: () =>
 let currentContent = ''
 
 export const terminal: Terminal = (content: string) => {
+    process.stdout.write(`${content}`)
     currentContent += content
 }
 

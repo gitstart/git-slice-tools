@@ -1,5 +1,5 @@
 import { runScript } from '../../tests/runner'
-import { prepareTestEnvs } from '../../common/tests'
+import { prepareTestEnvs } from '../../tests/common'
 import simpleGit from 'simple-git'
 
 describe('default flow - checkout', () => {
@@ -44,6 +44,8 @@ describe('default flow - checkout', () => {
 
         expect(upstreamStatus.current).toBe(process.env.GIT_SLICE_UPSTREAM_REPO_DEFAULT_BRANCH)
         expect(upstreamStatus.files).toHaveLength(0)
+
+        await runScript('pull')
 
         await cleanUp([])
     })

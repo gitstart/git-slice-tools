@@ -38,6 +38,11 @@ jobs:
         run: |
           yarn --mutex network --frozen-lockfile
 
+      - name: Typecheck
+        if: ${{ failure() || success() }}
+        run: |
+          yarn typecheck
+
       - name: Lint
         if: ${{ failure() || success() }}
         run: |
@@ -56,9 +61,12 @@ jobs:
       - name: Test
         if: ${{ failure() || success() }}
         run: |
+          cp .env.test.example .env.test
           yarn coverage
         env:
-          TEST_REPO_PASSWORD: ${{ secrets.TEST_GIT_SLICE_UPSTREAM_REPO_PASSWORD }}
+          TEST_REPO_PASSWORD: ${{ secrets.TEST_REPO_PASSWORD }}
+          TEST_REPO_USERNAME: ${{ secrets.TEST_REPO_USERNAME }}
+          TEST_REPO_EMAIL: ${{ secrets.TEST_REPO_EMAIL }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

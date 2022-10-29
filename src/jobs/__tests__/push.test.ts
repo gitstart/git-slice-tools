@@ -1,5 +1,5 @@
 import { runScript } from '../../tests/runner'
-import { prepareTestEnvs, prependTextFile, SAMPLE_BRANCHES } from '../../common/tests'
+import { prepareTestEnvs, prependTextFile, SAMPLE_BRANCHES } from '../../tests/common'
 import simpleGit from 'simple-git'
 import fs from 'fs-extra'
 import path from 'path'
@@ -259,6 +259,14 @@ describe('default flow - push', () => {
 
         await cleanUp([upstreamMainBranch, sliceMainBranch, pushedBranch, sliceBranch])
     })
+
+    it.todo(
+        'Should pull correct rev which current slice main branch is synced into pushing slice branch when current slice main branch has not synced with upstream main yet'
+    )
+
+    it.todo('Should push new symlinks')
+
+    it.todo('Should push changes in symlinks')
 })
 
 describe('opensource flow - push', () => {

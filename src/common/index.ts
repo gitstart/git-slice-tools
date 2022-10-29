@@ -148,6 +148,7 @@ export const copyFiles = async (
     }
 
     const fileChanges: string[] = []
+    const symlinkFiles: { filePath: string; targetLink: string; reason: Reason; state: DifferenceState }[] = []
 
     // Filter files only on left = to Dir
     const onlyOnToDirFiles = compareResponse.diffSet.filter(dif => dif.state === 'left')
@@ -157,7 +158,31 @@ export const copyFiles = async (
     for (let i = 0; i < onlyOnToDirFiles.length; i++) {
         const diff = onlyOnToDirFiles[i]
         const filePath = `${diff.relativePath.substring(1)}/${diff.name1}`
+        const absPath = path.join(toDir, filePath)
+
+        if (!fs.existsSync(absPath)) {
+            // For this case:
+            // 1. Trying to delete a file which is a direct or in-direct symlink to a deleted file
+
+            logWriteLine(scope, `Ignored: ${filePath}... (missing symlink direct/indirect file)`)
+
+            continue
+        }
+
         const lstat = await fs.lstat(path.join(toDir, filePath))
+
+        if (lstat.isSymbolicLink()) {
+            const targetLink = await fs.readlink(path.join(toDir, filePath))
+
+            symlinkFiles.push({
+                filePath,
+                targetLink,
+                reason: diff.reason,
+                state: diff.state,
+            })
+
+            continue
+        }
 
         if (lstat.isDirectory()) {
             // We don't handle directories here .i.e deleting directories since git focuses on files
@@ -167,17 +192,14 @@ export const copyFiles = async (
             continue
         }
 
-        const absPath = path.join(toDir, filePath)
-
         logWriteLine(scope, `Deleting: ${filePath}...`)
 
         fs.rmSync(absPath, { force: true, recursive: true })
+
         fileChanges.push(absPath)
 
         logExtendLastLine('Done!')
     }
-
-    const symlinkFiles: { filePath: string; targetLink: string; reason: Reason; state: DifferenceState }[] = []
 
     // TODO: Getting problem with `.gitignore` related case
     // + Client push update some files, then add them to .gitignore
@@ -270,34 +292,79 @@ export const copyFiles = async (
         logWriteLine(scope, `Ignored: ${filePath}`)
     }
 
+    // TODO: Verify user cases when upstream changes a folder/file to symlink
+
     logWriteLine(scope, `Found ${symlinkFiles.length} symlinks!`)
 
     for (let i = 0; i < symlinkFiles.length; i++) {
         const { filePath, targetLink, reason, state } = symlinkFiles[i]
 
-        logWriteLine(scope, `Checking symlink target: ${filePath} (${state}/${reason ?? 'No reason'})...`)
+        logWriteLine(
+            scope,
+            `Checking symlink target '${filePath}' (${state}/${reason ?? 'No reason'}) with target '${targetLink}'...`
+        )
 
-        if (state === 'distinct' && reason === 'different-symlink') {
+        // we should update the target of symlink
+        if (state === 'distinct') {
             const symlinkPath = path.join(toDir, filePath)
 
-            fs.rmSync(symlinkPath, { force: true })
-            fs.symlinkSync(targetLink, symlinkPath)
+            if (reason === 'different-symlink') {
+                logExtendLastLine(`Update synklink target of ${symlinkPath} with ${targetLink} on toDir...`)
 
-            fileChanges.push(symlinkPath)
+                // we need 'recursive: true' to handle the case of directory link
+                // We just need to copy the symlink file
+                fs.rmSync(symlinkPath, { force: true, recursive: true })
+                fs.symlinkSync(targetLink, symlinkPath)
 
-            logExtendLastLine('Done!')
+                fileChanges.push(symlinkPath)
+
+                logExtendLastLine('Done!')
+            }
 
             continue
         }
 
+        // only on toDir => we don't need to do anything here
+        if (state === 'left') {
+            logExtendLastLine('Ignored!')
+
+            continue
+        }
+
+        // only on fromDir => create that symlink on toDir
         if (state === 'right') {
             const symlinkPath = path.join(toDir, filePath)
+            const symlinkStats = fs.statSync(path.join(fromDir, filePath))
 
-            fs.symlinkSync(targetLink, symlinkPath)
+            if (symlinkStats.isFile()) {
+                logExtendLastLine(`Copy symlink ${filePath}...`)
+
+                // We just need to copy the symlink file
+                fs.copySync(path.join(fromDir, filePath), symlinkPath, {
+                    overwrite: false,
+                    dereference: false,
+                    recursive: false,
+                })
+            } else {
+                if (fs.existsSync(symlinkPath)) {
+                    // Use case for this:
+                    // + Uptream has symlink to a dir
+                    // + At this point, dir-compare considers that its sub files/dirs are new files/dirs and already copy them in above steps
+                    // + This will make below call fs.copySync failed
+                    // => That's why we need to call remove
+                    logExtendLastLine(`${filePath} exists, deleting...`)
+
+                    fs.rmSync(symlinkPath, { force: true, recursive: true })
+                }
+
+                logExtendLastLine(`Copy symlink ${filePath}...`)
+
+                fs.symlinkSync(targetLink, symlinkPath)
+            }
 
             fileChanges.push(symlinkPath)
 
-            logExtendLastLine('Done!')
+            logExtendLastLine(`Done!`)
 
             continue
         }

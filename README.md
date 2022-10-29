@@ -97,14 +97,11 @@ yarn dev --exec "yarn pull"
 
 ## Test
 
-### For GitStart members
-
-By default, we run unit tests on our prepared repo `https://github.com/GitStartHQ/git-slice-tools-test-cases`, you should ask for following env vars `TEST_REPO_USERNAME` `TEST_REPO_EMAIL` `TEST_REPO_PASSWORD` before executing test scripts
-
 ```bash
-export TEST_REPO_USERNAME=...
-export TEST_REPO_EMAIL=...
-export TEST_REPO_PASSWORD=...
+# Prepare .env.test file
+cp .env.test.example .env.test
+
+# Update `TEST_REPO_USERNAME` `TEST_REPO_EMAIL` `TEST_REPO_PASSWORD` in .env.test file
 
 # To execute all test files
 yarn test
@@ -115,26 +112,14 @@ yarn test <path_to_test_file>
 # ... with coverage details
 yarn coverage
 ```
+
+### For GitStart members
+
+By default, we run unit tests on our prepared repo `https://github.com/GitStartHQ/git-slice-tools-test-cases`, you should ask for write permission on that repo and use your own `TEST_REPO_USERNAME` `TEST_REPO_EMAIL` `TEST_REPO_PASSWORD` in .env.test file
 
 ### For community
 
-You would have to fork `https://github.com/GitStartHQ/git-slice-tools-test-cases` repo and set your credentials into these env vars
-
-```bash
-export TEST_REPO_URL=<your_forked_repo>
-export TEST_REPO_USERNAME=<your_github_username>
-export TEST_REPO_EMAIL=<your_github_email>
-export TEST_REPO_PASSWORD=<your_github_PAT>
-
-# To execute all test files
-yarn test
-
-# To execute single test file
-yarn test <path_to_test_file>
-
-# ... with coverage details
-yarn coverage
-```
+You would have to fork `https://github.com/GitStartHQ/git-slice-tools-test-cases` repo, use it for `TEST_REPO_URL` and set your credentials for `TEST_REPO_USERNAME` `TEST_REPO_EMAIL` `TEST_REPO_PASSWORD` in .env.test file
 
 ## Global CLI
 
