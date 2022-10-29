@@ -43,10 +43,11 @@ exports.init = void 0;
 var simple_git_1 = __importDefault(require("simple-git"));
 var common_1 = require("../common");
 var init = function (actionInputs) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceGit, upstreamGit, sliceRemote, upstreamRemote;
+    var sliceGit, upstreamGit, ignorePrintRemotes, sliceRemote, upstreamRemote;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                ignorePrintRemotes = process.env.TEST_ENV === 'true';
                 if (!actionInputs.forceInit) return [3 /*break*/, 3];
                 return [4 /*yield*/, (0, common_1.gitInit)('Slice', actionInputs.sliceRepo)];
             case 1:
@@ -65,34 +66,36 @@ var init = function (actionInputs) { return __awaiter(void 0, void 0, void 0, fu
             case 5:
                 _a.sent();
                 (0, common_1.logExtendLastLine)('Done!');
+                if (!!ignorePrintRemotes) return [3 /*break*/, 7];
                 return [4 /*yield*/, sliceGit.remote(['-v'])];
             case 6:
                 sliceRemote = _a.sent();
                 (0, common_1.logWriteLine)('Slice', "Repo:\n" + sliceRemote);
-                // const sliceUser = await sliceGit.getConfig('user.name')
-                // terminal(`Slice: User: ${sliceUser.value}\n`)
+                _a.label = 7;
+            case 7:
                 (0, common_1.logWriteLine)('Upstream', 'Feching...');
                 return [4 /*yield*/, upstreamGit.fetch('origin', ['-p'])];
-            case 7:
-                _a.sent();
-                (0, common_1.logExtendLastLine)('Done!');
-                if (!actionInputs.isOpenSourceFlow) return [3 /*break*/, 9];
-                (0, common_1.logWriteLine)('OpenSource', 'Feching...');
-                return [4 /*yield*/, upstreamGit.fetch(common_1.OPEN_SOURCE_REMOTE, ['-p'])];
             case 8:
                 _a.sent();
                 (0, common_1.logExtendLastLine)('Done!');
-                _a.label = 9;
-            case 9: return [4 /*yield*/, upstreamGit.remote(['-v'])];
+                if (!actionInputs.isOpenSourceFlow) return [3 /*break*/, 10];
+                (0, common_1.logWriteLine)('OpenSource', 'Feching...');
+                return [4 /*yield*/, upstreamGit.fetch(common_1.OPEN_SOURCE_REMOTE, ['-p'])];
+            case 9:
+                _a.sent();
+                (0, common_1.logExtendLastLine)('Done!');
+                _a.label = 10;
             case 10:
+                if (!!ignorePrintRemotes) return [3 /*break*/, 12];
+                return [4 /*yield*/, upstreamGit.remote(['-v'])];
+            case 11:
                 upstreamRemote = _a.sent();
                 (0, common_1.logWriteLine)('Upstream', "Repo:\n" + upstreamRemote);
-                // const upstreamUser = await upstreamGit.getConfig('user.name')
-                // terminal(`Upstream: User: ${upstreamUser.value}\n`)
-                return [2 /*return*/, {
-                        sliceGit: sliceGit,
-                        upstreamGit: upstreamGit,
-                    }];
+                _a.label = 12;
+            case 12: return [2 /*return*/, {
+                    sliceGit: sliceGit,
+                    upstreamGit: upstreamGit,
+                }];
         }
     });
 }); };

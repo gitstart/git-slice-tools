@@ -141,7 +141,7 @@ var push = function (sliceGit, upstreamGit, actionInputs, sliceBranch, commitMsg
                 _a.sent();
                 return [2 /*return*/];
             case 19:
-                common_1.logger.logWriteLine('Upstream', "Upstream: Checkout branch '" + upstreamBranch + "'...");
+                common_1.logger.logWriteLine('Upstream', "Checkout branch '" + upstreamBranch + "'...");
                 return [4 /*yield*/, upstreamGit.checkout(upstreamBranch)];
             case 20:
                 _a.sent();

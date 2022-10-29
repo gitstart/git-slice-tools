@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logInputs = exports.logExtendLastLine = exports.logWriteLine = void 0;
 var terminal_kit_1 = require("terminal-kit");
-var ignoreTimestamp = process.env.DISABLE_LOG_TIMESTAMP === 'true';
+var ignoreTimestamp = process.env.TEST_ENV === 'true';
 var lastLogLine = '';
 var lastLogTime = new Date();
 var logWriteLine = function (scope, content) {

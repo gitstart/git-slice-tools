@@ -35,15 +35,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteGitSliceIgnoreFiles = exports.getGitSliceIgoreConfig = void 0;
+exports.deleteGitSliceIgnoreFiles = exports.getFilesMatchPatterns = exports.getGitSliceIgoreConfig = void 0;
 var fs_extra_1 = __importDefault(require("fs-extra"));
-var globby_1 = __importDefault(require("globby"));
 var path_1 = __importDefault(require("path"));
 var logger_1 = require("./logger");
+var simple_git_1 = __importDefault(require("simple-git"));
 var getGitSliceIgoreConfig = function (dir) {
     var filePath = path_1.default.resolve(dir, '.gitsliceignore');
     var gitSliceIgnoreFileExists = fs_extra_1.default.existsSync(filePath);
@@ -59,13 +68,32 @@ var getGitSliceIgoreConfig = function (dir) {
         .filter(function (x) { return x && !x.startsWith('#'); }));
 };
 exports.getGitSliceIgoreConfig = getGitSliceIgoreConfig;
+// For now we couldn't find a good npm package to handle ignore patterns like .gitignore
+// So we use git command `ls-files --ignored` for now
+var getFilesMatchPatterns = function (patterns, rootDir) { return __awaiter(void 0, void 0, void 0, function () {
+    var git, raw;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                git = (0, simple_git_1.default)(rootDir, { binary: 'git' });
+                return [4 /*yield*/, git.raw(__spreadArray(['ls-files', '--ignored', '--cached'], patterns.flatMap(function (pattern) { return ['-x', pattern]; }), true))];
+            case 1:
+                raw = _a.sent();
+                return [2 /*return*/, (raw !== null && raw !== void 0 ? raw : '')
+                        .trim()
+                        .split('\n')
+                        .map(function (x) { return x.trim(); })];
+        }
+    });
+}); };
+exports.getFilesMatchPatterns = getFilesMatchPatterns;
 var deleteGitSliceIgnoreFiles = function (sliceIgnores, rootDir, scope) { return __awaiter(void 0, void 0, void 0, function () {
     var paths, i, pathMatch, resolvedPath;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 (0, logger_1.logWriteLine)(scope, "Getting git-slices ingoring files/directores...");
-                return [4 /*yield*/, (0, globby_1.default)(sliceIgnores, { cwd: rootDir })];
+                return [4 /*yield*/, (0, exports.getFilesMatchPatterns)(sliceIgnores, rootDir)];
             case 1:
                 paths = _a.sent();
                 (0, logger_1.logExtendLastLine)("Found " + paths.length);

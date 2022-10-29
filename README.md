@@ -129,10 +129,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.6.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.6.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.0
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -294,10 +294,10 @@ Setup steps:
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.6.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.0
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.6.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.0
 
 # Navigate to local cloned slice repo,
 # If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`
@@ -374,7 +374,7 @@ To allow upstream repos control this also, since version 1.2.0, `git-slice-tools
 Please note these:
 
 - `.gitsliceignore` file will be ignored in `push` job which means that only upstream repo can make changes on that file.
-- `.gitsliceignore` supports the same patterns as `.gitignore` does
+- `.gitsliceignore` supports the same patterns as `.gitignore` does, so you can use `git ls-files --ignored --cached -X .gitsliceignore` to verify which files will be ignored in git-slice-tools
 
 Example of a `.gitsliceignore` file:
 

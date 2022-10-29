@@ -9,10 +9,13 @@ var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
     if (ignoreCheckDirs === void 0) { ignoreCheckDirs = false; }
-    if (envFilePath && !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), envFilePath))) {
-        throw new Error(envFilePath + " doesn't exist");
+    var ignoreDotenv = process.env.TEST_ENV === 'true';
+    if (!ignoreDotenv) {
+        if (envFilePath && !fs_1.default.existsSync(path_1.default.resolve(process.cwd(), envFilePath))) {
+            throw new Error(envFilePath + " doesn't exist");
+        }
+        dotenv_1.default.config(envFilePath ? { path: envFilePath } : undefined);
     }
-    dotenv_1.default.config(envFilePath ? { path: envFilePath } : undefined);
     var forceInit = !process.env.GIT_SLICE_FORCE_GIT_INIT || process.env.GIT_SLICE_FORCE_GIT_INIT !== 'false';
     if (!ignoreCheckDirs &&
         (!process.env.GIT_SLICE_UPSTREAM_REPO_DIR ||
@@ -83,7 +86,7 @@ var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
         }
     }
     var prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false';
-    var isOpenSourceFlow = !process.env.GIT_SLICE_OPEN_SOURCE_FLOW || process.env.GIT_SLICE_OPEN_SOURCE_FLOW !== 'false';
+    var isOpenSourceFlow = process.env.GIT_SLICE_OPEN_SOURCE_FLOW === 'true';
     var openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL;
     if (isOpenSourceFlow && !openSourceUrl) {
         throw new Error("Missing 'GIT_SLICE_OPEN_SOURCE_URL'");

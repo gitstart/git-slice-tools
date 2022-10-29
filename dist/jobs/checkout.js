@@ -49,7 +49,7 @@ var checkout = function (sliceGit, upstreamGit, actionInputs) { return __awaiter
             case 1:
                 _a.sent();
                 common_1.logger.logExtendLastLine("Done!");
-                common_1.logger.logWriteLine('Slice', "Checking out default branch...");
+                common_1.logger.logWriteLine('Slice', "Checking out default branch " + actionInputs.sliceRepo.defaultBranch + "...");
                 return [4 /*yield*/, sliceGit.checkout(actionInputs.sliceRepo.defaultBranch)];
             case 2:
                 _a.sent();
@@ -59,7 +59,7 @@ var checkout = function (sliceGit, upstreamGit, actionInputs) { return __awaiter
             case 3:
                 _a.sent();
                 common_1.logger.logExtendLastLine("Done!");
-                common_1.logger.logWriteLine('Upstream', "Checking out default branch...");
+                common_1.logger.logWriteLine('Upstream', "Checking out default branch " + actionInputs.upstreamRepo.defaultBranch + "...");
                 return [4 /*yield*/, upstreamGit.checkout(actionInputs.upstreamRepo.defaultBranch)];
             case 4:
                 _a.sent();
