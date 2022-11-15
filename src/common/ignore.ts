@@ -33,6 +33,7 @@ export const getFilesMatchPatterns = async (patterns: string[], rootDir: string)
         .trim()
         .split('\n')
         .map(x => x.trim())
+        .filter(Boolean)
 }
 
 export const deleteGitSliceIgnoreFiles = async (

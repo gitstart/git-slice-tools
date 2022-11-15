@@ -1,6 +1,6 @@
 {
   "name": "git-slice-tools",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "main": "dist/cli.js",
   "license": "MIT",
   "engines": {

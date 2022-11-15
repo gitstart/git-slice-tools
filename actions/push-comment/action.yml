@@ -80,7 +80,7 @@ runs:
           }
 
     - name: git-slice-tools PUSH
-      uses: GitStartHQ/git-slice-tools/actions/push@v1.7.0
+      uses: GitStartHQ/git-slice-tools/actions/push@v1.7.1
       with:
         branch: ${{ fromJSON(steps.get-pr.outputs.result).head.ref }}
         message: ${{ fromJSON(steps.get-push-options.outputs.result).message }}

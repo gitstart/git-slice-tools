@@ -82,7 +82,8 @@ var getFilesMatchPatterns = function (patterns, rootDir) { return __awaiter(void
                 return [2 /*return*/, (raw !== null && raw !== void 0 ? raw : '')
                         .trim()
                         .split('\n')
-                        .map(function (x) { return x.trim(); })];
+                        .map(function (x) { return x.trim(); })
+                        .filter(Boolean)];
         }
     });
 }); };

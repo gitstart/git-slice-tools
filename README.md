@@ -129,10 +129,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.1
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.1
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -294,10 +294,10 @@ Setup steps:
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.1
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.1
 
 # Navigate to local cloned slice repo,
 # If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`
