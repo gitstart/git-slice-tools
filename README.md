@@ -129,10 +129,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.1
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.2
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.1
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.2
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]
@@ -248,14 +248,16 @@ Support `open source flow`
 
 Command arguments
 
-| Arg            | Description                                                                                            |
-| -------------- | ------------------------------------------------------------------------------------------------------ |
-| `--from`       | Number of the upstream issue you want to pull                                                          |
-| `--to`         | (optional) Number of the slice issue you want to update                                                |
-| `--trigger-by` | (optional) Username who executed this job, this username will be put in a comment on top of issue body |
+| Arg            | Description                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------- |
+| `--from`       | Number of the upstream issue you want to pull or the link of issue from any repos upstream account can access |
+| `--to`         | (optional) Number of the slice issue you want to update                                                       |
+| `--trigger-by` | (optional) Username who executed this job, this username will be put in a comment on top of issue body        |
 
 ```bash
-yarn pull-issue --from 123
+yarn pull-issue --from
+
+yarn pull-issue --from https://github.com/sourcegraph/sourcegraph/issues/46240
 
 yarn pull-issue --from 123 --to 332
 ```
@@ -275,7 +277,7 @@ In this flow:
 
 ## Use `git-slice-tools` in Github Action
 
-### Setup workflow manually
+### Setup workflow manually (recommended)
 
 You can setup `git-slice-tools` easily in Github Action by coping our prepared `git-slice-tools.yml` file into your `.github/workflows` folder and follow these steps:
 
@@ -287,17 +289,17 @@ Setup steps:
 - Create GIT_SLICE_UPSTREAM_REPO_CACHE_KEY repo secret with value is a dummy string
 - Invite GIT_SLICE_SLICE_REPO_USERNAME account with "maintainer" role to slice repo. If slice repo has "Require a pull request before merging" config, please add GIT_SLICE_SLICE_REPO_USERNAME into "Allow specified actors to bypass required pull requests"
 
-### Setup workflow with global cli
+### Setup workflow with global CLI
 
 ```shell
 
 # Install `git-slice-tools` globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.1
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.7.2
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.1
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.7.2
 
 # Navigate to local cloned slice repo,
 # If the slice repo is blank, then you should use `git init --initial-branch=main` together with `git remote set-url origin ...`

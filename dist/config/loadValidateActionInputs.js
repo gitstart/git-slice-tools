@@ -57,7 +57,7 @@ var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
     if (!process.env.GIT_SLICE_UPSTREAM_REPO_EMAIL) {
         throw new Error("Missing 'GIT_SLICE_UPSTREAM_REPO_EMAIL'");
     }
-    var sliceIgnores = ['.github', '!.github/PULL_REQUEST_TEMPLATE', 'git-slice.json'];
+    var sliceIgnores = ['.github', '!.github/PULL_REQUEST_TEMPLATE.md', 'git-slice.json'];
     if (process.env.GIT_SLICE_SLICE_IGNORES) {
         try {
             var parsedSliceIgnores = JSON.parse(process.env.GIT_SLICE_SLICE_IGNORES);

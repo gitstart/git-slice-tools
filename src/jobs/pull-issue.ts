@@ -5,17 +5,13 @@ import { ActionInputs, LogScope } from '../types'
 
 export const pullIssue = async (
     actionInputs: ActionInputs,
-    fromIssueNumber: number,
+    fromIssue: string,
     toIssueNumber: number,
     actor?: string
 ): Promise<void> => {
-    logger.logInputs('pull-issue', { fromIssueNumber, toIssueNumber })
+    logger.logInputs('pull-issue', { fromIssue, toIssueNumber })
 
     const { sliceRepo, upstreamRepo } = actionInputs
-    const upstreamLogScope: LogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream'
-    const upstreamGitUrlObject = actionInputs.isOpenSourceFlow
-        ? gitUrlParse(actionInputs.openSourceUrl)
-        : gitUrlParse(upstreamRepo.gitHttpUri)
     const sliceGitUrlObject = gitUrlParse(sliceRepo.gitHttpUri)
     const upstreamOctokit = new Octokit({
         auth: upstreamRepo.userToken,
@@ -23,6 +19,30 @@ export const pullIssue = async (
     const sliceOctokit = new Octokit({
         auth: actionInputs.sliceRepo.userToken,
     })
+
+    let upstreamLogScope: LogScope = 'Other'
+    let upstreamGitUrlObject: gitUrlParse.GitUrl
+    let fromIssueNumber = parseInt(fromIssue, 10)
+    const isUpstreamIssueNumber = !isNaN(fromIssueNumber)
+
+    if (isUpstreamIssueNumber) {
+        // fromIssue is an issue number from upstream
+        upstreamLogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream'
+        upstreamGitUrlObject = actionInputs.isOpenSourceFlow
+            ? gitUrlParse(actionInputs.openSourceUrl)
+            : gitUrlParse(upstreamRepo.gitHttpUri)
+    } else {
+        // fromIssue is an issue link
+        upstreamLogScope = 'Other'
+        const regexResult = /(https:\/\/github\.com\/)?([^/]+\/[^/]+)\/issues\/(\d+)/gi.exec(fromIssue)
+
+        if (!regexResult || !regexResult[2] || isNaN(parseInt(regexResult[3], 10))) {
+            throw new Error(`Unsuported fromIssue arg '${fromIssue}'`)
+        }
+
+        fromIssueNumber = parseInt(regexResult[3], 10)
+        upstreamGitUrlObject = gitUrlParse(`${regexResult[1] ?? 'https://github.com/'}${regexResult[2]}.git`)
+    }
 
     if (upstreamGitUrlObject.source !== 'github.com') {
         throw new Error(`Unsuported codehost '${upstreamGitUrlObject.source}'`)

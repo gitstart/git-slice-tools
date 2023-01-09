@@ -176,10 +176,10 @@ export default (args: string[] = null) =>
             "Pull an issue from upstream repo (or open source repo with 'GIT_SLICE_OPEN_SOURCE_FLOW') (GitHub only)",
             {
                 ...GLOBAL_OPTIONS_CONFIG,
-                fromIssueNumber: {
-                    type: 'number',
+                fromIssue: {
+                    type: 'string',
                     alias: 'from',
-                    desc: 'Number of the upstream issue you want to pull',
+                    desc: 'Number of the upstream issue you want to pull or the link of issue from any repos upstream account can access',
                 },
                 toIssueNumber: {
                     type: 'number',
@@ -193,17 +193,17 @@ export default (args: string[] = null) =>
                     desc: 'username of github account who executed this job',
                 },
             },
-            ({ env, fromIssueNumber, toIssueNumber, triggerBy }) => {
-                if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
-                    throw new Error(`pull-issue job: 'from' in number is required`)
+            ({ env, fromIssue, toIssueNumber, triggerBy }) => {
+                if (!fromIssue) {
+                    throw new Error(`pull-issue job: 'from' is required`)
                 }
 
                 if (toIssueNumber != null && typeof toIssueNumber !== 'number') {
                     throw new Error(`pull-issue job: 'to' in number is required`)
                 }
 
-                return loadActionInputsAndInit(env, ({ actionInputs }) =>
-                    pullIssue(actionInputs, fromIssueNumber, toIssueNumber, triggerBy)
+                return loadActionInputs(env, ({ actionInputs }) =>
+                    pullIssue(actionInputs, fromIssue, toIssueNumber, triggerBy)
                 )
             }
         )

@@ -183,10 +183,10 @@ exports.default = (function (args) {
             return (0, jobs_1.pullReview)(actionInputs, prNumber, prReivewLink);
         });
     })
-        .command('pull-issue', "Pull an issue from upstream repo (or open source repo with 'GIT_SLICE_OPEN_SOURCE_FLOW') (GitHub only)", __assign(__assign({}, GLOBAL_OPTIONS_CONFIG), { fromIssueNumber: {
-            type: 'number',
+        .command('pull-issue', "Pull an issue from upstream repo (or open source repo with 'GIT_SLICE_OPEN_SOURCE_FLOW') (GitHub only)", __assign(__assign({}, GLOBAL_OPTIONS_CONFIG), { fromIssue: {
+            type: 'string',
             alias: 'from',
-            desc: 'Number of the upstream issue you want to pull',
+            desc: 'Number of the upstream issue you want to pull or the link of issue from any repos upstream account can access',
         }, toIssueNumber: {
             type: 'number',
             alias: 'to',
@@ -197,16 +197,16 @@ exports.default = (function (args) {
             alias: 'trigger-by',
             desc: 'username of github account who executed this job',
         } }), function (_a) {
-        var env = _a.env, fromIssueNumber = _a.fromIssueNumber, toIssueNumber = _a.toIssueNumber, triggerBy = _a.triggerBy;
-        if (!fromIssueNumber || typeof fromIssueNumber !== 'number') {
-            throw new Error("pull-issue job: 'from' in number is required");
+        var env = _a.env, fromIssue = _a.fromIssue, toIssueNumber = _a.toIssueNumber, triggerBy = _a.triggerBy;
+        if (!fromIssue) {
+            throw new Error("pull-issue job: 'from' is required");
         }
         if (toIssueNumber != null && typeof toIssueNumber !== 'number') {
             throw new Error("pull-issue job: 'to' in number is required");
         }
-        return loadActionInputsAndInit(env, function (_a) {
+        return loadActionInputs(env, function (_a) {
             var actionInputs = _a.actionInputs;
-            return (0, jobs_1.pullIssue)(actionInputs, fromIssueNumber, toIssueNumber, triggerBy);
+            return (0, jobs_1.pullIssue)(actionInputs, fromIssue, toIssueNumber, triggerBy);
         });
     })
         .command('open-source', 'Open source tools', function (openSourceArgv) {

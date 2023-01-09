@@ -43,17 +43,14 @@ exports.pullIssue = void 0;
 var git_url_parse_1 = __importDefault(require("git-url-parse"));
 var octokit_1 = require("octokit");
 var common_1 = require("../common");
-var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) { return __awaiter(void 0, void 0, void 0, function () {
-    var sliceRepo, upstreamRepo, upstreamLogScope, upstreamGitUrlObject, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamIssue, title, body, html_url, pulledIssueBody, sliceIssue;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+var pullIssue = function (actionInputs, fromIssue, toIssueNumber, actor) { return __awaiter(void 0, void 0, void 0, function () {
+    var sliceRepo, upstreamRepo, sliceGitUrlObject, upstreamOctokit, sliceOctokit, upstreamLogScope, upstreamGitUrlObject, fromIssueNumber, isUpstreamIssueNumber, regexResult, upstreamIssue, title, body, html_url, pulledIssueBody, sliceIssue;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                common_1.logger.logInputs('pull-issue', { fromIssueNumber: fromIssueNumber, toIssueNumber: toIssueNumber });
+                common_1.logger.logInputs('pull-issue', { fromIssue: fromIssue, toIssueNumber: toIssueNumber });
                 sliceRepo = actionInputs.sliceRepo, upstreamRepo = actionInputs.upstreamRepo;
-                upstreamLogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream';
-                upstreamGitUrlObject = actionInputs.isOpenSourceFlow
-                    ? (0, git_url_parse_1.default)(actionInputs.openSourceUrl)
-                    : (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
                 sliceGitUrlObject = (0, git_url_parse_1.default)(sliceRepo.gitHttpUri);
                 upstreamOctokit = new octokit_1.Octokit({
                     auth: upstreamRepo.userToken,
@@ -61,6 +58,26 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) {
                 sliceOctokit = new octokit_1.Octokit({
                     auth: actionInputs.sliceRepo.userToken,
                 });
+                upstreamLogScope = 'Other';
+                fromIssueNumber = parseInt(fromIssue, 10);
+                isUpstreamIssueNumber = !isNaN(fromIssueNumber);
+                if (isUpstreamIssueNumber) {
+                    // fromIssue is an issue number from upstream
+                    upstreamLogScope = actionInputs.isOpenSourceFlow ? 'OpenSource' : 'Upstream';
+                    upstreamGitUrlObject = actionInputs.isOpenSourceFlow
+                        ? (0, git_url_parse_1.default)(actionInputs.openSourceUrl)
+                        : (0, git_url_parse_1.default)(upstreamRepo.gitHttpUri);
+                }
+                else {
+                    // fromIssue is an issue link
+                    upstreamLogScope = 'Other';
+                    regexResult = /(https:\/\/github\.com\/)?([^/]+\/[^/]+)\/issues\/(\d+)/gi.exec(fromIssue);
+                    if (!regexResult || !regexResult[2] || isNaN(parseInt(regexResult[3], 10))) {
+                        throw new Error("Unsuported fromIssue arg '" + fromIssue + "'");
+                    }
+                    fromIssueNumber = parseInt(regexResult[3], 10);
+                    upstreamGitUrlObject = (0, git_url_parse_1.default)("" + ((_a = regexResult[1]) !== null && _a !== void 0 ? _a : 'https://github.com/') + regexResult[2] + ".git");
+                }
                 if (upstreamGitUrlObject.source !== 'github.com') {
                     throw new Error("Unsuported codehost '" + upstreamGitUrlObject.source + "'");
                 }
@@ -71,7 +88,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) {
                         issue_number: fromIssueNumber,
                     })];
             case 1:
-                upstreamIssue = (_a.sent()).data;
+                upstreamIssue = (_b.sent()).data;
                 common_1.logger.logExtendLastLine("Done!");
                 title = upstreamIssue.title, body = upstreamIssue.body, html_url = upstreamIssue.html_url;
                 pulledIssueBody = "<!-- @" + (actor || actionInputs.sliceRepo.username) + " -->\nPulled from " + html_url + " by git-slice-tools:\n" + body;
@@ -85,7 +102,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) {
                         body: pulledIssueBody,
                     })];
             case 2:
-                _a.sent();
+                _b.sent();
                 common_1.logger.logExtendLastLine("Done!");
                 return [2 /*return*/];
             case 3:
@@ -97,7 +114,7 @@ var pullIssue = function (actionInputs, fromIssueNumber, toIssueNumber, actor) {
                         body: pulledIssueBody,
                     })];
             case 4:
-                sliceIssue = (_a.sent()).data;
+                sliceIssue = (_b.sent()).data;
                 common_1.logger.logExtendLastLine("Done! -> " + sliceIssue.html_url);
                 return [2 /*return*/];
         }
