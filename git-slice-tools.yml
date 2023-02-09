@@ -95,6 +95,8 @@ env:
   GIT_SLICE_OPEN_SOURCE_FLOW: <input-GIT_SLICE_OPEN_SOURCE_FLOW>
   # Http git url of open source repo, should be in this format : https://github.com/cypress.io/cypress.git, please use empty string "" if it's not
   GIT_SLICE_OPEN_SOURCE_URL: <input-GIT_SLICE_OPEN_SOURCE_URL>
+  # (`git-logs` or `pr-assignees` or `none`) Where to get co-authors for adding into open source commit message
+  GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS: <input-GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS>
 
 jobs:
   git-slice-checkout:
@@ -117,7 +119,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools CHECKOUT
-        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/checkout@v1.8.0
 
   git-slice-pull:
     runs-on: ubuntu-latest
@@ -144,7 +146,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL
-        uses: GitStartHQ/git-slice-tools/actions/pull@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/pull@v1.8.0
 
   git-slice-pull-branch:
     runs-on: ubuntu-latest
@@ -164,7 +166,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-BRANCH
-        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/pull-branch@v1.8.0
         with:
           branch: ${{ github.event.inputs.branch }}
           target-branch: ${{ github.event.inputs.targetBranch }}
@@ -185,7 +187,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW
-        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.8.0
         with:
           pr-number: ${{ github.event.inputs.prNumber }}
           from: ${{ github.event.inputs.prReivewLink }}
@@ -208,7 +210,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-REVIEW-COMMENT (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/pull-review-comment@v1.8.0
 
   git-slice-push:
     runs-on: ubuntu-latest
@@ -228,7 +230,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH
-        uses: GitStartHQ/git-slice-tools/actions/push@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/push@v1.8.0
         with:
           branch: ${{ github.event.inputs.branch }}
           message: ${{ github.event.inputs.commitMessage }}
@@ -256,7 +258,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PUSH (trigger by comments)
-        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/push-comment@v1.8.0
 
   git-slice-pull-issue:
     runs-on: ubuntu-latest
@@ -274,7 +276,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: git-slice-tools PULL-ISSUE
-        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.7.2
+        uses: GitStartHQ/git-slice-tools/actions/pull-issue@v1.8.0
         with:
           upstream-issue: ${{ github.event.inputs.upstreamIssue }}
           slice-issue: ${{ github.event.inputs.sliceIssue }}

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadValidateActionInputs = void 0;
+var common_1 = require("../common");
 var dotenv_1 = __importDefault(require("dotenv"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
@@ -88,8 +89,12 @@ var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
     var prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false';
     var isOpenSourceFlow = process.env.GIT_SLICE_OPEN_SOURCE_FLOW === 'true';
     var openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL;
+    var openSourceAutoCoAuthorsCommit = process.env.GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS || common_1.AUTO_CO_AUTHORS_COMMITS_OPTIONS.GitLogs;
     if (isOpenSourceFlow && !openSourceUrl) {
         throw new Error("Missing 'GIT_SLICE_OPEN_SOURCE_URL'");
+    }
+    if (!Object.values(common_1.AUTO_CO_AUTHORS_COMMITS_OPTIONS).includes(openSourceAutoCoAuthorsCommit)) {
+        throw new Error("Invalid 'GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS' should be on of [" + Object.values(common_1.AUTO_CO_AUTHORS_COMMITS_OPTIONS).join(', ') + "]");
     }
     return {
         sliceIgnores: sliceIgnores,
@@ -103,6 +108,7 @@ var loadValidateActionInputs = function (envFilePath, ignoreCheckDirs) {
         openSourceInstanceName: process.env.GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME,
         openSourceManagerProjectView: process.env.GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW,
         openSourceTeamReviewingCommittee: process.env.GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE,
+        autoCoAuthorsCommits: openSourceAutoCoAuthorsCommit,
         sliceRepo: {
             name: 'Slice',
             dir: path_1.default.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

@@ -89,8 +89,14 @@ export default (args: string[] = null) =>
                     default: false,
                     desc: 'Determine wether to use force push or not',
                 },
+                coAuthor: {
+                    type: 'string',
+                    alias: 'co-author',
+                    desc: 'co-Author to add into commit message, should be "<username>" or  "<username>,<useremail@email.com>"',
+                    array: true,
+                },
             },
-            ({ env, branch, message, forcePush }) => {
+            ({ env, branch, message, forcePush, coAuthor }) => {
                 if (!branch || typeof branch !== 'string') {
                     throw new Error(`push job: 'branch' in string is required`)
                 }
@@ -100,7 +106,7 @@ export default (args: string[] = null) =>
                 }
 
                 return loadActionInputsAndInit(env, ({ sliceGit, upstreamGit, actionInputs }) =>
-                    push(sliceGit, upstreamGit, actionInputs, branch, message, forcePush)
+                    push(sliceGit, upstreamGit, actionInputs, branch, message, forcePush, coAuthor)
                 )
             }
         )

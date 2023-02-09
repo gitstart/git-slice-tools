@@ -55,7 +55,8 @@ export const pull = async (sliceGit: SimpleGit, upstreamGit: SimpleGit, actionIn
             sliceGit,
             `git-slice:${upstreamLastCommitId}`,
             actionInputs.sliceRepo.defaultBranch,
-            'Slice'
+            'Slice',
+            false
         )
     }
 

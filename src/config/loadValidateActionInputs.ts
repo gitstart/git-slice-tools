@@ -1,3 +1,4 @@
+import { AUTO_CO_AUTHORS_COMMITS_OPTIONS } from '../common'
 import dotenv from 'dotenv'
 import fs from 'fs'
 import path from 'path'
@@ -108,9 +109,19 @@ export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs =
     const prDraft = !process.env.GIT_SLICE_PR_DRAFT || process.env.GIT_SLICE_PR_DRAFT !== 'false'
     const isOpenSourceFlow = process.env.GIT_SLICE_OPEN_SOURCE_FLOW === 'true'
     const openSourceUrl = process.env.GIT_SLICE_OPEN_SOURCE_URL
+    const openSourceAutoCoAuthorsCommit =
+        process.env.GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS || AUTO_CO_AUTHORS_COMMITS_OPTIONS.GitLogs
 
     if (isOpenSourceFlow && !openSourceUrl) {
         throw new Error(`Missing 'GIT_SLICE_OPEN_SOURCE_URL'`)
+    }
+
+    if (!(Object.values(AUTO_CO_AUTHORS_COMMITS_OPTIONS) as string[]).includes(openSourceAutoCoAuthorsCommit)) {
+        throw new Error(
+            `Invalid 'GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS' should be on of [${Object.values(
+                AUTO_CO_AUTHORS_COMMITS_OPTIONS
+            ).join(', ')}]`
+        )
     }
 
     return {
@@ -125,6 +136,7 @@ export const loadValidateActionInputs = (envFilePath?: string, ignoreCheckDirs =
         openSourceInstanceName: process.env.GIT_SLICE_OPEN_SOURCE_INSTANCE_NAME,
         openSourceManagerProjectView: process.env.GIT_SLICE_OPEN_SOURCE_MANAGER_PROJECT_VIEW,
         openSourceTeamReviewingCommittee: process.env.GIT_SLICE_OPEN_SOURCE_TEAM_REVIEWING_COMMITTEE,
+        autoCoAuthorsCommits: openSourceAutoCoAuthorsCommit,
         sliceRepo: {
             name: 'Slice',
             dir: path.resolve(process.cwd(), process.env.GIT_SLICE_SLICE_REPO_DIR),

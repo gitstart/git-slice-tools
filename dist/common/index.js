@@ -70,7 +70,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = exports.error = exports.logger = void 0;
+exports.checkoutAndPullLastVersion = exports.cleanAndDeleteLocalBranch = exports.copyFiles = exports.createCommitAndPushCurrentChanges = exports.pullRemoteBranchIntoCurrentBranch = exports.delay = exports.isErrorLike = exports.error = exports.logger = exports.coAuthorHelpers = void 0;
 var dir_compare_1 = require("dir-compare");
 var fs_extra_1 = __importDefault(require("fs-extra"));
 var path_1 = __importDefault(require("path"));
@@ -83,6 +83,7 @@ __exportStar(require("./gitInit"), exports);
 __exportStar(require("./ignore"), exports);
 __exportStar(require("./logger"), exports);
 __exportStar(require("./github"), exports);
+exports.coAuthorHelpers = __importStar(require("./coAuthors"));
 exports.logger = __importStar(require("./logger"));
 exports.error = __importStar(require("./error"));
 var isErrorLike = function (value) {
@@ -137,10 +138,20 @@ var pullRemoteBranchIntoCurrentBranch = function (logScope, git, remoteBranch, c
     });
 };
 exports.pullRemoteBranchIntoCurrentBranch = pullRemoteBranchIntoCurrentBranch;
-var createCommitAndPushCurrentChanges = function (git, commitMsg, branch, scope, forcePush) {
-    if (forcePush === void 0) { forcePush = false; }
+/**
+ *
+ * @param git
+ * @param commitMsg
+ * @param branch
+ * @param scope
+ * @param forcePush
+ * @param coAuthors should be "false" or string in format "username1,username1@email.com;username2,username2@email.com"
+ * @returns
+ */
+var createCommitAndPushCurrentChanges = function (git, commitMsg, branch, scope, forcePush, coAuthors) {
+    if (coAuthors === void 0) { coAuthors = []; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var status;
+        var status, resolvedCommitMsg;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, git.status()];
@@ -157,7 +168,15 @@ var createCommitAndPushCurrentChanges = function (git, commitMsg, branch, scope,
                     (0, logger_1.logWriteLine)(scope, __spreadArray(__spreadArray(__spreadArray([], status.modified.map(function (x) { return ({ filePath: x, changeType: '~' }); }), true), status.deleted.map(function (x) { return ({ filePath: x, changeType: '-' }); }), true), status.created.map(function (x) { return ({ filePath: x, changeType: '+' }); }), true).map(function (x) { return "Commit (" + x.changeType + ") " + x.filePath; })
                         .join('\n') + '\n');
                     (0, logger_1.logWriteLine)(scope, "Creating '" + commitMsg + "' commit...");
-                    return [4 /*yield*/, git.commit(commitMsg)];
+                    resolvedCommitMsg = commitMsg.trim();
+                    if (coAuthors.length > 0) {
+                        resolvedCommitMsg = coAuthors.reduce(function (prev, _a) {
+                            var authorEmail = _a.authorEmail, authorUserName = _a.authorUserName;
+                            return (prev +
+                                ("Co-authored-by: " + authorUserName + " <" + (authorEmail !== null && authorEmail !== void 0 ? authorEmail : authorUserName + "@users.noreply.github.com") + ">\n"));
+                        }, resolvedCommitMsg + "\n\n");
+                    }
+                    return [4 /*yield*/, git.commit(resolvedCommitMsg)];
                 case 3:
                     _a.sent();
                     (0, logger_1.logExtendLastLine)('Done!');

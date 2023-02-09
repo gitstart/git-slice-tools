@@ -1,23 +1,37 @@
 import { ResetMode, SimpleGit } from 'simple-git'
 import {
+    AUTO_CO_AUTHORS_COMMITS_OPTIONS,
     cleanAndDeleteLocalBranch,
+    coAuthorHelpers,
     copyFiles,
     createCommitAndPushCurrentChanges,
     getGitSliceIgoreConfig,
     logger,
     pullRemoteBranchIntoCurrentBranch,
 } from '../common'
-import { ActionInputs } from '../types'
+import { ActionInputs, CoAuthor } from '../types'
 
+/**
+ *
+ * @param sliceGit
+ * @param upstreamGit
+ * @param actionInputs
+ * @param sliceBranch
+ * @param commitMsg
+ * @param forcePush
+ * @param coAuthors array of pairs of "<username>;<email>" of each authors
+ * @returns
+ */
 export const push = async (
     sliceGit: SimpleGit,
     upstreamGit: SimpleGit,
     actionInputs: ActionInputs,
     sliceBranch: string,
     commitMsg: string,
-    forcePush: boolean
+    forcePush: boolean,
+    coAuthors: string[] = []
 ): Promise<void> => {
-    logger.logInputs('push', { sliceBranch, commitMsg, forcePush })
+    logger.logInputs('push', { sliceBranch, commitMsg, forcePush, coAuthors })
 
     if (!actionInputs.pushCommitMsgRegex.test(commitMsg)) {
         throw new Error('Commit message failed PUSH_COMMIT_MSG_REGEX')
@@ -68,6 +82,29 @@ export const push = async (
     await pullRemoteBranchIntoCurrentBranch('Slice', sliceGit, actionInputs.sliceRepo.defaultBranch, sliceBranch)
     await cleanAndDeleteLocalBranch(upstreamGit, 'Upstream', actionInputs.upstreamRepo.defaultBranch, upstreamBranch)
 
+    let coAuthorsDetails: CoAuthor[] = coAuthorHelpers.getCoAuthorsFromCliArgs(coAuthors)
+
+    if (
+        coAuthorsDetails.length === 0 &&
+        actionInputs.isOpenSourceFlow &&
+        // checking `autoCoAuthorsCommits` configuration
+        actionInputs.autoCoAuthorsCommits !== AUTO_CO_AUTHORS_COMMITS_OPTIONS.None
+    ) {
+        coAuthorsDetails =
+            actionInputs.autoCoAuthorsCommits === AUTO_CO_AUTHORS_COMMITS_OPTIONS.GitLogs
+                ? await coAuthorHelpers.getCoAuthorsFromGitLogs(sliceGit, actionInputs.sliceRepo, sliceBranch)
+                : await coAuthorHelpers.getCoAuthorsFromPR(actionInputs.sliceRepo, sliceBranch)
+    }
+
+    if (coAuthorsDetails.length !== 0) {
+        logger.logWriteLine(
+            'Upstream',
+            `Commit would include co-authors '${coAuthorsDetails
+                .map(x => `${x.authorUserName},${x.authorEmail}`)
+                .join(';')}'`
+        )
+    }
+
     let upstreamBranchExists = false
 
     try {
@@ -106,7 +143,8 @@ export const push = async (
             commitMsg,
             upstreamBranch,
             'Upstream',
-            upstreamBranchExists && forcePush
+            upstreamBranchExists && forcePush,
+            coAuthorsDetails
         )
 
         return
@@ -142,5 +180,5 @@ export const push = async (
         return
     }
 
-    await createCommitAndPushCurrentChanges(upstreamGit, commitMsg, upstreamBranch, 'Upstream', false)
+    await createCommitAndPushCurrentChanges(upstreamGit, commitMsg, upstreamBranch, 'Upstream', false, coAuthorsDetails)
 }

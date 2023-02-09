@@ -87,7 +87,7 @@ var pull = function (sliceGit, upstreamGit, actionInputs) { return __awaiter(voi
                 return [4 /*yield*/, sliceGit.raw('add', '.', '--force')];
             case 9:
                 _a.sent();
-                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(sliceGit, "git-slice:" + upstreamLastCommitId, actionInputs.sliceRepo.defaultBranch, 'Slice')];
+                return [4 /*yield*/, (0, common_1.createCommitAndPushCurrentChanges)(sliceGit, "git-slice:" + upstreamLastCommitId, actionInputs.sliceRepo.defaultBranch, 'Slice', false)];
             case 10:
                 _a.sent();
                 _a.label = 11;

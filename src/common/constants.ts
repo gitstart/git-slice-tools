@@ -37,3 +37,9 @@ export const OPEN_SOURCE_COMMENT_ISSUE_APPROVED = `:rocket: Heads up @{issueAdde
 export const OPEN_SOURCE_COMMENT_ISSUE_REJECTED = `:disappointed: Sorry @{issueAddedBy}, @{reviewer} rejected this issue.`
 export const OPEN_SOURCE_COMMENT_PR_APPROVED = `:tada: @{reviewer} approved this PR. Let's push this PR upstream, but be careful at the 5 PR per repo limit :slightly_smiling_face:`
 export const OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES = `:rocket: Heads up devs, @{reviewer} requested changes in this PR.`
+
+export const AUTO_CO_AUTHORS_COMMITS_OPTIONS = {
+    GitLogs: 'git-logs',
+    None: 'none',
+    PrAssignees: 'pr-assignees',
+} as const

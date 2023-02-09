@@ -2,7 +2,7 @@ import { compareSync, DifferenceState, Reason } from 'dir-compare'
 import fs from 'fs-extra'
 import path from 'path'
 import { CleanOptions, GitError, ResetMode, SimpleGit } from 'simple-git'
-import { ErrorLike, LogScope } from '../types'
+import { CoAuthor, ErrorLike, LogScope } from '../types'
 import { OPEN_SOURCE_REMOTE } from './constants'
 import { getFilesMatchPatterns } from './ignore'
 import { logExtendLastLine, logWriteLine } from './logger'
@@ -12,6 +12,7 @@ export * from './gitInit'
 export * from './ignore'
 export * from './logger'
 export * from './github'
+export * as coAuthorHelpers from './coAuthors'
 export * as logger from './logger'
 export * as error from './error'
 
@@ -64,12 +65,23 @@ export const pullRemoteBranchIntoCurrentBranch = async (
     }
 }
 
+/**
+ *
+ * @param git
+ * @param commitMsg
+ * @param branch
+ * @param scope
+ * @param forcePush
+ * @param coAuthors should be "false" or string in format "username1,username1@email.com;username2,username2@email.com"
+ * @returns
+ */
 export const createCommitAndPushCurrentChanges = async (
     git: SimpleGit,
     commitMsg: string,
     branch: string,
     scope: LogScope,
-    forcePush = false
+    forcePush: boolean,
+    coAuthors: CoAuthor[] = []
 ): Promise<boolean> => {
     const status = await git.status()
 
@@ -96,7 +108,17 @@ export const createCommitAndPushCurrentChanges = async (
 
     logWriteLine(scope, `Creating '${commitMsg}' commit...`)
 
-    await git.commit(commitMsg)
+    let resolvedCommitMsg = commitMsg.trim()
+    if (coAuthors.length > 0) {
+        resolvedCommitMsg = coAuthors.reduce((prev, { authorEmail, authorUserName }) => {
+            return (
+                prev +
+                `Co-authored-by: ${authorUserName} <${authorEmail ?? `${authorUserName}@users.noreply.github.com`}>\n`
+            )
+        }, `${resolvedCommitMsg}\n\n`)
+    }
+
+    await git.commit(resolvedCommitMsg)
 
     logExtendLastLine('Done!')
 

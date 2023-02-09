@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES = exports.OPEN_SOURCE_COMMENT_PR_APPROVED = exports.OPEN_SOURCE_COMMENT_ISSUE_REJECTED = exports.OPEN_SOURCE_COMMENT_ISSUE_APPROVED = exports.OPEN_SOURCE_COMMENT_PR_MERGED = exports.OPEN_SOURCE_COMMENT_PR_DISCONTINUED = exports.OPEN_SOURCE_COMMENT_ISSUE_DISCONTINUED = exports.OPEN_SOURCE_COMMENT_REQUEST_PR_REVIEW = exports.OPEN_SOURCE_COMMENT_REQUEST_ISSUE_REVIEW = exports.OPEN_SOURCE_PROJECT_FIELD_TYPES = exports.OPEN_SOURCE_STATUS_OPTIONS = exports.OPEN_SOURCE_FIELDS = exports.OPEN_SOURCE_REMOTE = void 0;
+exports.AUTO_CO_AUTHORS_COMMITS_OPTIONS = exports.OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES = exports.OPEN_SOURCE_COMMENT_PR_APPROVED = exports.OPEN_SOURCE_COMMENT_ISSUE_REJECTED = exports.OPEN_SOURCE_COMMENT_ISSUE_APPROVED = exports.OPEN_SOURCE_COMMENT_PR_MERGED = exports.OPEN_SOURCE_COMMENT_PR_DISCONTINUED = exports.OPEN_SOURCE_COMMENT_ISSUE_DISCONTINUED = exports.OPEN_SOURCE_COMMENT_REQUEST_PR_REVIEW = exports.OPEN_SOURCE_COMMENT_REQUEST_ISSUE_REVIEW = exports.OPEN_SOURCE_PROJECT_FIELD_TYPES = exports.OPEN_SOURCE_STATUS_OPTIONS = exports.OPEN_SOURCE_FIELDS = exports.OPEN_SOURCE_REMOTE = void 0;
 exports.OPEN_SOURCE_REMOTE = 'open-source';
 exports.OPEN_SOURCE_FIELDS = {
     Status: 'Status',
@@ -36,4 +36,9 @@ exports.OPEN_SOURCE_COMMENT_ISSUE_APPROVED = ":rocket: Heads up @{issueAddedBy},
 exports.OPEN_SOURCE_COMMENT_ISSUE_REJECTED = ":disappointed: Sorry @{issueAddedBy}, @{reviewer} rejected this issue.";
 exports.OPEN_SOURCE_COMMENT_PR_APPROVED = ":tada: @{reviewer} approved this PR. Let's push this PR upstream, but be careful at the 5 PR per repo limit :slightly_smiling_face:";
 exports.OPEN_SOURCE_COMMENT_PR_REQUESTED_CHANGES = ":rocket: Heads up devs, @{reviewer} requested changes in this PR.";
+exports.AUTO_CO_AUTHORS_COMMITS_OPTIONS = {
+    GitLogs: 'git-logs',
+    None: 'none',
+    PrAssignees: 'pr-assignees',
+};
 //# sourceMappingURL=constants.js.map

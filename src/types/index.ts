@@ -14,6 +14,7 @@ export interface ActionInputs {
     openSourceInstanceName: string
     openSourceManagerProjectView: string
     openSourceTeamReviewingCommittee: string
+    autoCoAuthorsCommits: string
 }
 
 export interface Repo {
@@ -24,6 +25,11 @@ export interface Repo {
     userEmail: string
     gitHttpUri: string
     userToken: string
+}
+
+export interface CoAuthor {
+    authorUserName: string
+    authorEmail: string
 }
 
 export interface ErrorLike {

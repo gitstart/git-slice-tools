@@ -125,8 +125,13 @@ exports.default = (function (args) {
             alias: 'force-push',
             default: false,
             desc: 'Determine wether to use force push or not',
+        }, coAuthor: {
+            type: 'string',
+            alias: 'co-author',
+            desc: 'co-Author to add into commit message, should be "<username>" or  "<username>,<useremail@email.com>"',
+            array: true,
         } }), function (_a) {
-        var env = _a.env, branch = _a.branch, message = _a.message, forcePush = _a.forcePush;
+        var env = _a.env, branch = _a.branch, message = _a.message, forcePush = _a.forcePush, coAuthor = _a.coAuthor;
         if (!branch || typeof branch !== 'string') {
             throw new Error("push job: 'branch' in string is required");
         }
@@ -135,7 +140,7 @@ exports.default = (function (args) {
         }
         return loadActionInputsAndInit(env, function (_a) {
             var sliceGit = _a.sliceGit, upstreamGit = _a.upstreamGit, actionInputs = _a.actionInputs;
-            return (0, jobs_1.push)(sliceGit, upstreamGit, actionInputs, branch, message, forcePush);
+            return (0, jobs_1.push)(sliceGit, upstreamGit, actionInputs, branch, message, forcePush, coAuthor);
         });
     })
         .command('raise-pr', 'Raise new PR for branch on upstream repo (GitHub only) with details (title/body) from the PR for a branch on slice repo', __assign(__assign({}, GLOBAL_OPTIONS_CONFIG), { branch: { type: 'string', alias: 'b', desc: 'Name of pushing branch in slice repo' } }), function (_a) {
