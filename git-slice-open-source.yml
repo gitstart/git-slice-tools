@@ -58,7 +58,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source add-issue
         run: git-slice-tools open-source add-issue "$REPO_NAME" "$ISSUE_NUMBER"
         env:
@@ -74,7 +74,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source reviewer-approve-issue
         run: git-slice-tools open-source reviewer-approve-issue "$ACTOR" "$REPO_NAME" "$ISSUE_NUMBER"
         env:
@@ -91,7 +91,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source reviewer-reject-issue
         run: git-slice-tools open-source reviewer-reject-issue "$ACTOR" "$REPO_NAME" "$ISSUE_NUMBER"
         env:
@@ -134,7 +134,7 @@ jobs:
               core.setFailed(`Request failed with error ${err}`);
             }
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source update-estimate
         run: git-slice-tools open-source update-estimate "$REPO_NAME" "$ISSUE_NUMBER" "$CREDITS"
         env:
@@ -151,7 +151,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source assign-dev
         run: git-slice-tools open-source assign-dev "$ASSIGNEE" "$REPO_NAME" "$ISSUE_NUMBER"
         env:
@@ -168,7 +168,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source request-review-pr
         run: git-slice-tools open-source request-review-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:
@@ -185,7 +185,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source reviewer-approve-pr
         run: git-slice-tools open-source reviewer-approve-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:
@@ -202,7 +202,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source reviewer-request-changes-pr
         run: git-slice-tools open-source reviewer-request-changes-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:
@@ -219,7 +219,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source push-pr
         run: git-slice-tools open-source push-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:
@@ -236,7 +236,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source merge-pr
         run: git-slice-tools open-source merge-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:
@@ -253,7 +253,7 @@ jobs:
         with:
           node-version: 16
       - name: Install git-slice-tools
-        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+        run: yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
       - name: git-slice-tools open-source close-pr
         run: git-slice-tools open-source close-pr "$ACTOR" "$REPO_NAME" "$PR_NUMBER"
         env:

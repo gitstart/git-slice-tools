@@ -57,7 +57,7 @@ runs:
           }
 
     - name: git-slice-tools PULL-REVIEW
-      uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.8.0
+      uses: GitStartHQ/git-slice-tools/actions/pull-review@v1.8.1
       with:
         pr-number: ${{ fromJSON(steps.get-pull-options.outputs.result).prNumber }}
         from: ${{ fromJSON(steps.get-pull-options.outputs.result).from }}

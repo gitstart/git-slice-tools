@@ -131,10 +131,10 @@ You can install and use `git-slice-tools` globally
 # Install package globally
 
 # With yarn
-yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+yarn global add https://github.com/GitStartHQ/git-slice-tools#v1.8.1
 
 # With npm
-npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.8.0
+npm install -g https://github.com/GitStartHQ/git-slice-tools#v1.8.1
 
 # Execute jobs
 git-slice-tools <job_name> [...job_options] [--env <env_file_path>] [--help] [--version]

@@ -39,10 +39,11 @@ export const getCoAuthorsFromGitLogs = async (
         `Finding co-authors with 'GIT_SLICE_OPEN_SOURCE_AUTO_CO_AUTHORS_COMMITS: ${AUTO_CO_AUTHORS_COMMITS_OPTIONS.GitLogs}'`
     )
     const { all } = await sliceGit.log({ from: sliceRepo.defaultBranch, to: sliceBranch })
-    const mergeMessageRegex = /^merge branch .* into .*$/gi
 
     return all
-        .filter(commit => !mergeMessageRegex.test(commit.message.trim()))
+        .filter(commit => {
+            return !/^merge branch/gi.test(commit.message.trim())
+        })
         .reduce((prev, next) => {
             if (prev.some(x => x.authorUserName === next.author_name || x.authorEmail === next.author_email)) {
                 return prev

@@ -72,7 +72,7 @@ var getCoAuthorsFromCliArgs = function (coAuthorCliArgs) {
 };
 exports.getCoAuthorsFromCliArgs = getCoAuthorsFromCliArgs;
 var getCoAuthorsFromGitLogs = function (sliceGit, sliceRepo, sliceBranch) { return __awaiter(void 0, void 0, void 0, function () {
-    var all, mergeMessageRegex;
+    var all;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -80,9 +80,10 @@ var getCoAuthorsFromGitLogs = function (sliceGit, sliceRepo, sliceBranch) { retu
                 return [4 /*yield*/, sliceGit.log({ from: sliceRepo.defaultBranch, to: sliceBranch })];
             case 1:
                 all = (_a.sent()).all;
-                mergeMessageRegex = /^merge branch .* into .*$/gi;
                 return [2 /*return*/, all
-                        .filter(function (commit) { return !mergeMessageRegex.test(commit.message.trim()); })
+                        .filter(function (commit) {
+                        return !/^merge branch/gi.test(commit.message.trim());
+                    })
                         .reduce(function (prev, next) {
                         if (prev.some(function (x) { return x.authorUserName === next.author_name || x.authorEmail === next.author_email; })) {
                             return prev;
