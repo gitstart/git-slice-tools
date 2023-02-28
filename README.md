@@ -356,3 +356,4 @@ This project works well with these features but we need more hands to make it st
 ### Open-source issues management workflow in Github Project V2
 
 Since version 1.3.0, `git-slice-tools` supports multiple `open-source <sub-command> [...]` which are used in multiple Github Actions for tracking all open source issues across repositories in a Github Project v2 table. For more information, please take a look at [open-source-issues-workflow](./docs/open-source-issues-workflow.md)
+
